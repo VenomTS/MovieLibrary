@@ -25,6 +25,7 @@ public class MovieService(IMovieRepository movieRepo)
             Id = movie.Id,
             Name = movie.Name,
             ReleaseDate = movie.ReleaseDate,
+            Genres = [],
         };
         return movieResponse;
     }
@@ -40,6 +41,11 @@ public class MovieService(IMovieRepository movieRepo)
                 Id = movie.Id,
                 Name = movie.Name,
                 ReleaseDate = movie.ReleaseDate,
+                Genres = movie.Genres.Select(x => new MovieGenreResponse
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                }).ToList(),
             };
     }
 }

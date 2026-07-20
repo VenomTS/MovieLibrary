@@ -7,7 +7,7 @@ public class MovieRepository(AppDbContext dbContext) : IMovieRepository
 {
     public async Task<IEnumerable<Movie>> GetMoviesAsync(SearchQuery query)
     {
-        var movies = dbContext.Movies.AsQueryable();
+        var movies = dbContext.Movies.Include(x => x.Genres).AsQueryable();
         
         // Improve-able
         if(!string.IsNullOrWhiteSpace(query.Name))
@@ -23,7 +23,7 @@ public class MovieRepository(AppDbContext dbContext) : IMovieRepository
 
     public async Task<Movie?> GetMovieByIdAsync(Guid movieId)
     {
-        var movie = await dbContext.Movies.FindAsync(movieId);
+        var movie = await dbContext.Movies.Include(x => x.Genres).FirstOrDefaultAsync(x => x.Id == movieId);
         return movie;
     }
 
