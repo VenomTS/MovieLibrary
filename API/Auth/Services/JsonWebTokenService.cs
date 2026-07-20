@@ -10,7 +10,7 @@ public class JsonWebTokenService(IConfiguration config)
 {
     private DateTime GetExpirationDate()
     {
-        var hours = config["JWT:Duration"];
+        var hours = config["JWT:DurationHours"];
         
         var result = int.TryParse(hours, out var hour);
         return !result ? throw new ArgumentNullException(nameof(hours)) : DateTime.Now.AddHours(hour);
