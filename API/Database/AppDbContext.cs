@@ -1,3 +1,4 @@
+using API.Genres;
 using API.Movies;
 using API.Users;
 using Microsoft.EntityFrameworkCore;
@@ -8,4 +9,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Movie> Movies { get; set; }
+    public DbSet<Genre> Genres { get; set; }
 }

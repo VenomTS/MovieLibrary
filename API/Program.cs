@@ -1,5 +1,7 @@
 using API.Auth.Services;
 using API.Database;
+using API.Movies;
+using API.Movies.Repositories;
 using API.Users;
 using API.Users.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +21,11 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder
 builder.Services.AddSingleton<HashingService>();
 builder.Services.AddSingleton<JsonWebTokenService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<MovieService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 
 var app = builder.Build();
 
