@@ -1,5 +1,7 @@
 using API.Auth.Services;
 using API.Database;
+using API.Genres;
+using API.Genres.Repositories;
 using API.Movies;
 using API.Movies.Repositories;
 using API.Users;
@@ -22,10 +24,12 @@ builder.Services.AddSingleton<HashingService>();
 builder.Services.AddSingleton<JsonWebTokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
+builder.Services.AddScoped<GenreService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 
 var app = builder.Build();
 
