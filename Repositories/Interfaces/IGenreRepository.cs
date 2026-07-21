@@ -1,3 +1,5 @@
+using Models;
+
 namespace API.Genres.Repositories;
 
 public interface IGenreRepository

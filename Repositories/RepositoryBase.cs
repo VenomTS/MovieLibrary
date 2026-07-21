@@ -3,7 +3,7 @@ using Repositories.Databasee;
 
 namespace Repositories
 {
-    internal abstract class RepositoryBase<TEntity> where TEntity : class
+    public abstract class RepositoryBase<TEntity> where TEntity : class
     {
 
         protected readonly AppDbContext Context;
@@ -27,6 +27,15 @@ namespace Repositories
 
         public virtual async Task Delete(TEntity entity)
         {
+            DbSet.Remove(entity);
+        }
+
+        public virtual async Task DeleteById(Guid id)
+        {
+            var entity = await DbSet.FindAsync(id);
+            if (entity == null)
+                return;
+
             DbSet.Remove(entity);
         }
 

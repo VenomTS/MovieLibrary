@@ -1,9 +1,11 @@
-using API.Database;
 using Microsoft.EntityFrameworkCore;
+using Models;
+using Repositories;
+using Repositories.Databasee;
 
 namespace API.Genres.Repositories;
 
-public class GenreRepository(AppDbContext dbContext) : IGenreRepository
+public class GenreRepository(AppDbContext dbContext) : RepositoryBase<Genre>(dbContext), IGenreRepository
 {
     public async Task<IEnumerable<Genre>> GetAllAsync()
     {
