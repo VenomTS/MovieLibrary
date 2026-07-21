@@ -47,4 +47,9 @@ public class MovieRepository(AppDbContext dbContext) : IMovieRepository
         return await dbContext.Movies.AnyAsync(x => x.Name == movie.Name && 
                                                     x.ReleaseDate == movie.ReleaseDate);
     }
+
+    public async Task<bool> MovieExistsAsync(Guid movieId)
+    {
+        return await dbContext.Movies.AnyAsync(x => x.Id == movieId);
+    }
 }

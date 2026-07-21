@@ -6,4 +6,5 @@ public interface IGenreRepository
     public Task<Genre?> GetByIdAsync(Guid id);
     public Task<Genre> CreateAsync(Genre genre);
     public Task<bool> GenreExistsAsync(string name);
+    public Task<bool> GenreExistsAsync(Guid id);
 }

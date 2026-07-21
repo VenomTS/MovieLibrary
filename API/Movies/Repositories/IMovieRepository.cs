@@ -7,4 +7,5 @@ public interface IMovieRepository
     public Task<Movie?> GetMovieByIdAsync(Guid movieId);
     public Task<Movie> AddMovieAsync(Movie movie);
     public Task<bool> MovieExistsAsync(Movie movie);
+    public Task<bool> MovieExistsAsync(Guid movieId);
 }

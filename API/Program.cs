@@ -2,6 +2,8 @@ using API.Auth.Services;
 using API.Database;
 using API.Genres;
 using API.Genres.Repositories;
+using API.MovieGenres;
+using API.MovieGenres.Repositories;
 using API.Movies;
 using API.Movies.Repositories;
 using API.Stocks;
@@ -28,12 +30,14 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
 builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<StockService>();
+builder.Services.AddScoped<MovieGenreService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IStockRepository, StockRepository>();
+builder.Services.AddScoped<IMovieGenreRepository, MovieGenreRepository>();
 
 var app = builder.Build();
 

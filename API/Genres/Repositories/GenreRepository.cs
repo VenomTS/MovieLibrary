@@ -24,8 +24,13 @@ public class GenreRepository(AppDbContext dbContext) : IGenreRepository
         return genre;
     }
 
-    public Task<bool> GenreExistsAsync(string name)
+    public async Task<bool> GenreExistsAsync(string name)
     {
-        return dbContext.Genres.AnyAsync(x => x.Name == name);
+        return await dbContext.Genres.AnyAsync(x => x.Name == name);
+    }
+
+    public async Task<bool> GenreExistsAsync(Guid id)
+    {
+        return await dbContext.Genres.AnyAsync(x => x.Id == id);
     }
 }
