@@ -4,6 +4,7 @@ using API.Genres;
 using API.Genres.Repositories;
 using API.Movies;
 using API.Movies.Repositories;
+using API.Stocks;
 using API.Stocks.Repositories;
 using API.Users;
 using API.Users.Repository;
@@ -26,6 +27,7 @@ builder.Services.AddSingleton<JsonWebTokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
 builder.Services.AddScoped<GenreService>();
+builder.Services.AddScoped<StockService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
