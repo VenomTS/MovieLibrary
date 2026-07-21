@@ -1,6 +1,7 @@
 using API.Genres;
 using API.MovieGenres;
 using API.Movies;
+using API.Rentals;
 using API.Stocks;
 using API.Users;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Genre> Genres { get; set; }
     public DbSet<MovieGenre> MovieGenres { get; set; }
     public DbSet<Stock> Stocks { get; set; }
+    public DbSet<Rental> Rentals { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

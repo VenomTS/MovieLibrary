@@ -1,4 +1,4 @@
-namespace API.Genres.DTO;
+namespace DTO.Genres;
 
 public class CreateGenreRequest
 {

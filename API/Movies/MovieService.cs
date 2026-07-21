@@ -3,6 +3,7 @@ using API.Movies.Repositories;
 using API.OneOfTypes;
 using API.Stocks;
 using API.Stocks.Repositories;
+using DTO.Movies;
 using OneOf;
 
 namespace API.Movies;

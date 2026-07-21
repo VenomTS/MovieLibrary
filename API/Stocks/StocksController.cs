@@ -1,4 +1,4 @@
-using API.Stocks.DTO;
+using DTO.Stocks;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Stocks;

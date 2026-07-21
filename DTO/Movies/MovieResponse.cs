@@ -1,4 +1,4 @@
-namespace API.Movies.DTO;
+namespace DTO.Movies;
 
 public class MovieResponse
 {

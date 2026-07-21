@@ -1,4 +1,4 @@
-using API.MovieGenres.DTO;
+using DTO.MovieGenres;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.MovieGenres;

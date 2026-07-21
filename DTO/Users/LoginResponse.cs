@@ -1,4 +1,4 @@
-namespace API.Users.DTO;
+namespace DTO.Users;
 
 public class LoginResponse
 {

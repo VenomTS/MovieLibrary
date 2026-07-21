@@ -1,6 +1,6 @@
-using API.Genres.DTO;
 using API.Genres.Repositories;
 using API.OneOfTypes;
+using DTO.Genres;
 using OneOf;
 
 namespace API.Genres;

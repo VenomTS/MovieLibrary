@@ -1,4 +1,4 @@
-namespace API.MovieGenres.DTO;
+namespace DTO.MovieGenres;
 
 public class AddMovieGenreRequest
 {

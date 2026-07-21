@@ -34,4 +34,9 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         await dbContext.Users.AddAsync(user);
         await dbContext.SaveChangesAsync();
     }
+
+    public async Task<bool> UserExistsAsync(Guid userId)
+    {
+        return await dbContext.Users.AnyAsync(x => x.Id == userId);
+    }
 }

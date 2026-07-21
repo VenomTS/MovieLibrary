@@ -1,6 +1,6 @@
 using API.OneOfTypes;
-using API.Stocks.DTO;
 using API.Stocks.Repositories;
+using DTO.Stocks;
 using OneOf;
 using OneOf.Types;
 

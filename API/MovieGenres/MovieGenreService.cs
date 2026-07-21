@@ -1,8 +1,8 @@
 using API.Genres.Repositories;
-using API.MovieGenres.DTO;
 using API.MovieGenres.Repositories;
 using API.Movies.Repositories;
 using API.OneOfTypes;
+using DTO.MovieGenres;
 using OneOf;
 using OneOf.Types;
 

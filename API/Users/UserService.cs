@@ -1,7 +1,7 @@
 using API.Auth.Services;
 using API.OneOfTypes;
-using API.Users.DTO;
 using API.Users.Repository;
+using DTO.Users;
 using OneOf;
 using OneOf.Types;
 

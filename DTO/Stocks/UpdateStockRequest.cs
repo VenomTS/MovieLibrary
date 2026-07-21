@@ -1,4 +1,4 @@
-namespace API.Stocks.DTO;
+namespace DTO.Stocks;
 
 public class UpdateStockRequest
 {

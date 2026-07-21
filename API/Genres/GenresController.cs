@@ -1,4 +1,4 @@
-using API.Genres.DTO;
+using DTO.Genres;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Genres;

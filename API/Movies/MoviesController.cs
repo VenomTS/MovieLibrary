@@ -1,4 +1,4 @@
-using API.Movies.DTO;
+using DTO.Movies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Movies;
