@@ -2,9 +2,10 @@ using DTO.SearchQueries;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Repositories;
-using Repositories.Databasee;
+using Repositories.Database;
+using Repositories.Interfaces;
 
-namespace API.Movies.Repositories;
+namespace Repositories.Implementations;
 
 public class MovieRepository(AppDbContext dbContext) : RepositoryBase<Movie>(dbContext), IMovieRepository
 {

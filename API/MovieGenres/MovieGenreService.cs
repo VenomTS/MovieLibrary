@@ -1,11 +1,9 @@
-using API.Genres.Repositories;
-using API.MovieGenres.Repositories;
-using API.Movies.Repositories;
 using API.OneOfTypes;
 using DTO.MovieGenres;
 using Models;
 using OneOf;
 using OneOf.Types;
+using Repositories.Interfaces;
 
 namespace API.MovieGenres;
 

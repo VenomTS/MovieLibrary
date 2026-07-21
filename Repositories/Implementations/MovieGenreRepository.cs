@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Repositories;
-using Repositories.Databasee;
+using Repositories.Database;
+using Repositories.Interfaces;
 
-namespace API.MovieGenres.Repositories;
+namespace Repositories.Implementations;
 
 public class MovieGenreRepository(AppDbContext dbContext) : RepositoryBase<MovieGenre>(dbContext), IMovieGenreRepository
 {

@@ -2,7 +2,7 @@ using DTO.SearchQueries;
 using Models;
 using Repositories;
 
-namespace API.Movies.Repositories;
+namespace Repositories.Interfaces;
 
 public interface IMovieRepository : IRepositoryBase<Movie>
 {

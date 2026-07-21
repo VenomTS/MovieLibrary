@@ -1,7 +1,7 @@
 using Models.Users;
 using Repositories;
 
-namespace API.Users.Repository;
+namespace Repositories.Interfaces;
 
 public interface IUserRepository : IRepositoryBase<User>
 {

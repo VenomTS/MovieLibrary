@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Users;
 using Repositories;
-using Repositories.Databasee;
+using Repositories.Database;
+using Repositories.Interfaces;
 
-namespace API.Users.Repository;
+namespace Repositories.Implementations;
 
 public class UserRepository(AppDbContext dbContext) : RepositoryBase<User>(dbContext), IUserRepository
 {

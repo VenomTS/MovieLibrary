@@ -1,10 +1,10 @@
 using API.Auth.Services;
 using API.OneOfTypes;
-using API.Users.Repository;
 using DTO.Users;
 using Models.Users;
 using OneOf;
 using OneOf.Types;
+using Repositories.Interfaces;
 
 namespace API.Users;
 

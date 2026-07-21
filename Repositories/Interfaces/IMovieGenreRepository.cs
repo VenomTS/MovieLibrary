@@ -1,7 +1,7 @@
 using Models;
 using Repositories;
 
-namespace API.MovieGenres.Repositories;
+namespace Repositories.Interfaces;
 
 public interface IMovieGenreRepository : IRepositoryBase<MovieGenre>
 {

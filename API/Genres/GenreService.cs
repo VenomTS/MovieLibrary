@@ -1,8 +1,8 @@
-using API.Genres.Repositories;
 using API.OneOfTypes;
 using DTO.Genres;
 using Models;
 using OneOf;
+using Repositories.Interfaces;
 
 namespace API.Genres;
 

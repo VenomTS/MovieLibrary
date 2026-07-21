@@ -2,9 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Repositories;
-using Repositories.Databasee;
+using Repositories.Database;
+using Repositories.Interfaces;
 
-namespace API.Rentals.Repositories
+namespace Repositories.Implementations
 {
     public class RentalRepository(AppDbContext dbContext) : RepositoryBase<Rental>(dbContext), IRentalRepository
     {

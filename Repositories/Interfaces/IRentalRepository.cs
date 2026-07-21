@@ -2,7 +2,7 @@
 using Models;
 using Repositories;
 
-namespace API.Rentals.Repositories
+namespace Repositories.Interfaces
 {
     public interface IRentalRepository : IRepositoryBase<Rental>
     {

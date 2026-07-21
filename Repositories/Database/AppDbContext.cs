@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.Users;
 
-namespace Repositories.Databasee;
+namespace Repositories.Database;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

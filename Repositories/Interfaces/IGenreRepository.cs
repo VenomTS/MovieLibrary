@@ -1,7 +1,7 @@
 using Models;
 using Repositories;
 
-namespace API.Genres.Repositories;
+namespace Repositories.Interfaces;
 
 public interface IGenreRepository : IRepositoryBase<Genre>
 {

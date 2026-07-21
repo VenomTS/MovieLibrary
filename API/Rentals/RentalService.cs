@@ -1,7 +1,4 @@
-﻿using API.Movies.Repositories;
-using API.OneOfTypes;
-using API.Rentals.Repositories;
-using API.Users.Repository;
+﻿using API.OneOfTypes;
 using DTO.Rentals;
 using DTO.SearchQueries;
 using Models;
@@ -19,6 +16,7 @@ namespace API.Rentals
 
             var rentalsDto = rentals.Select(x => new RentalResponse
             {
+                Id = x.Id,
                 MovieId = x.MovieId,
                 UserId = x.UserId,
                 DateRented = x.DateRented,
@@ -39,7 +37,6 @@ namespace API.Rentals
                 return new UserNotFound();
 
             var stock = await stockRepo.GetByIdAsync(request.MovieId);
-            // It should never be null since it is created when movie is added to the DB
             if (stock == null || stock.Amount <= 0)
                 return new MovieOutOfStock();
 

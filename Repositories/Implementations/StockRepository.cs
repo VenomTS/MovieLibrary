@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Repositories;
-using Repositories.Databasee;
+using Repositories.Database;
 using Repositories.Interfaces;
 
-namespace API.Stocks.Repositories;
+namespace Repositories.Implementations;
 
 public class StockRepository(AppDbContext dbContext) : RepositoryBase<Stock>(dbContext), IStockRepository
 {
