@@ -15,7 +15,6 @@ public class StockService(IStockRepository stockRepo)
             return new StockNotFound();
 
         stock.Amount = request.NewStockAmount;
-        await stockRepo.UpdateAsync(stock.MovieId, stock);
         return new Success();
     }
 }

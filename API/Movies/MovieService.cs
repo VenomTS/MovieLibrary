@@ -3,6 +3,7 @@ using API.OneOfTypes;
 using API.Stocks;
 using DTO.Movies;
 using DTO.SearchQueries;
+using Models;
 using OneOf;
 using Repositories.Interfaces;
 
@@ -12,12 +13,7 @@ public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo
 {
     public async Task<List<MovieResponse>> GetMoviesAsync(MovieSearchQuery query)
     {
-        IEnumerable<Movie> movies;
-
-        if (query.IsAvailable != null && query.IsAvailable.Value)
-            movies = await movieRepo.GetAvailableMoviesAsync(query);
-        else
-            movies = await movieRepo.GetMoviesAsync(query);
+        var movies = await movieRepo.Search(query);
 
         var moviesDto = movies.Select(x => new MovieResponse
         {
@@ -50,7 +46,7 @@ public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo
         if (movieExists)
             return new MovieAlreadyExists();
 
-        movie = await movieRepo.AddMovieAsync(movie);
+        await movieRepo.CreateAsync(movie);
         var movieResponse = new MovieResponse
         {
             Id = movie.Id,
@@ -64,14 +60,14 @@ public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo
             MovieId = movie.Id,
             Amount = 0,
         };
-        await stockRepo.AddAsync(stock);
+        await stockRepo.CreateAsync(stock);
         
         return movieResponse;
     }
 
     public async Task<OneOf<MovieResponse, MovieNotFound>> GetMovieByIdAsync(Guid id)
     {
-        var movie = await movieRepo.GetMovieByIdAsync(id);
+        var movie = await movieRepo.GetByIdAsync(id);
 
         return movie == null
             ? new MovieNotFound()

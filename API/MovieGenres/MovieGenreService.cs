@@ -3,6 +3,7 @@ using API.MovieGenres.Repositories;
 using API.Movies.Repositories;
 using API.OneOfTypes;
 using DTO.MovieGenres;
+using Models;
 using OneOf;
 using OneOf.Types;
 
@@ -29,7 +30,7 @@ public class MovieGenreService(IMovieGenreRepository movieGenreRepo, IMovieRepos
         if (movieGenreExists)
             return new MovieGenreAlreadyExists();
         
-        await movieGenreRepo.AddMovieGenre(movieGenre);
+        await movieGenreRepo.CreateAsync(movieGenre);
         return new Success();
     }
 
@@ -45,6 +46,6 @@ public class MovieGenreService(IMovieGenreRepository movieGenreRepo, IMovieRepos
         if (movieGenreExists)
             return;
         
-        await movieGenreRepo.RemoveMovieGenre(movieGenre);
+        await movieGenreRepo.Delete(movieGenre);
     }
 }

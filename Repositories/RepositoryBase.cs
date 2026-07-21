@@ -3,17 +3,10 @@ using Repositories.Databasee;
 
 namespace Repositories
 {
-    public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
+    public abstract class RepositoryBase<TEntity>(AppDbContext context) : IRepositoryBase<TEntity> where TEntity : class
     {
 
-        protected readonly AppDbContext Context;
-        protected readonly DbSet<TEntity> DbSet;
-
-        protected RepositoryBase(AppDbContext context)
-        {
-            Context = context;
-            DbSet = context.Set<TEntity>();
-        }
+        protected readonly DbSet<TEntity> DbSet = context.Set<TEntity>();
 
         public virtual async Task CreateAsync(TEntity entity)
         {
@@ -51,7 +44,7 @@ namespace Repositories
 
         public virtual async Task SaveChangesAsync()
         {
-            await Context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
         
     }

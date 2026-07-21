@@ -1,4 +1,5 @@
 using DTO.Movies;
+using DTO.SearchQueries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Movies;
@@ -29,7 +30,7 @@ public class MoviesController(MovieService movieService) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMovies([FromQuery] SearchQuery query)
+    public async Task<IActionResult> GetMovies([FromQuery] MovieSearchQuery query)
     {
         var result = await movieService.GetMoviesAsync(query);
 

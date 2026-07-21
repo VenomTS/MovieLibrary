@@ -1,9 +1,9 @@
+using API.Genres.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using Repositories;
 using Repositories.Databasee;
 
-namespace API.Genres.Repositories;
+namespace Repositories.Implementations;
 
 public class GenreRepository(AppDbContext dbContext) : RepositoryBase<Genre>(dbContext), IGenreRepository
 {

@@ -3,6 +3,7 @@ using System.Text;
 using API.Users;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Models.Users;
 
 namespace API.Auth.Services;
 

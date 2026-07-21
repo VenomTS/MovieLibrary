@@ -4,6 +4,7 @@ using API.Rentals.Repositories;
 using API.Users.Repository;
 using DTO.Rentals;
 using DTO.SearchQueries;
+using Models;
 using OneOf;
 using OneOf.Types;
 using Repositories.Interfaces;
@@ -14,7 +15,7 @@ namespace API.Rentals
     {
         public async Task<List<RentalResponse>> GetAllRentals(RentalSearchQuery rentalSearch)
         {
-            var rentals = await rentalRepo.GetAllRentals(rentalSearch);
+            var rentals = await rentalRepo.Search(rentalSearch);
 
             var rentalsDto = rentals.Select(x => new RentalResponse
             {
@@ -44,7 +45,6 @@ namespace API.Rentals
 
             // What if 2 users decrease same movie, possible off by 1
             stock.Amount -= 1;
-            await stockRepo.UpdateAsync(request.MovieId, stock);
 
             var rental = new Rental
             {
@@ -54,19 +54,18 @@ namespace API.Rentals
                 DateReturned = null
             };
 
-            await rentalRepo.AddRental(rental);
+            await rentalRepo.CreateAsync(rental);
             return new Success();
         }
 
         public async Task<OneOf<Success, RentalNotFound>> ReturnMovie(ReturnRequest request)
         {
-            var rental = await rentalRepo.GetRentalById(request.RentalId);
+            var rental = await rentalRepo.GetByIdAsync(request.RentalId);
 
             if (rental == null)
                 return new RentalNotFound();
 
             rental.DateReturned = request.DateReturned == null ? DateOnly.FromDateTime(DateTime.Now) : request.DateReturned.Value;
-            await rentalRepo.UpdateRental(request.RentalId, rental);
 
             var stock = await stockRepo.GetByIdAsync(rental.MovieId);
             if (stock == null)
@@ -74,7 +73,6 @@ namespace API.Rentals
 
             // What if 2 users increase same movie, possible off by 1
             stock.Amount += 1;
-            await stockRepo.UpdateAsync(stock.MovieId, stock);
             return new Success();
         }
     }

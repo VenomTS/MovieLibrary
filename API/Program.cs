@@ -13,6 +13,7 @@ using API.Users;
 using API.Users.Repository;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Databasee;
+using Repositories.Implementations;
 using Repositories.Interfaces;
 using Scalar.AspNetCore;
 

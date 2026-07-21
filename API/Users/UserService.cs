@@ -2,6 +2,7 @@ using API.Auth.Services;
 using API.OneOfTypes;
 using API.Users.Repository;
 using DTO.Users;
+using Models.Users;
 using OneOf;
 using OneOf.Types;
 
@@ -11,7 +12,7 @@ public class UserService(HashingService hashingService, JsonWebTokenService jwtS
 {
     public async Task<OneOf<Success, UserAlreadyExists>> Register(RegisterRequest request)
     {
-        var userExists = await userRepository.UserExists(request.Username);
+        var userExists = await userRepository.UserExistsAsync(request.Username);
         if (userExists)
             return new UserAlreadyExists();
 
@@ -25,13 +26,13 @@ public class UserService(HashingService hashingService, JsonWebTokenService jwtS
             Salt = salt,
         };
 
-        await userRepository.AddUser(user);
+        await userRepository.CreateAsync(user);
         return new Success();
     }
 
     public async Task<OneOf<LoginResponse, InvalidLogin>> Login(LoginRequest request)
     {
-        var user = await userRepository.GetUserByUsername(request.Username);
+        var user = await userRepository.GetUserByUsernameAsync(request.Username);
         
         // These should be unified, but I don't know how to handle that?
         if (user == null)
