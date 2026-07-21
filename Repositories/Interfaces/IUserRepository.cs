@@ -1,11 +1,11 @@
+using Models.Users;
+using Repositories;
+
 namespace API.Users.Repository;
 
-public interface IUserRepository
+public interface IUserRepository : IRepositoryBase<User>
 {
-    public Task<IEnumerable<User>> GetUsers();
-    public Task<User?> GetUserById(Guid id);
-    public Task<User?> GetUserByUsername(string username);
-    public Task<bool> UserExists(string username);
-    public Task AddUser(User user);
+    public Task<User?> GetUserByUsernameAsync(string username);
+    public Task<bool> UserExistsAsync(string username);
     Task<bool> UserExistsAsync(Guid userId);
 }

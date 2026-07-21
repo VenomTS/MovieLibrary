@@ -1,8 +1,9 @@
+using Models;
+using Repositories;
+
 namespace API.MovieGenres.Repositories;
 
-public interface IMovieGenreRepository
+public interface IMovieGenreRepository : IRepositoryBase<MovieGenre>
 {
-    public Task AddMovieGenre(MovieGenre movieGenre);
-    public Task RemoveMovieGenre(MovieGenre movieGenre);
     public Task<bool> MovieGenreExists(MovieGenre movieGenre);
 }

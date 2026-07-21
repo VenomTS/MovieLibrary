@@ -1,12 +1,11 @@
 ﻿using DTO.SearchQueries;
+using Models;
+using Repositories;
 
 namespace API.Rentals.Repositories
 {
-    public interface IRentalRepository
+    public interface IRentalRepository : IRepositoryBase<Rental>
     {
-        public Task<List<Rental>> GetAllRentals(RentalSearchQuery rentalSearch);
-        public Task<Rental?> GetRentalById(Guid id);
-        public Task AddRental(Rental rental);
-        public Task UpdateRental(Guid rentalId, Rental newRental);
+        public Task<IEnumerable<Rental>> Search(RentalSearchQuery query);
     }
 }

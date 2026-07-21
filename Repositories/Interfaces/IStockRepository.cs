@@ -1,8 +1,7 @@
-namespace API.Stocks.Repositories;
+using Models;
 
-public interface IStockRepository
+namespace Repositories.Interfaces;
+
+public interface IStockRepository : IRepositoryBase<Stock>
 {
-    public Task<Stock?> GetByIdAsync(Guid movieId);
-    public Task AddAsync(Stock stock);
-    public Task UpdateAsync(Guid id, Stock updatedStock);
 }

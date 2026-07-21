@@ -3,7 +3,7 @@ using Repositories.Databasee;
 
 namespace Repositories
 {
-    public abstract class RepositoryBase<TEntity> where TEntity : class
+    public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
     {
 
         protected readonly AppDbContext Context;
@@ -47,6 +47,11 @@ namespace Repositories
         public virtual async Task<List<TEntity>> GetAllAsync()
         {
             return await DbSet.ToListAsync();
+        }
+
+        public virtual async Task SaveChangesAsync()
+        {
+            await Context.SaveChangesAsync();
         }
         
     }

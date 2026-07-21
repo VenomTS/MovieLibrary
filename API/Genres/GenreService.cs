@@ -1,6 +1,7 @@
 using API.Genres.Repositories;
 using API.OneOfTypes;
 using DTO.Genres;
+using Models;
 using OneOf;
 
 namespace API.Genres;
@@ -18,8 +19,7 @@ public class GenreService(IGenreRepository genreRepo)
             Name = request.Name
         };
 
-        genre = await genreRepo.CreateAsync(genre);
-
+        await genreRepo.CreateAsync(genre);
         return new GenreResponse
         {
             Id = genre.Id,

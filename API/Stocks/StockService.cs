@@ -1,8 +1,8 @@
 using API.OneOfTypes;
-using API.Stocks.Repositories;
 using DTO.Stocks;
 using OneOf;
 using OneOf.Types;
+using Repositories.Interfaces;
 
 namespace API.Stocks;
 

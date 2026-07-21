@@ -1,47 +1,27 @@
-﻿using API.Database;
-using DTO.SearchQueries;
+﻿using DTO.SearchQueries;
 using Microsoft.EntityFrameworkCore;
+using Models;
+using Repositories;
+using Repositories.Databasee;
 
 namespace API.Rentals.Repositories
 {
-    public class RentalRepository(AppDbContext dbContext) : IRentalRepository
+    public class RentalRepository(AppDbContext dbContext) : RepositoryBase<Rental>(dbContext), IRentalRepository
     {
-        public async Task AddRental(Rental rental)
+        public async Task<IEnumerable<Rental>> Search(RentalSearchQuery query)
         {
-            await dbContext.Rentals.AddAsync(rental);
-            await dbContext.SaveChangesAsync();
-        }
+            var rentals = dbContext.Rentals.Include(x => x.Movie).Include(x => x.User).AsQueryable();
 
-        public async Task<List<Rental>> GetAllRentals(RentalSearchQuery rentalSearch)
-        {
-            var rentals = dbContext.Rentals.AsQueryable();
+            if (query.UserId != null)
+                rentals = rentals.Where(x => x.UserId == query.UserId);
 
-            if (rentalSearch.MovieId != null)
-                rentals = rentals.Where(x => x.MovieId == rentalSearch.MovieId.Value);
+            if (query.MovieId != null)
+                rentals = rentals.Where(x => x.MovieId == query.MovieId);
 
-            if (rentalSearch.UserId != null)
-                rentals = rentals.Where(x => x.UserId == rentalSearch.UserId.Value);
-
-            if (rentalSearch.DateRented != null)
-                rentals = rentals.Where(x => x.DateRented == rentalSearch.DateRented.Value);
+            if (query.DateRented != null)
+                rentals = rentals.Where(x => x.DateRented == query.DateRented);
 
             return await rentals.ToListAsync();
-        }
-
-        public async Task<Rental?> GetRentalById(Guid id)
-        {
-            var rental = await dbContext.Rentals.FirstOrDefaultAsync(x => x.Id == id);
-            return rental;
-        }
-
-        public async Task UpdateRental(Guid rentalId, Rental newRental)
-        {
-            var existingRental = await GetRentalById(rentalId);
-            if (existingRental == null)
-                return;
-
-            existingRental.DateReturned = newRental.DateReturned;
-            await dbContext.SaveChangesAsync();
         }
     }
 }

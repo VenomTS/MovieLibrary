@@ -1,12 +1,12 @@
 ﻿using API.Movies.Repositories;
 using API.OneOfTypes;
 using API.Rentals.Repositories;
-using API.Stocks.Repositories;
 using API.Users.Repository;
 using DTO.Rentals;
 using DTO.SearchQueries;
 using OneOf;
 using OneOf.Types;
+using Repositories.Interfaces;
 
 namespace API.Rentals
 {
