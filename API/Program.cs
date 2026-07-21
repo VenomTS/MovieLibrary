@@ -12,6 +12,7 @@ using API.Stocks.Repositories;
 using API.Users;
 using API.Users.Repository;
 using Microsoft.EntityFrameworkCore;
+using Repositories.Databasee;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

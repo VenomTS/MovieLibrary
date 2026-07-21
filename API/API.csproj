@@ -23,6 +23,7 @@
     <ItemGroup>
       <ProjectReference Include="..\DTO\DTO.csproj" />
       <ProjectReference Include="..\Models\Models.csproj" />
+      <ProjectReference Include="..\Repositories\Repositories.csproj" />
     </ItemGroup>
 
 </Project>
