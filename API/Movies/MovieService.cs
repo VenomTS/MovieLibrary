@@ -59,7 +59,9 @@ public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo
             MovieId = movie.Id,
             Amount = 0,
         };
+
         await stockRepo.CreateAsync(stock);
+        await stockRepo.SaveChangesAsync();
         
         return movieResponse;
     }

@@ -52,6 +52,7 @@ namespace API.Rentals
             };
 
             await rentalRepo.CreateAsync(rental);
+            await rentalRepo.SaveChangesAsync();
             return new Success();
         }
 
@@ -70,6 +71,8 @@ namespace API.Rentals
 
             // What if 2 users increase same movie, possible off by 1
             stock.Amount += 1;
+
+            await stockRepo.SaveChangesAsync();
             return new Success();
         }
     }

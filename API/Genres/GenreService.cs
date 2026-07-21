@@ -20,6 +20,8 @@ public class GenreService(IGenreRepository genreRepo)
         };
 
         await genreRepo.CreateAsync(genre);
+        await genreRepo.SaveChangesAsync();
+
         return new GenreResponse
         {
             Id = genre.Id,

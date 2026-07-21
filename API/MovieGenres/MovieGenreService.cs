@@ -29,6 +29,7 @@ public class MovieGenreService(IMovieGenreRepository movieGenreRepo, IMovieRepos
             return new MovieGenreAlreadyExists();
         
         await movieGenreRepo.CreateAsync(movieGenre);
+        await movieGenreRepo.SaveChangesAsync();
         return new Success();
     }
 
@@ -45,5 +46,6 @@ public class MovieGenreService(IMovieGenreRepository movieGenreRepo, IMovieRepos
             return;
         
         await movieGenreRepo.Delete(movieGenre);
+        await movieGenreRepo.SaveChangesAsync();
     }
 }

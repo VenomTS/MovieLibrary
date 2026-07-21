@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repositories.Database;
+using System.Linq.Expressions;
 
 namespace Repositories
 {
@@ -32,10 +33,29 @@ namespace Repositories
             DbSet.Remove(entity);
         }
 
-        public virtual async Task<TEntity?> GetByIdAsync(Guid id)
+        public virtual async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includes)
         {
-            return await DbSet.FindAsync(id);
+            IQueryable<TEntity> query = DbSet;
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.FirstOrDefaultAsync(predicate);
         }
+
+        /*public virtual async Task<TEntity?> GetByIdAsync(Guid id, params Expression<Func<TEntity, object>>[] includes)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.FirstOrDefaultAsync(x => EF.Property<Guid>(x, "Id") == id);
+        }*/
 
         public virtual async Task<List<TEntity>> GetAllAsync()
         {
@@ -46,6 +66,5 @@ namespace Repositories
         {
             await context.SaveChangesAsync();
         }
-        
     }
 }

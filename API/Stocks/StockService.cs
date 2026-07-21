@@ -15,6 +15,7 @@ public class StockService(IStockRepository stockRepo)
             return new StockNotFound();
 
         stock.Amount = request.NewStockAmount;
+        await stockRepo.SaveChangesAsync();
         return new Success();
     }
 }

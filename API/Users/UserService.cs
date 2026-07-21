@@ -27,6 +27,7 @@ public class UserService(HashingService hashingService, JsonWebTokenService jwtS
         };
 
         await userRepository.CreateAsync(user);
+        await userRepository.SaveChangesAsync();
         return new Success();
     }
 
