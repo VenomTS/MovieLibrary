@@ -45,7 +45,7 @@ namespace Repositories
             return await query.FirstOrDefaultAsync(predicate);
         }
 
-        /*public virtual async Task<TEntity?> GetByIdAsync(Guid id, params Expression<Func<TEntity, object>>[] includes)
+        public virtual async Task<TEntity?> GetByIdAsync(Guid id, params Expression<Func<TEntity, object>>[] includes)
         {
             IQueryable<TEntity> query = DbSet;
 
@@ -55,11 +55,20 @@ namespace Repositories
             }
 
             return await query.FirstOrDefaultAsync(x => EF.Property<Guid>(x, "Id") == id);
-        }*/
+        }
 
-        public virtual async Task<List<TEntity>> GetAllAsync()
+        public virtual async Task<TEntity?> GetByIdAsync(Guid id)
         {
-            return await DbSet.ToListAsync();
+            return await DbSet.FindAsync(id);
+        }
+        public virtual async Task<List<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
+        {
+            IQueryable<TEntity> query = DbSet;
+
+            foreach (var include in includes)
+                query = query.Include(include);
+
+            return await query.ToListAsync();
         }
 
         public virtual async Task SaveChangesAsync()
