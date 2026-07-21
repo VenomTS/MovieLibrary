@@ -1,12 +1,8 @@
-using API.Genres;
-using API.MovieGenres;
-using API.Movies;
-using API.Rentals;
-using API.Stocks;
-using API.Users;
 using Microsoft.EntityFrameworkCore;
+using Models;
+using Models.Users;
 
-namespace API.Database;
+namespace Repositories.Databasee;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

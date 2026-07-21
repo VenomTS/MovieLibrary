@@ -1,16 +1,16 @@
-using API.Movies.DTO;
 using API.Movies.Repositories;
 using API.OneOfTypes;
 using API.Stocks;
 using API.Stocks.Repositories;
 using DTO.Movies;
+using DTO.SearchQueries;
 using OneOf;
 
 namespace API.Movies;
 
 public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo)
 {
-    public async Task<List<MovieResponse>> GetMoviesAsync(SearchQuery query)
+    public async Task<List<MovieResponse>> GetMoviesAsync(MovieSearchQuery query)
     {
         IEnumerable<Movie> movies;
 

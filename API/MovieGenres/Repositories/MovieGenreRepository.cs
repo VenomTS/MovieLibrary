@@ -1,5 +1,5 @@
-using API.Database;
 using Microsoft.EntityFrameworkCore;
+using Models;
 
 namespace API.MovieGenres.Repositories;
 

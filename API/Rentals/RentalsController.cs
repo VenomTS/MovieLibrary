@@ -1,4 +1,5 @@
 ﻿using DTO.Rentals;
+using DTO.SearchQueries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Rentals
@@ -31,7 +32,7 @@ namespace API.Rentals
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllRentals([FromQuery] RentalSearch rentalSearch)
+        public async Task<IActionResult> GetAllRentals([FromQuery] RentalSearchQuery rentalSearch)
         {
             var result = await rentalService.GetAllRentals(rentalSearch);
             return Ok(result);

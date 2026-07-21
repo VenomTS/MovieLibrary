@@ -1,8 +1,6 @@
-using API.Movies.DTO;
+namespace DTO.SearchQueries;
 
-namespace API.Movies;
-
-public class SearchQuery
+public class MovieSearchQuery
 {
     public string? Name { get; set; }
     public bool? IsAvailable { get; set; }

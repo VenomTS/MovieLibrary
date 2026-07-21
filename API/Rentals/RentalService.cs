@@ -4,6 +4,7 @@ using API.Rentals.Repositories;
 using API.Stocks.Repositories;
 using API.Users.Repository;
 using DTO.Rentals;
+using DTO.SearchQueries;
 using OneOf;
 using OneOf.Types;
 
@@ -11,7 +12,7 @@ namespace API.Rentals
 {
     public class RentalService(IRentalRepository rentalRepo, IStockRepository stockRepo, IMovieRepository movieRepo, IUserRepository userRepo)
     {
-        public async Task<List<RentalResponse>> GetAllRentals(RentalSearch rentalSearch)
+        public async Task<List<RentalResponse>> GetAllRentals(RentalSearchQuery rentalSearch)
         {
             var rentals = await rentalRepo.GetAllRentals(rentalSearch);
 

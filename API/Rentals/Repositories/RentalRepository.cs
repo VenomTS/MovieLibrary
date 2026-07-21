@@ -1,4 +1,5 @@
 ﻿using API.Database;
+using DTO.SearchQueries;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Rentals.Repositories
@@ -11,7 +12,7 @@ namespace API.Rentals.Repositories
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<Rental>> GetAllRentals(RentalSearch rentalSearch)
+        public async Task<List<Rental>> GetAllRentals(RentalSearchQuery rentalSearch)
         {
             var rentals = dbContext.Rentals.AsQueryable();
 

@@ -1,7 +1,4 @@
-using API.Genres;
-using API.Stocks;
-
-namespace API.Movies;
+namespace Models;
 
 public class Movie
 {

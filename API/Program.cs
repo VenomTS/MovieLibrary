@@ -1,5 +1,4 @@
 using API.Auth.Services;
-using API.Database;
 using API.Genres;
 using API.Genres.Repositories;
 using API.MovieGenres;

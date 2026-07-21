@@ -1,6 +1,6 @@
-﻿namespace API.Rentals
+﻿namespace DTO.SearchQueries
 {
-    public class RentalSearch
+    public class RentalSearchQuery
     {
         public Guid? MovieId { get; set; }
         public Guid? UserId { get; set; }

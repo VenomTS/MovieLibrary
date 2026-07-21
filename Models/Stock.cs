@@ -1,6 +1,4 @@
-using API.Movies;
-
-namespace API.Stocks;
+namespace Models;
 
 public class Stock
 {

@@ -1,6 +1,4 @@
-using API.Movies;
-
-namespace API.Genres;
+namespace Models;
 
 public class Genre
 {

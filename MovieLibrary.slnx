@@ -1,7 +1,10 @@
 <Solution>
   <Project Path="API/API.csproj">
     <BuildDependency Project="DTO/DTO.csproj" />
+    <BuildDependency Project="Models/Models.csproj" />
   </Project>
   <Project Path="App/App.csproj" Id="0dc03768-8f9f-42b5-819c-08e8f62030e1" />
   <Project Path="DTO/DTO.csproj" Id="c55501ad-835b-4cf2-a799-860fca7ee622" />
+  <Project Path="Models/Models.csproj" Id="30b27305-71fd-4eb1-8031-1fb1b93d0de5" />
+  <Project Path="Repositories/Repositories.csproj" Id="0fbb4e56-49f2-4145-a399-d41c3e583f39" />
 </Solution>

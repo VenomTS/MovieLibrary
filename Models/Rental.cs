@@ -1,7 +1,6 @@
-﻿using API.Movies;
-using API.Users;
+﻿using Models.Users;
 
-namespace API.Rentals
+namespace Models
 {
     public class Rental
     {
