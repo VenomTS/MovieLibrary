@@ -1,6 +1,7 @@
 using API.Genres;
 using API.MovieGenres;
 using API.Movies;
+using API.Stocks;
 using API.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Movie> Movies { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<MovieGenre> MovieGenres { get; set; }
+    public DbSet<Stock> Stocks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,5 +21,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         
         modelBuilder.Entity<MovieGenre>().HasKey(x => new { x.MovieId, x.GenreId });
         modelBuilder.Entity<Movie>().HasMany(x => x.Genres).WithMany(x => x.Movies).UsingEntity<MovieGenre>();
+
+        // MovieId is both primary and foreign key
+        modelBuilder.Entity<Stock>().HasKey(x => x.MovieId);
+        modelBuilder.Entity<Stock>().HasOne(x => x.Movie).WithOne(x => x.Stock).HasForeignKey<Stock>(x => x.MovieId);
     }
 }

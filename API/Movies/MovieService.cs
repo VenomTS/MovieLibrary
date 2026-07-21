@@ -1,12 +1,42 @@
 using API.Movies.DTO;
 using API.Movies.Repositories;
 using API.OneOfTypes;
+using API.Stocks;
+using API.Stocks.Repositories;
 using OneOf;
 
 namespace API.Movies;
 
-public class MovieService(IMovieRepository movieRepo)
+public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo)
 {
+    public async Task<List<MovieResponse>> GetMoviesAsync(SearchQuery query)
+    {
+        IEnumerable<Movie> movies;
+
+        if (query.IsAvailable != null && query.IsAvailable.Value)
+            movies = await movieRepo.GetAvailableMoviesAsync(query);
+        else
+            movies = await movieRepo.GetMoviesAsync(query);
+
+        var moviesDto = movies.Select(x => new MovieResponse
+        {
+            Id = x.Id,
+            Name = x.Name,
+            ReleaseDate = x.ReleaseDate,
+            Genres = x.Genres.Select(genre => new MovieGenreResponse
+            {
+                Id = genre.Id,
+                Name = genre.Name,
+            }).ToList(),
+            Stock = new MovieStockResponse
+            {
+                AmountInStock = x.Stock.Amount,
+            }
+        });
+        
+        return moviesDto.ToList();
+    }
+    
     public async Task<OneOf<MovieResponse, MovieAlreadyExists>> AddMovieAsync(AddMovieRequest request)
     {
         var movie = new Movie
@@ -27,6 +57,14 @@ public class MovieService(IMovieRepository movieRepo)
             ReleaseDate = movie.ReleaseDate,
             Genres = [],
         };
+
+        var stock = new Stock
+        {
+            MovieId = movie.Id,
+            Amount = 0,
+        };
+        await stockRepo.AddAsync(stock);
+        
         return movieResponse;
     }
 
@@ -46,6 +84,10 @@ public class MovieService(IMovieRepository movieRepo)
                     Id = x.Id,
                     Name = x.Name,
                 }).ToList(),
+                Stock = new MovieStockResponse
+                {
+                    AmountInStock = movie.Stock.Amount,
+                }
             };
     }
 }

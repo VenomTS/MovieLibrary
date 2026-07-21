@@ -4,6 +4,7 @@ using API.Genres;
 using API.Genres.Repositories;
 using API.Movies;
 using API.Movies.Repositories;
+using API.Stocks.Repositories;
 using API.Users;
 using API.Users.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
+builder.Services.AddScoped<IStockRepository, StockRepository>();
 
 var app = builder.Build();
 

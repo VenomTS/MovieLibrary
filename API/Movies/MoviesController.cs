@@ -27,4 +27,12 @@ public class MoviesController(MovieService movieService) : ControllerBase
             _ => CreatedAtAction(nameof(GetMovieById), new { id = result.AsT0.Id }, result.AsT0),
             _ => Conflict("Movie already exists"));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetMovies([FromQuery] SearchQuery query)
+    {
+        var result = await movieService.GetMoviesAsync(query);
+
+        return Ok(result);
+    }
 }
