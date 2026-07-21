@@ -12,11 +12,6 @@ public class MovieRepository(AppDbContext dbContext) : IMovieRepository
         // Improve-able
         if(!string.IsNullOrWhiteSpace(query.Name))
             movies = movies.Where(x => x.Name.Contains(query.Name));
-        
-        // if(query.Genres.Count > 0)
-        //     movies = movies.Where(x => x.Genres.)
-
-        Console.WriteLine(query.Genres.Count);
 
         foreach (var genre in query.Genres)
             movies = movies.Where(x => x.Genres.Any(g => g.Name == genre));
