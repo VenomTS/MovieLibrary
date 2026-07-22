@@ -19,14 +19,19 @@ namespace App
             var host = CreateHostBuilder().Build();
             ServiceProvider = host.Services;
             
-            // ApplicationConfiguration.Initialize();
-            Application.Run(ServiceProvider.GetRequiredService<MainPage>());
+            var loginForm = ServiceProvider.GetRequiredService<LoginForm>();
+            
+            if(loginForm.ShowDialog() == DialogResult.OK)
+                Application.Run(ServiceProvider.GetRequiredService<MainPage>());
+            
         }
 
         static IHostBuilder CreateHostBuilder()
         {
             return Host.CreateDefaultBuilder().ConfigureServices((context, services) =>
             {
+                services.AddTransient<LoginForm>();
+                services.AddTransient<RegisterForm>();
                 services.AddTransient<MainPage>();
             });
         }

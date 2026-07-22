@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-
-namespace App
+﻿namespace App
 {
     public partial class LoginForm : Form
     {
@@ -162,11 +154,8 @@ namespace App
             // Replace this with your actual login logic
             if (txtUsername.Text == "admin" && txtPassword.Text == "password123")
             {
-                MessageBox.Show(
-                    "Login Successful!",
-                    "Success",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                DialogResult = DialogResult.OK;
+                Close();
             }
             else
             {
