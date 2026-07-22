@@ -15,6 +15,16 @@ namespace API.InventoryRecords
             return Ok(result);
         }
 
+        [HttpGet("{movieId:guid}")]
+        public async Task<IActionResult> GetByMovieId([FromRoute] Guid movieId)
+        {
+            var result = await inventoryService.GetByMovieId(movieId);
+
+            return result.Match<IActionResult>(
+                Ok,
+                _ => NotFound("Movie not found"));
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(CreateInventoryRecordRequest request)
         {

@@ -4,6 +4,7 @@ namespace Repositories.Interfaces
 {
     public interface IInventoryRecordRepository : IRepositoryBase<InventoryRecord>
     {
-        public Task<List<InventoryRecord>> GetInventoryRecordsByMovieId(Guid movieId);
+        public Task<List<InventoryRecord>> GetByMovieId(Guid movieId);
+        public Task<int> GetTotalAmount(Guid movieId, DateOnly fromDate, DateOnly toDate);
     }
 }

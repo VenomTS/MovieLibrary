@@ -46,5 +46,23 @@ namespace API.InventoryRecords
 
             return recordsDto.ToList();
         }
+
+        public async Task<OneOf<List<InventoryRecordDataResponse>, MovieNotFound>> GetByMovieId(Guid movieId)
+        {
+            var movieExists = await movieRepo.MovieExistsAsync(movieId);
+            if (!movieExists)
+                return new MovieNotFound();
+
+            var records = await inventoryRepo.GetByMovieId(movieId);
+
+            var recordsDto = records.GroupBy(x => x.Date)
+                .Select(x => new InventoryRecordDataResponse
+                {
+                    Date = x.Key,
+                    Amount = x.Sum(y => y.Amount),
+                }).ToList();
+
+            return recordsDto;
+        }
     }
 }
