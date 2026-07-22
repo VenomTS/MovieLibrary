@@ -8,7 +8,7 @@ namespace Repositories
         Task Update(TEntity entity);
         Task Delete(TEntity entity);
         Task DeleteById(Guid id);
-        Task<List<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includese);
+        Task<List<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes);
         Task SaveChangesAsync();
     }
 }
