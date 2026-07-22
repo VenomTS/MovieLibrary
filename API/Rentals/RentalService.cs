@@ -47,7 +47,7 @@ namespace API.Rentals
             {
                 MovieId = request.MovieId,
                 UserId = request.UserId,
-                DateRented = request.DateRented == null ? DateOnly.FromDateTime(DateTime.Now) : request.DateRented.Value,
+                DateRented = request.DateRented ?? DateOnly.FromDateTime(DateTime.Now),
                 DateReturned = null
             };
 
@@ -63,7 +63,7 @@ namespace API.Rentals
             if (rental == null)
                 return new RentalNotFound();
 
-            rental.DateReturned = request.DateReturned == null ? DateOnly.FromDateTime(DateTime.Now) : request.DateReturned.Value;
+            rental.DateReturned = request.DateReturned ?? DateOnly.FromDateTime(DateTime.Now);
 
             var stock = await stockRepo.GetByIdAsync(rental.MovieId);
             if (stock == null)

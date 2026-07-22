@@ -9,6 +9,11 @@ namespace Repositories.Implementations;
 
 public class MovieRepository(AppDbContext dbContext) : RepositoryBase<Movie>(dbContext), IMovieRepository
 {
+    public async Task<Movie?> GetByIdAsync(Guid id)
+    {
+        return await dbContext.Movies.Include(x => x.Genres).Include(x => x.Stock).FirstOrDefaultAsync(x => x.Id == id);
+    }
+    
     public async Task<IEnumerable<Movie>> Search(MovieSearchQuery query)
     {
         var movies = dbContext.Movies.Include(x => x.Genres).Include(x => x.Stock).AsQueryable();

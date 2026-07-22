@@ -9,6 +9,12 @@ namespace Repositories.Implementations
 {
     public class RentalRepository(AppDbContext dbContext) : RepositoryBase<Rental>(dbContext), IRentalRepository
     {
+        public async Task<Rental?> GetByIdAsync(Guid id)
+        {
+            return await dbContext.Rentals.Include(x => x.Movie).Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
         public async Task<IEnumerable<Rental>> Search(RentalSearchQuery query)
         {
             var rentals = dbContext.Rentals.Include(x => x.Movie).Include(x => x.User).AsQueryable();

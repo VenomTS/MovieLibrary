@@ -1,5 +1,4 @@
 using API.OneOfTypes;
-using API.Stocks;
 using DTO.Movies;
 using DTO.SearchQueries;
 using Models;
