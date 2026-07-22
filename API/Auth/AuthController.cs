@@ -1,5 +1,6 @@
 using API.Users;
 using DTO.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Auth;
@@ -8,6 +9,16 @@ namespace API.Auth;
 [Route("api/v1/[controller]")]
 public class AuthController(UserService userService) : ControllerBase
 {
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var result = await userService.GetMeAsync(HttpContext.User);
+
+        return result.Match<IActionResult>(
+            Ok,
+            _ => NotFound("User not found"));
+    }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)

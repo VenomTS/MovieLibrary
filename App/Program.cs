@@ -1,3 +1,6 @@
+using App.Services;
+using App.Services.Interfaces;
+using App.UserControls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -18,21 +21,29 @@ namespace App
 
             var host = CreateHostBuilder().Build();
             ServiceProvider = host.Services;
-            
-            var loginForm = ServiceProvider.GetRequiredService<LoginForm>();
-            
-            if(loginForm.ShowDialog() == DialogResult.OK)
-                Application.Run(ServiceProvider.GetRequiredService<MainPage>());
-            
+
+            var appForm = ServiceProvider.GetRequiredService<AppForm>();
+            Application.Run(appForm);
         }
 
         static IHostBuilder CreateHostBuilder()
         {
             return Host.CreateDefaultBuilder().ConfigureServices((context, services) =>
             {
-                services.AddTransient<LoginForm>();
-                services.AddTransient<RegisterForm>();
-                services.AddTransient<MainPage>();
+                // Services
+                services.AddTransient<IHttpService, HttpService>();
+                services.AddTransient<IAuthService, AuthService>();
+                services.AddSingleton<INavigationService, NavigationService>();
+
+                // 
+                services.AddSingleton<AccountManager>();
+
+                // Forms
+                services.AddSingleton<AppForm>();
+
+                // UserControls
+                services.AddTransient<LoginView>();
+                services.AddTransient<RentMoviesView>();
             });
         }
     }

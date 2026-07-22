@@ -4,7 +4,8 @@
     "Projects": [
       {
         "Path": "API\\API.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "http"
       },
       {
         "Path": "App\\App.csproj",

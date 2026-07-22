@@ -8,6 +8,12 @@ namespace Repositories.Implementations;
 
 public class UserRepository(AppDbContext dbContext) : RepositoryBase<User>(dbContext), IUserRepository
 {
+    public async Task<User?> GetByIdAsync(Guid id)
+    {
+        var user = await dbContext.Users.FindAsync(id);
+        return user;
+    }
+
     public async Task<User?> GetUserByUsernameAsync(string username)
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);

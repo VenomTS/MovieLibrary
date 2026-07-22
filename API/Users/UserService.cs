@@ -1,15 +1,35 @@
 using API.Auth.Services;
 using API.OneOfTypes;
 using DTO.Users;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Models.Users;
 using OneOf;
 using OneOf.Types;
 using Repositories.Interfaces;
+using System.Security.Claims;
 
 namespace API.Users;
 
 public class UserService(HashingService hashingService, JsonWebTokenService jwtService, IUserRepository userRepository)
 {
+    public async Task<OneOf<GetMeResponse, UserNotFound>> GetMeAsync(ClaimsPrincipal user)
+    {
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            throw new Exception("JWT does not contain Id");
+
+        var accountUser = await userRepository.GetByIdAsync(new Guid(userId));
+
+        if (accountUser == null)
+            return new UserNotFound();
+        return new GetMeResponse
+        {
+            Id = accountUser.Id,
+            Role = accountUser.Role
+        };
+    }
+
     public async Task<OneOf<Success, UserAlreadyExists>> Register(RegisterRequest request)
     {
         var userExists = await userRepository.UserExistsAsync(request.Username);

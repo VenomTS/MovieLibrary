@@ -5,42 +5,46 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Net;
-using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 using System.Windows.Forms;
 
-namespace App
+namespace App.UserControls
 {
-    public partial class MainPage : Form
+    public partial class RentMoviesView : UserControl
     {
 
         private DataGridView dgvMovies;
         private Button btnRefresh;
         private TextBox txtSearch;
 
+        //
         private IHttpService _httpService;
         private AccountManager _accountManager;
 
-        public MainPage(IHttpService httpService, AccountManager accountManager)
+        private List<MovieResponse> _movies = [];
+
+        public RentMoviesView(IHttpService httpService, AccountManager accountManager)
         {
             InitializeComponent();
-            BuildComponents();
+            InitializeControls();
+
             _httpService = httpService;
             _accountManager = accountManager;
-        }
 
-        private List<MovieResponse> _movies = new();
+        }
 
         private async Task LoadMovies()
         {
             var movieName = txtSearch.Text;
             var movieSearchParam = string.IsNullOrWhiteSpace(movieName) ? "" : $"?name={movieName}";
 
-            (var statusCode, _movies) = await _httpService.GetAsync<List<MovieResponse>>($"movies{movieSearchParam}");
+            var (statusCode, movies) = await _httpService.GetAsync<List<MovieResponse>>($"movies{movieSearchParam}");
+            if (movies == null)
+                throw new Exception("Movies are null");
+
+            _movies = movies;
             DisplayMovies();
         }
 
@@ -48,7 +52,7 @@ namespace App
         {
             dgvMovies.Rows.Clear();
 
-            foreach(var movie in _movies)
+            foreach (var movie in _movies)
             {
                 int rowIndex = dgvMovies.Rows.Add(
                     movie.Name,
@@ -88,7 +92,7 @@ namespace App
                 var (responseCode, content) = await _httpService.PostAsync<RentRequest, string>("rentals", new RentRequest
                 {
                     MovieId = movie.Id,
-                    UserId = _accountManager.User.Id,
+                    UserId = _accountManager.User!.Id,
                     DateRented = DateOnly.FromDateTime(DateTime.Now),
                 });
 
@@ -104,12 +108,8 @@ namespace App
             }
         }
 
-        private void BuildComponents()
+        private void InitializeControls()
         {
-            this.Text = "Movies";
-            this.Size = new Size(900, 600);
-            this.StartPosition = FormStartPosition.CenterScreen;
-
             txtSearch = new TextBox
             {
                 Left = 20,
