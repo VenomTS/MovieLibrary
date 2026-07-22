@@ -15,6 +15,11 @@ namespace Repositories.Implementations
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<List<Rental>> GetByMovieIdAsync(Guid movieId)
+        {
+            return await dbContext.Rentals.Where(x => x.MovieId == movieId).ToListAsync();
+        }
+
         public async Task<IEnumerable<Rental>> Search(RentalSearchQuery query)
         {
             var rentals = dbContext.Rentals.Include(x => x.Movie).Include(x => x.User).AsQueryable();

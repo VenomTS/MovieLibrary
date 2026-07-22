@@ -1,6 +1,7 @@
 ﻿using API.OneOfTypes;
 using DTO.Rentals;
 using DTO.SearchQueries;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Models;
 using OneOf;
 using OneOf.Types;
@@ -8,7 +9,7 @@ using Repositories.Interfaces;
 
 namespace API.Rentals
 {
-    public class RentalService(IRentalRepository rentalRepo, IStockRepository stockRepo, IMovieRepository movieRepo, IUserRepository userRepo)
+    public class RentalService(IRentalRepository rentalRepo, IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo, IUserRepository userRepo)
     {
         public async Task<List<RentalResponse>> GetAllRentals(RentalSearchQuery rentalSearch)
         {
@@ -36,18 +37,20 @@ namespace API.Rentals
             if (!userExists)
                 return new UserNotFound();
 
-            var stock = await stockRepo.GetByIdAsync(request.MovieId);
-            if (stock == null || stock.Amount <= 0)
-                return new MovieOutOfStock();
+            var rentingDate = request.DateRented == null ? DateOnly.FromDateTime(DateTime.Now) : request.DateRented.Value;
 
-            // What if 2 users decrease same movie, possible off by 1
-            stock.Amount -= 1;
+            var totalInInventory = await inventoryRepo.GetTotalAmount(request.MovieId, DateOnly.MinValue, rentingDate);
+            var totalRented = await rentalRepo.GetByMovieIdAsync(request.MovieId);
+            var totalNotReturned = totalRented.Count(x => x.DateReturned == null);
+
+            if (totalInInventory - totalNotReturned <= 0)
+                return new MovieOutOfStock();
 
             var rental = new Rental
             {
                 MovieId = request.MovieId,
                 UserId = request.UserId,
-                DateRented = request.DateRented ?? DateOnly.FromDateTime(DateTime.Now),
+                DateRented = rentingDate,
                 DateReturned = null
             };
 
@@ -65,14 +68,7 @@ namespace API.Rentals
 
             rental.DateReturned = request.DateReturned ?? DateOnly.FromDateTime(DateTime.Now);
 
-            var stock = await stockRepo.GetByIdAsync(rental.MovieId);
-            if (stock == null)
-                throw new Exception("This should not be reachable");
-
-            // What if 2 users increase same movie, possible off by 1
-            stock.Amount += 1;
-
-            await stockRepo.SaveChangesAsync();
+            await rentalRepo.SaveChangesAsync();
             return new Success();
         }
     }

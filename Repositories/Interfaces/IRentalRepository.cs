@@ -8,5 +8,6 @@ namespace Repositories.Interfaces
     {
         public Task<Rental?> GetByIdAsync(Guid id);
         public Task<IEnumerable<Rental>> Search(RentalSearchQuery query);
+        public Task<List<Rental>> GetByMovieIdAsync(Guid movieId);
     }
 }
