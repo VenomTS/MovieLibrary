@@ -39,7 +39,7 @@ namespace API.Rentals
 
             var rentingDate = request.DateRented == null ? DateOnly.FromDateTime(DateTime.Now) : request.DateRented.Value;
 
-            var totalInInventory = await inventoryRepo.GetTotalAmount(request.MovieId, DateOnly.MinValue, rentingDate);
+            var totalInInventory = await inventoryRepo.GetTotalAmount(request.MovieId, rentingDate);
             var totalRented = await rentalRepo.GetByMovieIdAsync(request.MovieId);
             var totalNotReturned = totalRented.Count(x => x.DateReturned == null);
 

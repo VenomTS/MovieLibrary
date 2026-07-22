@@ -13,9 +13,9 @@ namespace Repositories.Implementations
             return records;
         }
 
-        public async Task<int> GetTotalAmount(Guid movieId, DateOnly startDate, DateOnly endDate)
+        public async Task<int> GetTotalAmount(Guid movieId, DateOnly untilDate)
         {
-            var records = await dbContext.InventoryRecords.Where(x => x.MovieId == movieId && x.Date >= startDate && x.Date <= endDate).SumAsync(x => x.Amount);
+            var records = await dbContext.InventoryRecords.Where(x => x.MovieId == movieId && x.Date <= untilDate).SumAsync(x => x.Amount);
 
             return records;
         }
