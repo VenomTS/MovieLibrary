@@ -2,37 +2,36 @@
 using DTO.Users;
 using System.Net;
 using App.Account;
-using DTO;
+using App.APIResponses;
 
 namespace App.Services
 {
     public class AuthService(IHttpService httpService, AccountManager accountManager) : IAuthService
     {
-        public async Task<bool> LoginAsync(string mail, string password)
+        public async Task<APIResponse<LoginResponse>> LoginAsync(string mail, string password)
         {
-            var (statusCode, content) = await httpService.PostAsync<LoginRequest, LoginResponse>("auth/login", new LoginRequest
+            var response = await httpService.PostAsync<LoginRequest, LoginResponse>("auth/login", new LoginRequest
             {
                 Email = mail,
                 Password = password
             });
 
-            if (statusCode == HttpStatusCode.OK)
-                await accountManager.Initialize(content!.AccessToken);
-
-
-            return statusCode == HttpStatusCode.OK;
+            if (response.Status == HttpStatusCode.OK)
+                await accountManager.Initialize(response.Content!.AccessToken);
+            
+            return response;
         }
 
-        public async Task<bool> RegisterAsync(string mail, string password)
+        public async Task<APIResponse<EmptyResponse>> RegisterAsync(string mail, string password)
         {
-            var (statusCode, content) = await httpService.PostAsync<RegisterRequest, EmptyResponse>("auth/register",
+            var response = await httpService.PostAsync<RegisterRequest, EmptyResponse>("auth/register",
                 new RegisterRequest
                 {
                     Email = mail,
                     Password = password
                 });
-            
-            return statusCode == HttpStatusCode.OK;
+
+            return response;
         }
     }
 }

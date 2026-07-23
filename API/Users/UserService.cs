@@ -24,7 +24,7 @@ public class UserService(UserManager<AppUser> userManager)
 
         return new GetMeResponse
         {
-            Id = new Guid(accountUser.Id),
+            Id = accountUser.Id,
             Roles = roles,
         };
     }

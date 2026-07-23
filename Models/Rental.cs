@@ -4,7 +4,7 @@
     {
         public Guid Id { get; set; }
         public Guid MovieId { get; set; }
-        public Guid UserId { get; set; }
+        public Guid AppUserId { get; set; }
         public DateOnly DateRented { get; set; }
         public DateOnly? DateReturned { get; set; }
 

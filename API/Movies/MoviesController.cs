@@ -10,13 +10,17 @@ public class MoviesController(MovieService movieService) : ControllerBase
 {
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetMovieById(Guid id)
+    public async Task<IActionResult> GetById(Guid id)
     {
         var result = await movieService.GetMovieByIdAsync(id);
 
         return result.Match<IActionResult>(
-            _ => Ok(result.AsT0),
-            _ => NotFound("Movie not found"));
+            Ok,
+            _ => NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Detail = $"The movie with ID {id} was not found",
+            }));
     }
     
     [HttpPost]
@@ -25,8 +29,12 @@ public class MoviesController(MovieService movieService) : ControllerBase
         var result = await movieService.AddMovieAsync(request);
 
         return result.Match<IActionResult>(
-            _ => CreatedAtAction(nameof(GetMovieById), new { id = result.AsT0.Id }, result.AsT0),
-            _ => Conflict("Movie already exists"));
+            movie => CreatedAtAction(nameof(GetById), new { id = movie.Id }, movie),
+            _ => NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Detail = $"The specified movie already exists",
+            }));
     }
 
     [HttpGet]

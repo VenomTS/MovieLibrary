@@ -1,4 +1,5 @@
-﻿using App.Services.Interfaces;
+﻿using System.Net;
+using App.Services.Interfaces;
 using App.UserControls;
 
 namespace App
@@ -39,7 +40,6 @@ namespace App
 
             bool valid = true;
 
-
             if (string.IsNullOrWhiteSpace(txtMail.Text))
             {
                 errorProvider.SetError(
@@ -65,16 +65,13 @@ namespace App
 
 
 
-            var success = await _authService.LoginAsync(
+            var apiResponse = await _authService.LoginAsync(
                 txtMail.Text,
                 txtPassword.Text);
+            
+            if(apiResponse.Status == HttpStatusCode.OK)
+                _navigationService.ShowView<RentMoviesView>();
 
-
-
-            if(success)
-            {
-                _navigationService.ShowView<MovieInventoryView>();
-            }
             else
             {
                 MessageBox.Show(

@@ -1,23 +1,11 @@
 ﻿using App.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using App.Account;
 
 namespace App
 {
     public partial class AppForm : Form
     {
-
-        private IServiceProvider _serviceProvider;
         private INavigationService _navigationService;
-        private AccountManager _accountManager;
 
         // Controls
         private Panel _panelContainer;
@@ -25,10 +13,16 @@ namespace App
         public AppForm(IServiceProvider serviceProvider)
         {
             InitializeComponent();
+
+            // Form settings
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = true;
+            StartPosition = FormStartPosition.CenterScreen;
+            ClientSize = new Size(900, 600);
+
             InitializeControls();
 
-            _serviceProvider = serviceProvider;
-            _accountManager = serviceProvider.GetRequiredService<AccountManager>();
             _navigationService = serviceProvider.GetRequiredService<INavigationService>();
 
             _navigationService.Initialize(_panelContainer);

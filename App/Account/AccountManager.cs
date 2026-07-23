@@ -11,15 +11,15 @@ namespace App.Account
         public async Task Initialize(string jwt)
         {
             httpService.SetJwt(jwt);
-            var (statusCode, user) = await httpService.GetAsync<GetMeResponse>("auth/me");
-
-            if (statusCode != HttpStatusCode.OK)
+            var response = await httpService.GetAsync<GetMeResponse>("auth/me");
+            
+            if(response.Status != HttpStatusCode.OK)
                 throw new Exception("Account is not authorized");
 
-            if (user == null)
+            if (response.Content == null)
                 return;
 
-            SetupUser(user);
+            SetupUser(response.Content);
         }
 
         public bool IsLoggedIn() => User != null;

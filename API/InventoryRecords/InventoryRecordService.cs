@@ -4,13 +4,27 @@ using Models;
 using OneOf;
 using OneOf.Types;
 using Repositories.Interfaces;
-using System.Runtime.InteropServices;
 
 namespace API.InventoryRecords
 {
     public class InventoryRecordService(IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo)
     {
-        public async Task<OneOf<Success, MovieNotFound>> AddAsync(CreateInventoryRecordRequest request)
+        public async Task<OneOf<InventoryRecordSingularResponse, NotFound>> GetByIdAsync(Guid id)
+        {
+            var record = await inventoryRepo.GetByIdAsync(id);
+            if (record == null)
+                return new NotFound();
+
+            return new InventoryRecordSingularResponse()
+            {
+                Id = record.Id,
+                MovieId = record.MovieId,
+                Amount = record.Amount,
+                Date = record.Date
+            };
+        }
+        
+        public async Task<OneOf<InventoryRecordSingularResponse, MovieNotFound>> AddAsync(CreateInventoryRecordRequest request)
         {
             var movieExists = await movieRepo.MovieExistsAsync(request.MovieId);
             if (!movieExists)
@@ -20,12 +34,18 @@ namespace API.InventoryRecords
             {
                 MovieId = request.MovieId,
                 Amount = request.Amount,
-                Date = request.Date == null ? DateOnly.FromDateTime(DateTime.Now) : request.Date.Value
+                Date = request.Date ?? DateOnly.FromDateTime(DateTime.Now)
             };
 
             await inventoryRepo.CreateAsync(inventoryRecord);
             await inventoryRepo.SaveChangesAsync();
-            return new Success();
+
+            return new InventoryRecordSingularResponse
+            {
+                MovieId = inventoryRecord.MovieId,
+                Amount = inventoryRecord.Amount,
+                Date = inventoryRecord.Date
+            };
         }
 
         public async Task<List<InventoryRecordResponse>> GetAllAsync()

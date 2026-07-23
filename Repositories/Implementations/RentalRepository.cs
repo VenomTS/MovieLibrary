@@ -20,7 +20,7 @@ namespace Repositories.Implementations
             var rentals = dbContext.Rentals.Include(x => x.Movie).Include(x => x.AppUser).AsQueryable();
 
             if (query.UserId != null)
-                rentals = rentals.Where(x => x.UserId == query.UserId);
+                rentals = rentals.Where(x => x.AppUserId == query.UserId);
 
             if (query.MovieId != null)
                 rentals = rentals.Where(x => x.MovieId == query.MovieId);

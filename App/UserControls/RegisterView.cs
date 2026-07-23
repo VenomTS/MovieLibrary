@@ -1,3 +1,4 @@
+using System.Net;
 using App.Services.Interfaces;
 
 namespace App.UserControls;
@@ -321,13 +322,14 @@ public partial class RegisterView : UserControl
         if(!valid)
             return;
         
-        var result = await _authService.RegisterAsync(txtMail.Text, txtPassword.Text);
-        if (!result)
+        var response = await _authService.RegisterAsync(txtMail.Text, txtPassword.Text);
+        
+        if(response.Status == HttpStatusCode.OK)
+            _navigationService.ShowView<LoginView>();
+        else
         {
-            MessageBox.Show("Registration Failed - Reason: ", "Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
+            Console.WriteLine(response.ErrorResponse!.Errors);
         }
-
-        _navigationService.ShowView<LoginView>();
+        Console.WriteLine("Dosao");
     }
 }

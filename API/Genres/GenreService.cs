@@ -8,6 +8,18 @@ namespace API.Genres;
 
 public class GenreService(IGenreRepository genreRepo)
 {
+    public async Task<OneOf<GenreResponse, GenreNotFound>> GetByIdAsync(Guid id)
+    {
+        var genre = await genreRepo.GetByIdAsync(id);
+        if (genre == null)
+            return new GenreNotFound();
+
+        return new GenreResponse
+        {
+            Id = genre.Id,
+            Name = genre.Name
+        };
+    }
     public async Task<OneOf<GenreResponse, GenreAlreadyExists>> CreateGenre(CreateGenreRequest request)
     {
         var genreExists = await genreRepo.GenreExistsAsync(request.Name);

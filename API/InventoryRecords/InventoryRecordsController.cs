@@ -7,6 +7,20 @@ namespace API.InventoryRecords
     [Route("api/v1/[controller]")]
     public class InventoryRecordsController(InventoryRecordService inventoryService) : ControllerBase
     {
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
+        {
+            var result = await inventoryService.GetByIdAsync(id);
+
+            return result.Match<IActionResult>(
+                Ok,
+                _ => NotFound(new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Detail = $"The inventory record with ID {id} was not found",
+                }));
+        }
+        
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -15,14 +29,18 @@ namespace API.InventoryRecords
             return Ok(result);
         }
 
-        [HttpGet("{movieId:guid}")]
+        [HttpGet("movie/{movieId:guid}")]
         public async Task<IActionResult> GetByMovieId([FromRoute] Guid movieId)
         {
             var result = await inventoryService.GetByMovieId(movieId);
 
             return result.Match<IActionResult>(
                 Ok,
-                _ => NotFound("Movie not found"));
+                _ => NotFound(new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Detail = $"The movie with ID {movieId} was not found",
+                }));
         }
 
         [HttpPost]
@@ -31,8 +49,12 @@ namespace API.InventoryRecords
             var result = await inventoryService.AddAsync(request);
 
             return result.Match<IActionResult>(
-                _ => NoContent(),
-                _ => NotFound("Movie not found"));
+                inventoryRecord => CreatedAtAction(nameof(GetById), new { id = inventoryRecord.Id }, inventoryRecord),
+                _ => NotFound(new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Detail = $"The movie with ID {request.MovieId} was not found",
+                }));
         }
     }
 }

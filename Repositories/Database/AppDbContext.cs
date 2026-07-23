@@ -5,7 +5,7 @@ using Models;
 
 namespace Repositories.Database;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<Movie> Movies { get; set; }
     public DbSet<Genre> Genres { get; set; }
@@ -16,6 +16,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<AppUser>(b =>
+        {
+            b.Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");
+        });
         
         modelBuilder.Entity<MovieGenre>().HasKey(x => new { x.MovieId, x.GenreId });
         modelBuilder.Entity<Movie>().HasMany(x => x.Genres).WithMany(x => x.Movies).UsingEntity<MovieGenre>();

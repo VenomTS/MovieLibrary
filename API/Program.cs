@@ -26,7 +26,7 @@ builder.Services
 
 builder.Services
     .AddIdentityCore<AppUser>()
-    .AddRoles<IdentityRole>()
+    .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddApiEndpoints();
 
@@ -51,7 +51,7 @@ var app = builder.Build();
 // Seed roles
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
     string[] roles = ["Admin", "Librarian", "Customer"];
 
@@ -59,7 +59,7 @@ using (var scope = app.Services.CreateScope())
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            await roleManager.CreateAsync(new IdentityRole<Guid>(role));
         }
     }
 }

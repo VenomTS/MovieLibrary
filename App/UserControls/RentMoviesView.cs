@@ -1,166 +1,354 @@
-﻿using App.Services.Interfaces;
+﻿using App.Account;
+using App.Services.Interfaces;
 using DTO.Movies;
 using DTO.Rentals;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Net;
-using System.Text;
-using System.Windows.Forms;
-using App.Account;
 
-namespace App.UserControls
+namespace App.UserControls;
+
+public partial class RentMoviesView : UserControl
 {
-    public partial class RentMoviesView : UserControl
+    private FlowLayoutPanel moviePanel;
+    private Button refreshButton;
+    private TextBox searchBox;
+    private Label titleLabel;
+
+    private readonly IHttpService _httpService;
+    private readonly AccountManager _accountManager;
+
+    private List<MovieResponse> _movies = [];
+
+
+    public RentMoviesView(
+        IHttpService httpService,
+        AccountManager accountManager)
     {
+        InitializeComponent();
 
-        private DataGridView dgvMovies;
-        private Button btnRefresh;
-        private TextBox txtSearch;
+        _httpService = httpService;
+        _accountManager = accountManager;
 
-        //
-        private IHttpService _httpService;
-        private AccountManager _accountManager;
+        SetupUI();
 
-        private List<MovieResponse> _movies = [];
+        Load += RentMoviesView_Load;
+    }
 
-        public RentMoviesView(IHttpService httpService, AccountManager accountManager)
+
+    private void SetupUI()
+    {
+        BackColor = Color.FromArgb(245, 246, 250);
+
+
+        Panel headerPanel = new Panel
         {
-            InitializeComponent();
-            InitializeControls();
+            Dock = DockStyle.Top,
+            Height = 70,
+            BackColor = Color.White,
+            Padding = new Padding(20)
+        };
 
-            _httpService = httpService;
-            _accountManager = accountManager;
 
-        }
-
-        private async Task LoadMovies()
+        titleLabel = new Label
         {
-            var movieName = txtSearch.Text;
-            var movieSearchParam = string.IsNullOrWhiteSpace(movieName) ? "" : $"?name={movieName}";
+            Text = "Rent Movies",
+            Font = new Font(
+                "Segoe UI",
+                20,
+                FontStyle.Bold),
+            ForeColor = Color.FromArgb(40,40,40),
+            AutoSize = true,
+            Dock = DockStyle.Left,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
 
-            var (statusCode, movies) = await _httpService.GetAsync<List<MovieResponse>>($"movies{movieSearchParam}");
-            if (movies == null)
-                throw new Exception("Movies are null");
 
-            _movies = movies;
-            DisplayMovies();
-        }
-
-        private void DisplayMovies()
+        Panel actionPanel = new Panel
         {
-            dgvMovies.Rows.Clear();
+            Dock = DockStyle.Right,
+            Width = 390
+        };
 
-            foreach (var movie in _movies)
-            {
-                int rowIndex = dgvMovies.Rows.Add(
-                    movie.Name,
-                    string.Join(", ", movie.Genres.Select(g => g.Name)),
-                    movie.ReleaseDate.ToShortDateString(),
-                    movie.Stock.AmountInStock);
 
-                var buttonCell = (DataGridViewButtonCell)dgvMovies.Rows[rowIndex].Cells["Rent"];
+        searchBox = new TextBox
+        {
+            Width = 240,
+            Height = 35,
+            Font = new Font(
+                "Segoe UI",
+                10),
+            Location = new Point(0,15)
+        };
 
-                if (movie.Stock.AmountInStock > 0)
-                {
-                    buttonCell.Value = "Rent";
-                }
-                else
-                {
-                    buttonCell.Value = "Out of stock";
-                    buttonCell.Style.ForeColor = Color.Gray;
-                }
 
-            }
-        }
+        refreshButton = new Button
+        {
+            Text = "Refresh",
+            Width = 120,
+            Height = 38,
+            Location = new Point(255,13),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(52,152,219),
+            ForeColor = Color.White,
+            Font = new Font(
+                "Segoe UI",
+                10,
+                FontStyle.Bold),
+            Cursor = Cursors.Hand
+        };
 
-        private async void MovieForm_Load(object sender, EventArgs e)
+
+        refreshButton.FlatAppearance.BorderSize = 0;
+
+
+        refreshButton.Click += async (s,e)=>
         {
             await LoadMovies();
+        };
+
+
+        searchBox.KeyDown += async (s,e)=>
+        {
+            if(e.KeyCode == Keys.Enter)
+                await LoadMovies();
+        };
+
+
+        actionPanel.Controls.Add(searchBox);
+        actionPanel.Controls.Add(refreshButton);
+
+
+        headerPanel.Controls.Add(actionPanel);
+        headerPanel.Controls.Add(titleLabel);
+
+
+
+        moviePanel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoScroll = true,
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false,
+            Padding = new Padding(25),
+            BackColor = Color.FromArgb(245,246,250)
+        };
+
+
+        moviePanel.Resize += (s,e)=>
+        {
+            foreach(Control control in moviePanel.Controls)
+            {
+                control.Width =
+                    moviePanel.ClientSize.Width - 60;
+            }
+        };
+
+
+        Controls.Add(moviePanel);
+        Controls.Add(headerPanel);
+    }
+
+
+    private async void RentMoviesView_Load(
+        object sender,
+        EventArgs e)
+    {
+        await LoadMovies();
+    }
+
+
+    private async Task LoadMovies()
+    {
+        moviePanel.Controls.Clear();
+
+
+        string search =
+            string.IsNullOrWhiteSpace(searchBox.Text)
+            ? ""
+            : $"?name={searchBox.Text}";
+
+
+        var response = await _httpService.GetAsync<List<MovieResponse>>($"movies{search}");
+        var movies = response.Content;
+
+        if(movies == null || movies.Count == 0)
+        {
+            moviePanel.Controls.Add(
+                new Label
+                {
+                    Text = "No movies available",
+                    Font = new Font(
+                        "Segoe UI",
+                        12),
+                    AutoSize = true,
+                    Padding = new Padding(20)
+                });
+
+            return;
         }
 
-        private async void DgvMovies_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0)
-                return;
 
-            if (dgvMovies.Columns[e.ColumnIndex].Name == "Rent")
+        _movies = movies;
+
+
+        foreach(var movie in movies)
+        {
+            AddMovieCard(movie);
+        }
+    }
+
+
+
+    private void AddMovieCard(MovieResponse movie)
+    {
+        Panel card = new Panel
+        {
+            Height = 120,
+            Width = moviePanel.ClientSize.Width - 60,
+            BackColor = Color.White,
+            Margin = new Padding(0,0,0,15),
+            Padding = new Padding(20)
+        };
+
+
+        Label movieName = new Label
+        {
+            Text = movie.Name,
+            Font = new Font(
+                "Segoe UI",
+                14,
+                FontStyle.Bold),
+            ForeColor =
+                Color.FromArgb(30,30,30),
+            AutoSize = true,
+            Location =
+                new Point(20,15)
+        };
+
+
+        string genres =
+            movie.Genres.Count == 0
+            ? "None"
+            : string.Join(
+                ", ",
+                movie.Genres.Select(x=>x.Name));
+
+
+        Label details = new Label
+        {
+            AutoSize = true,
+            Location =
+                new Point(20,45),
+            ForeColor = Color.Gray,
+            Font =
+                new Font(
+                    "Segoe UI",
+                    10),
+            Text =
+                $"Genres: {genres}\n" +
+                $"Release: {movie.ReleaseDate:d}\n" +
+                $"Available: {movie.Stock.AmountInStock}"
+        };
+
+
+        Button rentButton = new Button
+        {
+            Text = movie.Stock.AmountInStock > 0
+                ? "Rent Movie"
+                : "Unavailable",
+
+            Width = 140,
+            Height = 38,
+
+            BackColor =
+                movie.Stock.AmountInStock > 0
+                ? Color.FromArgb(46,204,113)
+                : Color.Gray,
+
+            ForeColor = Color.White,
+
+            FlatStyle = FlatStyle.Flat,
+
+            Font =
+                new Font(
+                    "Segoe UI",
+                    9,
+                    FontStyle.Bold),
+
+            Cursor = Cursors.Hand
+        };
+
+
+        rentButton.FlatAppearance.BorderSize = 0;
+
+
+        rentButton.Location =
+            new Point(
+                card.Width -
+                rentButton.Width -
+                25,
+                40);
+
+
+        card.Resize += (s,e)=>
+        {
+            rentButton.Left =
+                card.Width -
+                rentButton.Width -
+                25;
+        };
+
+
+        if(movie.Stock.AmountInStock > 0)
+        {
+            rentButton.Click += async (s,e)=>
             {
-                var movie = _movies[e.RowIndex];
-                // API attempt rent
-                var (responseCode, content) = await _httpService.PostAsync<RentRequest, string>("rentals", new RentRequest
+                await RentMovie(movie);
+            };
+        }
+
+
+        card.MouseEnter += (s,e)=>
+        {
+            card.BackColor =
+                Color.FromArgb(235,245,255);
+        };
+
+
+        card.MouseLeave += (s,e)=>
+        {
+            card.BackColor = Color.White;
+        };
+
+
+        card.Controls.Add(movieName);
+        card.Controls.Add(details);
+        card.Controls.Add(rentButton);
+
+
+        moviePanel.Controls.Add(card);
+    }
+
+
+
+    private async Task RentMovie(MovieResponse movie)
+    {
+        var response =
+            await _httpService
+            .PostAsync<RentRequest,RentalResponse>(
+                "rentals",
+                new RentRequest
                 {
                     MovieId = movie.Id,
                     UserId = _accountManager.User!.Id,
-                    DateRented = DateOnly.FromDateTime(DateTime.Now),
+                    DateRented =
+                        DateOnly.FromDateTime(
+                            DateTime.Now)
                 });
 
-                if (responseCode == HttpStatusCode.NoContent)
-                    MessageBox.Show($"You successfully rented {movie.Name}");
-                else if (responseCode == HttpStatusCode.OK)
-                    MessageBox.Show("Movie is out of stock");
-                else
-                    MessageBox.Show($"{responseCode} - {_accountManager.User.Id} - {movie.Id}");
-                // Add when movie is not found and when appUser is not found FOR SOME REASON
-
-                await LoadMovies();
-            }
-        }
-
-        private void InitializeControls()
-        {
-            txtSearch = new TextBox
-            {
-                Left = 20,
-                Top = 20,
-                Width = 250
-            };
-
-            btnRefresh = new Button
-            {
-                Text = "Refresh",
-                Left = 290,
-                Top = 18,
-                Width = 100
-            };
-
-            btnRefresh.Click += async (s, e) => await LoadMovies();
-
-            dgvMovies = new DataGridView
-            {
-                Left = 20,
-                Top = 60,
-                Width = 840,
-                Height = 470,
-                ReadOnly = true,
-                AllowUserToAddRows = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect
-            };
-
-            dgvMovies.Columns.Add("Name", "Name");
-            dgvMovies.Columns.Add("Genres", "Genres");
-            dgvMovies.Columns.Add("ReleaseDate", "Release Date");
-            dgvMovies.Columns.Add("Stock", "Stock");
-
-            var rentButton = new DataGridViewButtonColumn
-            {
-                Name = "Rent",
-                HeaderText = "",
-                Text = "Rent",
-                UseColumnTextForButtonValue = true
-            };
-            dgvMovies.Columns.Add(rentButton);
-
-            dgvMovies.CellContentClick += DgvMovies_CellContentClick;
-
-            Controls.Add(txtSearch);
-            Controls.Add(btnRefresh);
-            Controls.Add(dgvMovies);
-
-            Load += MovieForm_Load;
-        }
+        if(response.Status == HttpStatusCode.OK)
+            MessageBox.Show($"You rented {movie.Name}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        else if(response.Status == HttpStatusCode.Conflict)
+            MessageBox.Show($"{movie.Name} is out of stock", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        await LoadMovies();
     }
 }

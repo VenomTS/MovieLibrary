@@ -1,8 +1,11 @@
-﻿namespace App.Services.Interfaces
+﻿using App.APIResponses;
+using DTO.Users;
+
+namespace App.Services.Interfaces
 {
     public interface IAuthService
     {
-        public Task<bool> LoginAsync(string mail, string password);
-        public Task<bool> RegisterAsync(string mail, string password);
+        public Task<APIResponse<LoginResponse>> LoginAsync(string mail, string password);
+        public Task<APIResponse<EmptyResponse>> RegisterAsync(string mail, string password);
     }
 }
