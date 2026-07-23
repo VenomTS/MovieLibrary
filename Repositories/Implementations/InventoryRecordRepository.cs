@@ -7,6 +7,8 @@ namespace Repositories.Implementations
 {
     public class InventoryRecordRepository(AppDbContext dbContext) : RepositoryBase<InventoryRecord>(dbContext), IInventoryRecordRepository
     {
+        private readonly AppDbContext dbContext = dbContext;
+
         public async Task<List<InventoryRecord>> GetByMovieId(Guid movieId)
         {
             var records = await dbContext.InventoryRecords.Where(x => x.MovieId == movieId).ToListAsync();

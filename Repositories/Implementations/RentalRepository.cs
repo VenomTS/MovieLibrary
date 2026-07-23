@@ -1,7 +1,6 @@
 ﻿using DTO.SearchQueries;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using Repositories;
 using Repositories.Database;
 using Repositories.Interfaces;
 
@@ -9,11 +8,7 @@ namespace Repositories.Implementations
 {
     public class RentalRepository(AppDbContext dbContext) : RepositoryBase<Rental>(dbContext), IRentalRepository
     {
-        public async Task<Rental?> GetByIdAsync(Guid id)
-        {
-            return await dbContext.Rentals.Include(x => x.Movie).Include(x => x.AppUser)
-                .FirstOrDefaultAsync(x => x.Id == id);
-        }
+        private readonly AppDbContext dbContext = dbContext;
 
         public async Task<List<Rental>> GetByMovieIdAsync(Guid movieId)
         {

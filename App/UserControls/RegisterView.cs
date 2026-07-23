@@ -104,22 +104,15 @@ public partial class RegisterView : UserControl
             Top = 75
         };
 
-
         card.Controls.Add(title);
         card.Controls.Add(subtitle);
 
-
-
         int y = 120;
-
-
-
+        
         txtMail = AddTextBox(
             card,
             "Email",
             ref y);
-
-
 
         txtPassword = AddTextBox(
             card,

@@ -8,6 +8,8 @@ namespace Repositories.Implementations;
 
 public class MovieGenreRepository(AppDbContext dbContext) : RepositoryBase<MovieGenre>(dbContext), IMovieGenreRepository
 {
+    private readonly AppDbContext dbContext = dbContext;
+
     public async Task<bool> MovieGenreExists(MovieGenre movieGenre)
     {
         return await dbContext.MovieGenres.AnyAsync(x =>

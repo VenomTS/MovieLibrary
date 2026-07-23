@@ -4,6 +4,7 @@ namespace Repositories
 {
     public interface IRepositoryBase<TEntity> where TEntity : class
     {
+        Task<TEntity?> GetByIdAsync(Guid id, params Expression<Func<TEntity, object>>[] includes);
         Task CreateAsync(TEntity entity);
         Task Update(TEntity entity);
         Task Delete(TEntity entity);

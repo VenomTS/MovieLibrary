@@ -1,6 +1,4 @@
 ﻿using App.Services.Interfaces;
-using System.CodeDom;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;

@@ -59,7 +59,7 @@ public class MovieService(IMovieRepository movieRepo, IRentalRepository rentalRe
 
     public async Task<OneOf<MovieResponse, MovieNotFound>> GetMovieByIdAsync(Guid id)
     {
-        var movie = await movieRepo.GetByIdAsync(id);
+        var movie = await movieRepo.GetByIdAsync(id, x => x.Id == id);
 
         return movie == null
             ? new MovieNotFound()
