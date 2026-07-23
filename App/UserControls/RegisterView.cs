@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using App.Services.Interfaces;
 
 namespace App.UserControls;
@@ -19,7 +20,6 @@ public partial class RegisterView : UserControl
     private INavigationService _navigationService;
     private IAuthService _authService;
 
-
     public RegisterView(INavigationService navigationService, IAuthService authService)
     {
         InitializeComponent();
@@ -29,8 +29,6 @@ public partial class RegisterView : UserControl
 
         InitializeControls();
     }
-
-
 
     private void InitializeControls()
     {
@@ -44,17 +42,14 @@ public partial class RegisterView : UserControl
 
 
         errorProvider = new ErrorProvider();
-
-
-
+        
         Panel card = new Panel()
         {
             Width = 370,
             Height = 500,
             BackColor = Color.White
         };
-
-
+        
         void CenterCard()
         {
             card.Left = (Width - card.Width) / 2;
@@ -66,11 +61,8 @@ public partial class RegisterView : UserControl
         {
             CenterCard();
         };
-
-
+        
         CenterCard();
-
-
 
         card.Paint += (s,e)=>
         {
@@ -129,8 +121,6 @@ public partial class RegisterView : UserControl
 
         txtVerifyPassword.UseSystemPasswordChar = true;
 
-
-
         chkShowPassword = new CheckBox()
         {
             Text = "Show Passwords",
@@ -165,12 +155,8 @@ public partial class RegisterView : UserControl
 
 
         card.Controls.Add(btnRegister);
-
-
-
+        
         y += 60;
-
-
 
         btnLogin = CreateButton(
             "Already have an account? Login",
@@ -191,9 +177,6 @@ public partial class RegisterView : UserControl
         Controls.Add(card);
     }
 
-
-
-
     private TextBox AddTextBox(
         Panel parent,
         string label,
@@ -209,9 +192,7 @@ public partial class RegisterView : UserControl
 
 
         parent.Controls.Add(lbl);
-
-
-
+        
         TextBox txt = new TextBox()
         {
             Width = 300,
@@ -223,17 +204,12 @@ public partial class RegisterView : UserControl
                 10)
         };
 
-
         parent.Controls.Add(txt);
-
-
+        
         y += 70;
-
-
+        
         return txt;
     }
-
-
 
 
     private Button CreateButton(
@@ -257,11 +233,9 @@ public partial class RegisterView : UserControl
                 FontStyle.Bold),
             Cursor = Cursors.Hand
         };
-
-
+        
         button.FlatAppearance.BorderSize = 0;
-
-
+        
         return button;
     }
 
@@ -276,8 +250,6 @@ public partial class RegisterView : UserControl
 
         bool valid = true;
 
-
-
         if (string.IsNullOrWhiteSpace(txtMail.Text))
         {
             errorProvider.SetError(
@@ -286,9 +258,7 @@ public partial class RegisterView : UserControl
 
             valid = false;
         }
-
-
-
+        
         if (string.IsNullOrWhiteSpace(txtPassword.Text))
         {
             errorProvider.SetError(
@@ -306,8 +276,6 @@ public partial class RegisterView : UserControl
             valid = false;
         }
 
-
-
         if(txtPassword.Text != txtVerifyPassword.Text)
         {
             errorProvider.SetError(
@@ -316,9 +284,7 @@ public partial class RegisterView : UserControl
 
             valid = false;
         }
-
-
-
+        
         if(!valid)
             return;
         
@@ -328,8 +294,7 @@ public partial class RegisterView : UserControl
             _navigationService.ShowView<LoginView>();
         else
         {
-            Console.WriteLine(response.ErrorResponse!.Errors);
+            MessageBox.Show($"Invalid Register Credentials", "Register Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-        Console.WriteLine("Dosao");
     }
 }

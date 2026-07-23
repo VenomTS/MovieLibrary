@@ -6,6 +6,7 @@ namespace App.Services.Interfaces
 {
     public interface INavigationService
     {
+        public event EventHandler<OnNavigatedToArgs> OnNavigatedTo;
         public void Initialize(Panel panel);
         public void ShowView<T>() where T : UserControl;
     }

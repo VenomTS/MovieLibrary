@@ -256,8 +256,6 @@ public partial class MovieInventoryView : UserControl
         await LoadMovies();
     }
 
-
-
     private async void AddMovieButton_Click(object sender, EventArgs e)
     {
         using var dialog = new AddMovieDialog();
