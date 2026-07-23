@@ -6,7 +6,7 @@ namespace App.Account
 {
     public class AccountManager(IHttpService httpService)
     {
-        public AppAccount? User { get; set; } = null;
+        public AppAccount? User { get; set; }
 
         public async Task Initialize(string jwt)
         {

@@ -1,4 +1,5 @@
-﻿using App.Services;
+﻿using App.Account;
+using App.Services;
 using App.Services.Interfaces;
 using App.UserControls;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ namespace App;
 public partial class AppForm : Form
 {
     private readonly INavigationService _navigationService;
+    private readonly AccountManager _accountManager;
 
     // Controls
     private Panel _topPanel;
@@ -27,6 +29,7 @@ public partial class AppForm : Form
         InitializeControls();
 
         _navigationService = serviceProvider.GetRequiredService<INavigationService>();
+        _accountManager = serviceProvider.GetRequiredService<AccountManager>();
 
         _navigationService.Initialize(_panelContainer);
         _navigationService.OnNavigatedTo += OnNavigatedTo;
@@ -38,7 +41,10 @@ public partial class AppForm : Form
     {
         var view = e.NavigatedTo;
         
-        _topPanel.Visible = view is not LoginView or RegisterView;
+        _topPanel.Visible = view is not (LoginView or RegisterView);
+        
+        if(!_accountManager.IsLoggedIn() && view is not (LoginView or RegisterView))
+            _navigationService.ShowView<LoginView>();
     }
 
     private void InitializeControls()
