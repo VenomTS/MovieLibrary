@@ -7,7 +7,7 @@ using Repositories.Interfaces;
 
 namespace API.Movies;
 
-public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo)
+public class MovieService(IMovieRepository movieRepo, IRentalRepository rentalRepo, IInventoryRecordRepository inventoryRepo)
 {
     public async Task<List<MovieResponse>> GetMoviesAsync(MovieSearchQuery query)
     {
@@ -25,7 +25,7 @@ public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo
             }).ToList(),
             Stock = new MovieStockResponse
             {
-                AmountInStock = x.Stock.Amount,
+                AmountInStock = GetMovieStock(x.Id).GetAwaiter().GetResult()
             }
         });
         
@@ -52,16 +52,8 @@ public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo
             ReleaseDate = movie.ReleaseDate,
             Genres = [],
         };
-
-        var stock = new Stock
-        {
-            MovieId = movie.Id,
-            Amount = 0,
-        };
-
-        await stockRepo.CreateAsync(stock);
-        await stockRepo.SaveChangesAsync();
         
+        await movieRepo.SaveChangesAsync();
         return movieResponse;
     }
 
@@ -83,8 +75,20 @@ public class MovieService(IMovieRepository movieRepo, IStockRepository stockRepo
                 }).ToList(),
                 Stock = new MovieStockResponse
                 {
-                    AmountInStock = movie.Stock.Amount,
+                    AmountInStock = GetMovieStock(movie.Id).GetAwaiter().GetResult(),
                 }
             };
+    }
+
+    private async Task<int> GetMovieStock(Guid movieId)
+    {
+        var movieExists = await movieRepo.MovieExistsAsync(movieId);
+        if (!movieExists)
+            return 0;
+
+        var totalInventory = await inventoryRepo.GetTotalAmount(movieId, DateOnly.FromDateTime(DateTime.Now));
+        var totalRentedMovies = await rentalRepo.GetByMovieIdAsync(movieId);
+        var totalMoviesNotReturned = totalRentedMovies.Count(x => x.DateReturned == null);
+        return totalInventory - totalMoviesNotReturned;
     }
 }

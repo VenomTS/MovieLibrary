@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using App.Account;
 
 namespace App.UserControls
 {
@@ -102,7 +103,7 @@ namespace App.UserControls
                     MessageBox.Show("Movie is out of stock");
                 else
                     MessageBox.Show($"{responseCode} - {_accountManager.User.Id} - {movie.Id}");
-                // Add when movie is not found and when user is not found FOR SOME REASON
+                // Add when movie is not found and when appUser is not found FOR SOME REASON
 
                 await LoadMovies();
             }

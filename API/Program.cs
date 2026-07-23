@@ -1,72 +1,68 @@
-using API.Auth.Services;
 using API.Genres;
 using API.InventoryRecords;
 using API.MovieGenres;
 using API.Movies;
 using API.Rentals;
-using API.Stocks;
 using API.Users;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Repositories.Database;
 using Repositories.Implementations;
 using Repositories.Interfaces;
 using Scalar.AspNetCore;
-using System.Text;
+using API.Auth;
+using Microsoft.AspNetCore.Identity;
+using Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"] ?? throw new InvalidOperationException()))
-    };
-});
-
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services
+    .AddAuthentication(IdentityConstants.BearerScheme)
+    .AddBearerToken(IdentityConstants.BearerScheme);
+
+builder.Services
+    .AddIdentityCore<AppUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddApiEndpoints();
+
 // Services
-builder.Services.AddSingleton<HashingService>();
-builder.Services.AddSingleton<JsonWebTokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
 builder.Services.AddScoped<GenreService>();
-builder.Services.AddScoped<StockService>();
 builder.Services.AddScoped<MovieGenreService>();
 builder.Services.AddScoped<RentalService>();
 builder.Services.AddScoped<InventoryRecordService>();
+builder.Services.AddSingleton<IEmailSender<AppUser>, NoOpEmailSender>();
 
 // Repositories
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
-builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<IMovieGenreRepository, MovieGenreRepository>();
 builder.Services.AddScoped<IRentalRepository, RentalRepository>();
 builder.Services.AddScoped<IInventoryRecordRepository, InventoryRecordRepository>();
 
 var app = builder.Build();
+
+// Seed roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roles = ["Admin", "Librarian", "Customer"];
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -78,6 +74,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapGroup("/api/v1/Auth").WithTags("Auth").MapIdentityApi<AppUser>();
 
 app.UseAuthentication();
 app.UseAuthorization();

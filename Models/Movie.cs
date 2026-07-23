@@ -7,5 +7,4 @@ public class Movie
     public DateOnly ReleaseDate { get; set; }
 
     public List<Genre> Genres { get; set; } = [];
-    public Stock Stock { get; set; }
 }

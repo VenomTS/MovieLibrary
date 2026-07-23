@@ -1,6 +1,8 @@
 ﻿using API.OneOfTypes;
 using DTO.Rentals;
 using DTO.SearchQueries;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Models;
 using OneOf;
@@ -9,7 +11,7 @@ using Repositories.Interfaces;
 
 namespace API.Rentals
 {
-    public class RentalService(IRentalRepository rentalRepo, IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo, IUserRepository userRepo)
+    public class RentalService(IRentalRepository rentalRepo, IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo, UserManager<AppUser> userManager)
     {
         public async Task<List<RentalResponse>> GetAllRentals(RentalSearchQuery rentalSearch)
         {
@@ -32,8 +34,8 @@ namespace API.Rentals
             var movieExists = await movieRepo.MovieExistsAsync(request.MovieId);
             if (!movieExists)
                 return new MovieNotFound();
-
-            var userExists = await userRepo.UserExistsAsync(request.UserId);
+            
+            var userExists = await userManager.Users.AnyAsync(x => x.Id == request.UserId.ToString());
             if (!userExists)
                 return new UserNotFound();
 

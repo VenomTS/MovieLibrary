@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using DTO;
 
 namespace App.Services
 {
@@ -44,7 +45,7 @@ namespace App.Services
             var isSuccessful = await IsSuccessfulAsync(response);
 
             if (!isSuccessful)
-                return (response.StatusCode, default(TResponse));
+                return (response.StatusCode, default);
 
             var result = await response.Content.ReadFromJsonAsync<TResponse>(_options);
             return (response.StatusCode, result);
@@ -56,21 +57,17 @@ namespace App.Services
 
             var isSuccessful = await IsSuccessfulAsync(response);
 
-            if (!isSuccessful)
-                return (response.StatusCode, default(TResponse));
-
-            if (typeof(TResponse) == typeof(string))
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                return (response.StatusCode, (TResponse)(object) content);
-            }
+            if (!isSuccessful || typeof(TResponse) == typeof(EmptyResponse))
+                return (response.StatusCode, (TResponse)(object)new EmptyResponse
+                {
+                    ResponseText = response.Content.ReadAsStringAsync().Result
+                });
 
             var result = await response.Content.ReadFromJsonAsync<TResponse>(_options);
 
             return (response.StatusCode, result);
         }
-
-
+        
         public async Task<(HttpStatusCode, TResponse?)> PatchAsync<TRequest, TResponse>(string url, TRequest data)
         {
             var json = JsonSerializer.Serialize(data, _options);

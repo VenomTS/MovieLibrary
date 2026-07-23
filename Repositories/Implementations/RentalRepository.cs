@@ -11,7 +11,7 @@ namespace Repositories.Implementations
     {
         public async Task<Rental?> GetByIdAsync(Guid id)
         {
-            return await dbContext.Rentals.Include(x => x.Movie).Include(x => x.User)
+            return await dbContext.Rentals.Include(x => x.Movie).Include(x => x.AppUser)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -22,7 +22,7 @@ namespace Repositories.Implementations
 
         public async Task<IEnumerable<Rental>> Search(RentalSearchQuery query)
         {
-            var rentals = dbContext.Rentals.Include(x => x.Movie).Include(x => x.User).AsQueryable();
+            var rentals = dbContext.Rentals.Include(x => x.Movie).Include(x => x.AppUser).AsQueryable();
 
             if (query.UserId != null)
                 rentals = rentals.Where(x => x.UserId == query.UserId);

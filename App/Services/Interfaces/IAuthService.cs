@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace App.Services.Interfaces
+﻿namespace App.Services.Interfaces
 {
     public interface IAuthService
     {
-        public Task<bool> LoginAsync(string username, string password);
+        public Task<bool> LoginAsync(string mail, string password);
+        public Task<bool> RegisterAsync(string mail, string password);
     }
 }

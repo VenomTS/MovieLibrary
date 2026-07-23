@@ -1,39 +1,37 @@
 ﻿using App.Services.Interfaces;
 using App.UserControls;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace App
 {
     public partial class LoginView : UserControl
     {
-        private TextBox txtUsername;
+        private TextBox txtMail;
         private TextBox txtPassword;
 
         private CheckBox chkShowPassword;
 
         private Button btnLogin;
-        private LinkLabel linkRegister;
+        private Button btnRegister;
 
         private ErrorProvider errorProvider;
 
-        // Services
         private INavigationService _navigationService;
         private IAuthService _authService;
 
-        public LoginView(INavigationService navigationService, IAuthService authService)
+
+        public LoginView(
+            INavigationService navigationService,
+            IAuthService authService)
         {
             InitializeComponent();
-            InitializeControls();
 
             _navigationService = navigationService;
             _authService = authService;
+
+            InitializeControls();
         }
+
+
 
         private async void BtnLogin_Click(object sender, EventArgs e)
         {
@@ -41,150 +39,288 @@ namespace App
 
             bool valid = true;
 
-            if (string.IsNullOrWhiteSpace(txtUsername.Text))
+
+            if (string.IsNullOrWhiteSpace(txtMail.Text))
             {
-                errorProvider.SetError(txtUsername, "Username is required.");
+                errorProvider.SetError(
+                    txtMail,
+                    "Email is required.");
+
                 valid = false;
             }
 
+
             if (string.IsNullOrWhiteSpace(txtPassword.Text))
             {
-                errorProvider.SetError(txtPassword, "Password is required.");
+                errorProvider.SetError(
+                    txtPassword,
+                    "Password is required.");
+
                 valid = false;
             }
+
 
             if (!valid)
                 return;
 
-            var success = await _authService.LoginAsync(txtUsername.Text, txtPassword.Text);
 
-            if (success)
+
+            var success = await _authService.LoginAsync(
+                txtMail.Text,
+                txtPassword.Text);
+
+
+
+            if(success)
             {
-                _navigationService.ShowView<RentMoviesView>();
+                _navigationService.ShowView<MovieInventoryView>();
             }
-
             else
             {
                 MessageBox.Show(
-                    "Invalid username or password.",
+                    "Invalid mail or password.",
                     "Login Failed",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
 
+
+
+
         private void InitializeControls()
         {
-            Text = "Login";
-            Size = new Size(420, 380);
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            Dock = DockStyle.Fill;
+
+            BackColor = Color.FromArgb(245,246,250);
+
+            Font = new Font(
+                "Segoe UI",
+                10);
+
+
             errorProvider = new ErrorProvider();
 
-            Label lblTitle = new Label()
+
+
+            Panel card = new Panel()
+            {
+                Width = 370,
+                Height = 420,
+                BackColor = Color.White
+            };
+
+
+
+            void CenterCard()
+            {
+                card.Left = (Width - card.Width) / 2;
+                card.Top = (Height - card.Height) / 2;
+            }
+
+
+            Resize += (s,e)=>
+            {
+                CenterCard();
+            };
+
+
+            CenterCard();
+
+
+
+            card.Paint += (s,e)=>
+            {
+                ControlPaint.DrawBorder(
+                    e.Graphics,
+                    card.ClientRectangle,
+                    Color.LightGray,
+                    ButtonBorderStyle.Solid);
+            };
+
+
+
+            Label title = new Label()
             {
                 Text = "WELCOME BACK",
-                Font = new Font("Segoe UI", 18, FontStyle.Bold),
+                Font = new Font(
+                    "Segoe UI",
+                    18,
+                    FontStyle.Bold),
                 AutoSize = true,
-                Location = new Point(90, 20)
+                Left = 80,
+                Top = 35
             };
 
-            Label lblSubtitle = new Label()
+
+            Label subtitle = new Label()
             {
                 Text = "Sign in to continue",
-                AutoSize = true,
                 ForeColor = Color.Gray,
-                Location = new Point(130, 60)
+                AutoSize = true,
+                Left = 105,
+                Top = 75
             };
 
-            Controls.Add(lblTitle);
-            Controls.Add(lblSubtitle);
 
-            int y = 110;
+            card.Controls.Add(title);
+            card.Controls.Add(subtitle);
 
-            txtUsername = AddTextBox("Username", ref y);
 
-            txtPassword = AddTextBox("Password", ref y);
+
+            int y = 120;
+
+
+
+            txtMail = AddTextBox(
+                card,
+                "Email",
+                ref y);
+
+
+
+            txtPassword = AddTextBox(
+                card,
+                "Password",
+                ref y);
+
+
             txtPassword.UseSystemPasswordChar = true;
+
+
 
             chkShowPassword = new CheckBox()
             {
                 Text = "Show Password",
                 AutoSize = true,
-                Location = new Point(40, y)
+                Left = 35,
+                Top = y
             };
 
-            chkShowPassword.CheckedChanged += (s, e) =>
+
+            chkShowPassword.CheckedChanged += (s,e)=>
             {
-                txtPassword.UseSystemPasswordChar = !chkShowPassword.Checked;
+                txtPassword.UseSystemPasswordChar =
+                    !chkShowPassword.Checked;
             };
 
-            Controls.Add(chkShowPassword);
+
+            card.Controls.Add(chkShowPassword);
+
+
 
             y += 45;
 
-            btnLogin = new Button()
-            {
-                Text = "LOGIN",
-                Size = new Size(320, 45),
-                Location = new Point(40, y),
-                BackColor = Color.DodgerBlue,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
 
-            btnLogin.FlatAppearance.BorderSize = 0;
+
+            btnLogin = CreateButton(
+                "LOGIN",
+                y,
+                Color.FromArgb(52,152,219));
+
+
             btnLogin.Click += BtnLogin_Click;
 
-            Controls.Add(btnLogin);
 
-            y += 65;
+            card.Controls.Add(btnLogin);
 
-            Label lblRegister = new Label()
+
+
+            y += 60;
+
+
+
+            btnRegister = CreateButton(
+                "No Account? Register",
+                y,
+                Color.FromArgb(46,204,113));
+
+
+            btnRegister.Click += (s,e)=>
             {
-                Text = "Don't have an account?",
-                AutoSize = true,
-                Location = new Point(70, y)
+                _navigationService.ShowView<RegisterView>();
             };
 
-            linkRegister = new LinkLabel()
-            {
-                Text = "Register",
-                AutoSize = true,
-                Location = new Point(230, y)
-            };
 
-            linkRegister.Click += (s, e) =>
-            {
-                MessageBox.Show("Open Register Form");
-            };
+            card.Controls.Add(btnRegister);
 
-            Controls.Add(lblRegister);
-            Controls.Add(linkRegister);
+
+
+            Controls.Add(card);
         }
 
-        private TextBox AddTextBox(string label, ref int y)
+
+
+
+        private TextBox AddTextBox(
+            Panel parent,
+            string label,
+            ref int y)
         {
             Label lbl = new Label()
             {
                 Text = label,
                 AutoSize = true,
-                Location = new Point(40, y)
+                Left = 35,
+                Top = y
             };
 
-            Controls.Add(lbl);
+
+            parent.Controls.Add(lbl);
+
+
 
             TextBox txt = new TextBox()
             {
-                Width = 320,
-                Location = new Point(40, y + 25)
+                Width = 300,
+                Height = 30,
+                Left = 35,
+                Top = y + 25,
+                Font = new Font(
+                    "Segoe UI",
+                    10)
             };
 
-            Controls.Add(txt);
+
+            parent.Controls.Add(txt);
+
 
             y += 70;
 
+
             return txt;
+        }
+
+
+
+
+        private Button CreateButton(
+            string text,
+            int y,
+            Color color)
+        {
+            Button button = new Button()
+            {
+                Text = text,
+                Width = 300,
+                Height = 42,
+                Left = 35,
+                Top = y,
+                BackColor = color,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font(
+                    "Segoe UI",
+                    10,
+                    FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+
+
+            button.FlatAppearance.BorderSize = 0;
+
+
+            return button;
         }
     }
 }

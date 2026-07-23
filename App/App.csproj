@@ -19,4 +19,19 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.20.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="UserControls\MovieInventoryView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Dialogs\InventoryDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dialogs\AddMovieDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="UserControls\RegisterView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

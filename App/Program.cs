@@ -1,3 +1,5 @@
+using App.Account;
+using App.Dialogs;
 using App.Services;
 using App.Services.Interfaces;
 using App.UserControls;
@@ -40,10 +42,16 @@ namespace App
 
                 // Forms
                 services.AddSingleton<AppForm>();
+                
+                // Dialogs
+                services.AddTransient<AddMovieDialog>();
+                services.AddTransient<InventoryDialog>();
 
                 // UserControls
                 services.AddTransient<LoginView>();
+                services.AddTransient<RegisterView>();
                 services.AddTransient<RentMoviesView>();
+                services.AddTransient<MovieInventoryView>();
             });
         }
     }

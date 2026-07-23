@@ -17,7 +17,7 @@ namespace API.Rentals
             return result.Match<IActionResult>(
                 _ => NoContent(),
                 _ => NotFound("Movie not found"),
-                _ => NotFound("User not found"),
+                _ => NotFound("AppUser not found"),
                 _ => Ok("Movie out of stock"));
         }
 

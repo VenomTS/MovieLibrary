@@ -1,16 +1,13 @@
-using API.Auth.Services;
 using API.OneOfTypes;
 using DTO.Users;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Models.Users;
 using OneOf;
-using OneOf.Types;
-using Repositories.Interfaces;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Models;
 
 namespace API.Users;
 
-public class UserService(HashingService hashingService, JsonWebTokenService jwtService, IUserRepository userRepository)
+public class UserService(UserManager<AppUser> userManager)
 {
     public async Task<OneOf<GetMeResponse, UserNotFound>> GetMeAsync(ClaimsPrincipal user)
     {
@@ -19,17 +16,20 @@ public class UserService(HashingService hashingService, JsonWebTokenService jwtS
         if (userId == null)
             throw new Exception("JWT does not contain Id");
 
-        var accountUser = await userRepository.GetByIdAsync(new Guid(userId));
-
-        if (accountUser == null)
+        var accountUser = await userManager.GetUserAsync(user);
+        if(accountUser == null)
             return new UserNotFound();
+        
+        var roles = await userManager.GetRolesAsync(accountUser);
+
         return new GetMeResponse
         {
-            Id = accountUser.Id,
-            Role = accountUser.Role
+            Id = new Guid(accountUser.Id),
+            Roles = roles,
         };
     }
-
+    
+    /*
     public async Task<OneOf<Success, UserAlreadyExists>> Register(RegisterRequest request)
     {
         var userExists = await userRepository.UserExistsAsync(request.Username);
@@ -38,7 +38,7 @@ public class UserService(HashingService hashingService, JsonWebTokenService jwtS
 
         hashingService.CreateHash(request.Password, out var hash, out var salt);
 
-        var user = new User
+        var user = new AppUser
         {
             Username = request.Username,
             Role = Roles.Customer,
@@ -69,4 +69,5 @@ public class UserService(HashingService hashingService, JsonWebTokenService jwtS
             JsonWebToken = token,
         };
     }
+    */
 }

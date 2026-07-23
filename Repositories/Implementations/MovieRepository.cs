@@ -11,18 +11,15 @@ public class MovieRepository(AppDbContext dbContext) : RepositoryBase<Movie>(dbC
 {
     public async Task<Movie?> GetByIdAsync(Guid id)
     {
-        return await dbContext.Movies.Include(x => x.Genres).Include(x => x.Stock).FirstOrDefaultAsync(x => x.Id == id);
+        return await dbContext.Movies.Include(x => x.Genres).FirstOrDefaultAsync(x => x.Id == id);
     }
     
     public async Task<IEnumerable<Movie>> Search(MovieSearchQuery query)
     {
-        var movies = dbContext.Movies.Include(x => x.Genres).Include(x => x.Stock).AsQueryable();
+        var movies = dbContext.Movies.Include(x => x.Genres).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(query.Name))
             movies = movies.Where(x => x.Name.Contains(query.Name));
-
-        if (query.IsAvailable != null && query.IsAvailable.Value)
-            movies = movies.Where(x => x.Stock.Amount > 0);
 
         foreach (var genre in query.Genres)
             movies = movies.Where(x => x.Genres.Any(g => g.Name == genre));

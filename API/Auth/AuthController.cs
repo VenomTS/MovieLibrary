@@ -13,13 +13,14 @@ public class AuthController(UserService userService) : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetMe()
     {
-        var result = await userService.GetMeAsync(HttpContext.User);
+        var result = await userService.GetMeAsync(User);
 
         return result.Match<IActionResult>(
             Ok,
-            _ => NotFound("User not found"));
+            _ => NotFound("AppUser not found"));
     }
-
+    
+    /*
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
@@ -39,5 +40,6 @@ public class AuthController(UserService userService) : ControllerBase
             _ => Ok(result.AsT0),
             _ => Unauthorized("Username or password is incorrect"));
     }
+    */
     
 }

@@ -1,19 +1,12 @@
-﻿using App.Services.Interfaces;
-using DTO.Rentals;
+﻿using System.Net;
+using App.Services.Interfaces;
 using DTO.Users;
-using Models.Users;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Text;
 
-namespace App
+namespace App.Account
 {
     public class AccountManager(IHttpService httpService)
     {
-        public User? User { get; set; } = null;
+        public AppAccount? User { get; set; } = null;
 
         public async Task Initialize(string jwt)
         {
@@ -23,6 +16,9 @@ namespace App
             if (statusCode != HttpStatusCode.OK)
                 throw new Exception("Account is not authorized");
 
+            if (user == null)
+                return;
+
             SetupUser(user);
         }
 
@@ -30,10 +26,10 @@ namespace App
 
         private void SetupUser(GetMeResponse user)
         {
-            User = new User
+            User = new AppAccount
             {
                 Id = user.Id,
-                Role = user.Role
+                Roles = user.Roles
             };
         }
 

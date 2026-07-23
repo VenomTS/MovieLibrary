@@ -1,6 +1,4 @@
-﻿using Models.Users;
-
-namespace Models
+﻿namespace Models
 {
     public class Rental
     {
@@ -11,6 +9,6 @@ namespace Models
         public DateOnly? DateReturned { get; set; }
 
         public Movie Movie { get; set; }
-        public User User { get; set; }
+        public AppUser AppUser { get; set; }
     }
 }
