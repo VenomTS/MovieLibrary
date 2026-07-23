@@ -349,6 +349,8 @@ public partial class RentMoviesView : UserControl
             MessageBox.Show($"You rented {movie.Name}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         else if(response.Status == HttpStatusCode.Conflict)
             MessageBox.Show($"{movie.Name} is out of stock", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        else if(response.Status == HttpStatusCode.BadRequest)
+            MessageBox.Show($"You are already renting that movie", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         await LoadMovies();
     }
 }

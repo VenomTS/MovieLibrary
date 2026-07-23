@@ -53,7 +53,7 @@ namespace API.Rentals
             return rentalsDto;
         }
 
-        public async Task<OneOf<RentalResponse, MovieNotFound, UserNotFound, MovieOutOfStock>> RentMovie(RentRequest request)
+        public async Task<OneOf<RentalResponse, AlreadyRenting, MovieNotFound, UserNotFound, MovieOutOfStock>> RentMovie(RentRequest request)
         {
             var movieExists = await movieRepo.MovieExistsAsync(request.MovieId);
             if (!movieExists)
@@ -62,6 +62,15 @@ namespace API.Rentals
             var userExists = await userManager.Users.AnyAsync(x => x.Id == request.UserId);
             if (!userExists)
                 return new UserNotFound();
+
+            var rentals = await rentalRepo.Search(new RentalSearchQuery
+            {
+                UserId = request.UserId,
+                MovieId = request.MovieId,
+            });
+
+            if (rentals.Any())
+                return new AlreadyRenting();
 
             var rentingDate = request.DateRented ?? DateOnly.FromDateTime(DateTime.Now);
 
@@ -93,9 +102,9 @@ namespace API.Rentals
             };
         }
 
-        public async Task<OneOf<RentalResponse, RentalNotFound>> ReturnMovie(ReturnRequest request)
+        public async Task<OneOf<RentalResponse, RentalNotFound>> ReturnMovie(Guid rentalId, ReturnRequest request)
         {
-            var rental = await rentalRepo.GetByIdAsync(request.RentalId);
+            var rental = await rentalRepo.GetByIdAsync(rentalId);
 
             if (rental == null)
                 return new RentalNotFound();
@@ -112,6 +121,28 @@ namespace API.Rentals
                 DateRented = rental.DateRented,
                 DateReturned = rental.DateReturned,
             };
+        }
+
+        public async Task<OneOf<List<UserRentalsResponse>, NotFound>> GetUnreturnedByUserId(Guid userId)
+        {
+            var userExists = await userManager.Users.AnyAsync(x => x.Id == userId);
+            if (!userExists)
+                return new NotFound();
+            var rentals = await rentalRepo.GetByUserIdAsync(userId);
+            var unreturned = rentals.Where(x => x.DateReturned == null);
+
+            var rentalsDto = unreturned.Select(x => new UserRentalsResponse
+            {
+                Id = x.Id,
+                Movie = new RentalMovieResponse
+                {
+                    Id = x.Movie.Id,
+                    Name = x.Movie.Name,
+                    DateReleased = x.Movie.ReleaseDate,
+                },
+                DateRented = x.DateRented,
+            });
+            return rentalsDto.ToList();
         }
     }
 }

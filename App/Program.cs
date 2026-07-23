@@ -52,6 +52,7 @@ namespace App
                 services.AddTransient<RegisterView>();
                 services.AddTransient<RentMoviesView>();
                 services.AddTransient<MovieInventoryView>();
+                services.AddTransient<MyRentalsView>();
             });
         }
     }

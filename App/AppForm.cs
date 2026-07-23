@@ -3,9 +3,9 @@ using App.Services.Interfaces;
 using App.UserControls;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace App
-{
-    public partial class AppForm : Form
+namespace App;
+
+public partial class AppForm : Form
 {
     private readonly INavigationService _navigationService;
 
@@ -72,8 +72,8 @@ namespace App
         btnReports.Click += (_, _) => _navigationService.ShowView<ReportsView>();
         */
 
-        var btnSettings = CreateNavButton("Rentals");
-        btnSettings.Click += (_, _) => _navigationService.ShowView<RentalsView>();
+        var btnSettings = CreateNavButton("My Rentals");
+        btnSettings.Click += (_, _) => _navigationService.ShowView<MyRentalsView>();
 
         // Add buttons left-to-right
         _topPanel.Controls.Add(btnSettings);
@@ -88,7 +88,7 @@ namespace App
     {
         return new Button
         {
-            Text = text,
+            Text = text, 
             Dock = DockStyle.Left,
             Width = 120,
             FlatStyle = FlatStyle.Flat,
@@ -98,5 +98,4 @@ namespace App
             Font = new Font("Segoe UI", 10, FontStyle.Regular)
         };
     }
-}
 }

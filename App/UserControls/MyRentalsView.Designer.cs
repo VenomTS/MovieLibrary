@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace App.UserControls;
 
-partial class RentalsView
+partial class MyRentalsView
 {
     /// <summary> 
     /// Required designer variable.

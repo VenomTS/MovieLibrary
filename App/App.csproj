@@ -32,7 +32,7 @@
     <Compile Update="UserControls\RegisterView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="UserControls\RentalsView.cs">
+    <Compile Update="UserControls\MyRentalsView.cs">
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
