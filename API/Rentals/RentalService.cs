@@ -3,7 +3,6 @@ using DTO.Rentals;
 using DTO.SearchQueries;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Models;
 using OneOf;
 using OneOf.Types;
@@ -30,7 +29,7 @@ namespace API.Rentals
                 },
                 User = new RentalUserResponse
                 {
-                    Id = rental.AppUserId,
+                    Id = rental.UserId,
                     Name = rental.AppUser.UserName ?? "No UserName",
                 },
                 DateRented = rental.DateRented,
@@ -46,7 +45,7 @@ namespace API.Rentals
             {
                 Id = x.Id,
                 MovieId = x.MovieId,
-                UserId = x.AppUserId,
+                UserId = x.UserId,
                 DateRented = x.DateRented,
                 DateReturned = x.DateReturned,
             }).ToList();
@@ -76,7 +75,7 @@ namespace API.Rentals
             var rental = new Rental
             {
                 MovieId = request.MovieId,
-                AppUserId = request.UserId,
+                UserId = request.UserId,
                 DateRented = rentingDate,
                 DateReturned = null
             };
@@ -88,7 +87,7 @@ namespace API.Rentals
             {
                 Id = rental.Id,
                 MovieId = rental.MovieId,
-                UserId = rental.AppUserId,
+                UserId = rental.UserId,
                 DateRented = rental.DateRented,
                 DateReturned = rental.DateReturned,
             };
@@ -109,7 +108,7 @@ namespace API.Rentals
             {
                 Id = rental.Id,
                 MovieId = rental.MovieId,
-                UserId = rental.AppUserId,
+                UserId = rental.UserId,
                 DateRented = rental.DateRented,
                 DateReturned = rental.DateReturned,
             };

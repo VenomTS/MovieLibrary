@@ -24,5 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         
         modelBuilder.Entity<MovieGenre>().HasKey(x => new { x.MovieId, x.GenreId });
         modelBuilder.Entity<Movie>().HasMany(x => x.Genres).WithMany(x => x.Movies).UsingEntity<MovieGenre>();
+        
+        modelBuilder.Entity<Rental>().HasOne(x => x.AppUser).WithMany().HasForeignKey(x => x.UserId);
     }
 }
