@@ -1,5 +1,6 @@
 using DTO.Movies;
 using DTO.SearchQueries;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Movies;
@@ -10,6 +11,7 @@ public class MoviesController(MovieService movieService) : ControllerBase
 {
 
     [HttpGet("{id:guid}")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var result = await movieService.GetMovieByIdAsync(id);
@@ -24,6 +26,7 @@ public class MoviesController(MovieService movieService) : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> AddMovie([FromBody] AddMovieRequest request)
     {
         var result = await movieService.AddMovieAsync(request);
@@ -38,6 +41,7 @@ public class MoviesController(MovieService movieService) : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Customer, Librarian")]
     public async Task<IActionResult> GetMovies([FromQuery] MovieSearchQuery query)
     {
         var result = await movieService.GetMoviesAsync(query);
@@ -46,6 +50,7 @@ public class MoviesController(MovieService movieService) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> UpdateMovie([FromRoute] Guid id, [FromBody] UpdateMovieRequest request)
     {
         var result = await movieService.UpdateAsync(id, request);

@@ -70,7 +70,7 @@ namespace App
                 txtPassword.Text);
             
             if(apiResponse.Status == HttpStatusCode.OK)
-                _navigationService.ShowView<RentMoviesView>();
+                _navigationService.ShowView<AfterLoginView>();
 
             else
             {

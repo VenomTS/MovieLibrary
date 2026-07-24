@@ -33,7 +33,7 @@ namespace App
             return Host.CreateDefaultBuilder().ConfigureServices((context, services) =>
             {
                 // Services
-                services.AddTransient<IHttpService, HttpService>();
+                services.AddSingleton<IHttpService, HttpService>();
                 services.AddTransient<IAuthService, AuthService>();
                 services.AddSingleton<INavigationService, NavigationService>();
 
@@ -51,9 +51,10 @@ namespace App
                 services.AddTransient<LoginView>();
                 services.AddTransient<RegisterView>();
                 services.AddTransient<RentMoviesView>();
-                services.AddTransient<InventoryManagementView>();
+                services.AddTransient<MovieManagementView>();
                 services.AddTransient<MyRentalsView>();
                 services.AddTransient<AccountManagementView>();
+                services.AddTransient<AfterLoginView>();
             });
         }
     }

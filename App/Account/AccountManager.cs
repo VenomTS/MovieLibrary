@@ -11,6 +11,7 @@ namespace App.Account
         public async Task Initialize(string jwt)
         {
             httpService.SetJwt(jwt);
+            
             var response = await httpService.GetAsync<GetMeResponse>("auth/me");
             
             if(response.Status != HttpStatusCode.OK)

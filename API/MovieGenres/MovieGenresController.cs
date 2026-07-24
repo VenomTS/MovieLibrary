@@ -1,4 +1,5 @@
 using DTO.MovieGenres;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.MovieGenres;
@@ -8,6 +9,7 @@ namespace API.MovieGenres;
 public class MovieGenresController(MovieGenreService movieGenreService) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> AssignGenre([FromBody] AddMovieGenreRequest request)
     {
         var result = await movieGenreService.AddMovieGenre(request);

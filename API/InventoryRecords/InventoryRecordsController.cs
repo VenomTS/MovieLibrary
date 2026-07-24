@@ -1,4 +1,5 @@
 ﻿using DTO.InventoryRecords;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.InventoryRecords
@@ -8,6 +9,7 @@ namespace API.InventoryRecords
     public class InventoryRecordsController(InventoryRecordService inventoryService) : ControllerBase
     {
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Librarian")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var result = await inventoryService.GetByIdAsync(id);
@@ -22,6 +24,7 @@ namespace API.InventoryRecords
         }
         
         [HttpGet]
+        [Authorize(Roles = "Librarian")]
         public async Task<IActionResult> GetAll()
         {
             var result = await inventoryService.GetAllAsync();
@@ -30,6 +33,7 @@ namespace API.InventoryRecords
         }
 
         [HttpGet("movie/{movieId:guid}")]
+        [Authorize(Roles = "Librarian")]
         public async Task<IActionResult> GetByMovieId([FromRoute] Guid movieId)
         {
             var result = await inventoryService.GetByMovieId(movieId);
@@ -44,6 +48,7 @@ namespace API.InventoryRecords
         }
 
         [HttpPost]
+        [Authorize(Roles = "Librarian")]
         public async Task<IActionResult> Create(CreateInventoryRecordRequest request)
         {
             var result = await inventoryService.AddAsync(request);

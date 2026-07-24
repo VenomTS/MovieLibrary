@@ -1,5 +1,6 @@
 ﻿using DTO.Rentals;
 using DTO.SearchQueries;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Rentals;
@@ -10,6 +11,7 @@ public class RentalsController(RentalService rentalService) : ControllerBase
 {
     // Post = Rent; Patch = Return
     [HttpGet("{id:guid}")]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         var result = await rentalService.GetByIdAsync(id);
@@ -24,6 +26,7 @@ public class RentalsController(RentalService rentalService) : ControllerBase
     }
 
     [HttpGet("user/{userId:guid}")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetByUserId([FromRoute] Guid userId)
     {
         var result = await rentalService.GetUnreturnedByUserId(userId);
@@ -38,6 +41,7 @@ public class RentalsController(RentalService rentalService) : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> RentMovie([FromBody] RentRequest request)
     {
         var result = await rentalService.RentMovie(request);
@@ -67,6 +71,7 @@ public class RentalsController(RentalService rentalService) : ControllerBase
     }
 
     [HttpPatch("{rentalId:guid}")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> ReturnMovie([FromRoute] Guid rentalId, [FromBody] ReturnRequest request)
     {
         var result = await rentalService.ReturnMovie(rentalId, request);
@@ -81,6 +86,7 @@ public class RentalsController(RentalService rentalService) : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> GetAllRentals([FromQuery] RentalSearchQuery rentalSearch)
     {
         var result = await rentalService.GetAllRentals(rentalSearch);

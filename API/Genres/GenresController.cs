@@ -1,4 +1,5 @@
 using DTO.Genres;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Genres;
@@ -8,6 +9,7 @@ namespace API.Genres;
 public class GenresController(GenreService genreService) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> GetAll()
     {
         var result = await genreService.GetAllAsync();
@@ -16,6 +18,7 @@ public class GenresController(GenreService genreService) : ControllerBase
     }
     
     [HttpGet("{id:guid}")]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         var result = await genreService.GetByIdAsync(id);
@@ -30,6 +33,7 @@ public class GenresController(GenreService genreService) : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Librarian")]
     public async Task<IActionResult> CreateGenre([FromBody] CreateGenreRequest request)
     {
         var result = await genreService.CreateGenre(request);

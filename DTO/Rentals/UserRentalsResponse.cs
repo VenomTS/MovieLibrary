@@ -1,5 +1,3 @@
-using System.Security.AccessControl;
-
 namespace DTO.Rentals;
 
 public class UserRentalsResponse

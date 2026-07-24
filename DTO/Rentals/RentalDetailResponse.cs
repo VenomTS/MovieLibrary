@@ -1,5 +1,3 @@
-using DTO.Movies;
-
 namespace DTO.Rentals;
 
 public class RentalDetailResponse

@@ -7,7 +7,7 @@ using DTO.Movies;
 
 namespace App.UserControls;
 
-public partial class InventoryManagementView : UserControl
+public partial class MovieManagementView : UserControl
 {
     private FlowLayoutPanel moviePanel;
     private Button addMovieButton;
@@ -15,7 +15,7 @@ public partial class InventoryManagementView : UserControl
 
     private readonly IHttpService _httpService;
 
-    public InventoryManagementView(IHttpService httpService)
+    public MovieManagementView(IHttpService httpService)
     {
         InitializeComponent();
 

@@ -32,20 +32,4 @@ public class MovieGenreService(IMovieGenreRepository movieGenreRepo, IMovieRepos
         await movieGenreRepo.SaveChangesAsync();
         return new Success();
     }
-
-    public async Task RemoveMovieGenre(RemoveMovieGenreRequest request)
-    {
-        var movieGenre = new MovieGenre
-        {
-            MovieId = request.MovieId,
-            GenreId = request.GenreId
-        };
-        
-        var movieGenreExists = await movieGenreRepo.MovieGenreExists(movieGenre);
-        if (movieGenreExists)
-            return;
-        
-        await movieGenreRepo.Delete(movieGenre);
-        await movieGenreRepo.SaveChangesAsync();
-    }
 }

@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace App.UserControls;
 
-partial class InventoryManagementView
+partial class AfterLoginView
 {
     /// <summary> 
     /// Required designer variable.

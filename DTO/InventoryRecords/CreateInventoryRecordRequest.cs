@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DTO.InventoryRecords
+﻿namespace DTO.InventoryRecords
 {
     public class CreateInventoryRecordRequest
     {

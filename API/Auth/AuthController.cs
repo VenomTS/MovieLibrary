@@ -9,8 +9,8 @@ namespace API.Auth;
 [Route("api/v1/[controller]")]
 public class AuthController(UserService userService) : ControllerBase
 {
-    [Authorize]
     [HttpGet("me")]
+    [Authorize]
     public async Task<IActionResult> GetMe()
     {
         var result = await userService.GetMeAsync(User);
@@ -21,6 +21,7 @@ public class AuthController(UserService userService) : ControllerBase
     }
 
     [HttpGet("users")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetUsers()
     {
         var result = await userService.GetUsersAsync();
@@ -29,6 +30,7 @@ public class AuthController(UserService userService) : ControllerBase
     }
 
     [HttpGet("roles")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetRoles()
     {
         var result = await userService.GetRolesAsync();
@@ -37,6 +39,7 @@ public class AuthController(UserService userService) : ControllerBase
     }
 
     [HttpPut("users/{userId:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateUser([FromRoute] Guid userId, UpdateUserRoleRequest request)
     {
         var result = await userService.UpdateAsync(userId, request);

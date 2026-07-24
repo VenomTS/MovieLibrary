@@ -162,7 +162,6 @@ public partial class AccountManagementView : UserControl
             editRolesButton.Left = card.Width - editRolesButton.Width - 25;
         };
 
-        // TODO: Implement role editing
         editRolesButton.Click += async (s, e) =>
         {
             using var dialog = new EditAccountDialog(user, _roles);

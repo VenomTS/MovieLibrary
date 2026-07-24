@@ -48,6 +48,21 @@ public partial class AppForm : Form
     private void OnNavigatedTo(object? sender, OnNavigatedToArgs e)
     {
         var view = e.NavigatedTo;
+
+        if (view is AfterLoginView)
+        {
+            var isLoggedIn = _accountManager.IsLoggedIn();
+            if (!isLoggedIn)
+                throw new Exception("User has changed to AfterLoginView without being logged in");
+            
+            if(_accountManager.HasRole("Customer"))
+                _navigationService.ShowView<RentMoviesView>();
+            else if(_accountManager.HasRole("Librarian"))
+                _navigationService.ShowView<MovieManagementView>();
+            else if(_accountManager.HasRole("Admin"))
+                _navigationService.ShowView<AccountManagementView>();
+            return;
+        }
         
         _topPanel.Visible = view is not (LoginView or RegisterView);
         
@@ -83,7 +98,7 @@ public partial class AppForm : Form
 
         rentsButton.Click += (_, _) => _navigationService.ShowView<RentMoviesView>();
         myRentalsButton.Click += (_, _) => _navigationService.ShowView<MyRentalsView>();
-        movieManagementButton.Click += (_, _) => _navigationService.ShowView<InventoryManagementView>();
+        movieManagementButton.Click += (_, _) => _navigationService.ShowView<MovieManagementView>();
         accountManagementButton.Click += (_, _) => _navigationService.ShowView<AccountManagementView>();
         
         logoutButton.Click += LogoutButtonOnClick;
@@ -102,9 +117,13 @@ public partial class AppForm : Form
 
     private void SetupButtonPermissions()
     {
-        // Logout, Renting and MyRentals moze svako
+        // Logout moze svako
+        // Rent and MyRentals moze Customer
         // Movie Management moze Librarian
-        
+        // Account Management moze Admin
+
+        rentsButton.Visible = _accountManager.HasRole("Customer");
+        myRentalsButton.Visible = _accountManager.HasRole("Customer");
         movieManagementButton.Visible = _accountManager.HasRole("Librarian");
         accountManagementButton.Visible = _accountManager.HasRole("Admin");
     }
