@@ -15,8 +15,6 @@ namespace App.Services
                 Email = mail,
                 Password = password
             });
-            
-            Console.WriteLine(response.Content!.AccessToken);
 
             if (response.Status == HttpStatusCode.OK)
                 await accountManager.Initialize(response.Content!.AccessToken);

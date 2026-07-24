@@ -176,8 +176,6 @@ public partial class AccountManagementView : UserControl
                 {
                     Roles = selectedRoleIds
                 });
-            
-            Console.WriteLine(response.Status);
 
             await LoadUsers();
         };
