@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace App.UserControls;
 
-partial class MovieInventoryView
+partial class InventoryManagementView
 {
     /// <summary> 
     /// Required designer variable.

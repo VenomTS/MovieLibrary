@@ -33,5 +33,10 @@ namespace App.Account
             };
         }
 
+        public void LogOut()
+        {
+            User = null;
+            httpService.SetJwt("");
+        }
     }
 }

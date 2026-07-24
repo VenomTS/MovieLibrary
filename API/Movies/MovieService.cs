@@ -117,8 +117,8 @@ public class MovieService(IMovieRepository movieRepo,
         {
             if (request.GenreIds.Remove(currentGenre.GenreId))
                 continue;
-
-            await genreRepo.DeleteById(currentGenre.GenreId);
+            
+            await movieGenreRepo.Delete(currentGenre);
         }
         
         foreach (var genreId in request.GenreIds)

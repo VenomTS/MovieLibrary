@@ -9,7 +9,6 @@ namespace API.Users;
 
 public class UserService(UserManager<AppUser> userManager)
 {
-
     private const string DefaultRole = "Customer";
     
     public async Task<OneOf<GetMeResponse, UserNotFound>> GetMeAsync(ClaimsPrincipal user)

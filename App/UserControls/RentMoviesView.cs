@@ -3,6 +3,7 @@ using App.Services.Interfaces;
 using DTO.Movies;
 using DTO.Rentals;
 using System.Net;
+using Timer = System.Windows.Forms.Timer;
 
 namespace App.UserControls;
 
@@ -12,11 +13,12 @@ public partial class RentMoviesView : UserControl
     private Button refreshButton;
     private TextBox searchBox;
     private Label titleLabel;
+    private Timer _searchTimer;
 
     private readonly IHttpService _httpService;
     private readonly AccountManager _accountManager;
 
-    private List<MovieResponse> _movies = [];
+    private const int DebounceTimeMS = 150;
 
 
     public RentMoviesView(
@@ -35,117 +37,137 @@ public partial class RentMoviesView : UserControl
 
 
     private void SetupUI()
+{
+    BackColor = Color.FromArgb(245, 246, 250);
+
+    Panel headerPanel = new Panel
     {
-        BackColor = Color.FromArgb(245, 246, 250);
+        Dock = DockStyle.Top,
+        Height = 70,
+        BackColor = Color.White,
+        Padding = new Padding(20, 0, 20, 0)
+    };
 
 
-        Panel headerPanel = new Panel
+    titleLabel = new Label
+    {
+        Text = "Rent Movies",
+        Font = new Font(
+            "Segoe UI",
+            20,
+            FontStyle.Bold),
+        ForeColor = Color.FromArgb(40, 40, 40),
+        AutoSize = true,
+        Dock = DockStyle.Left,
+        TextAlign = ContentAlignment.MiddleLeft
+    };
+
+
+    Panel actionPanel = new Panel
+    {
+        Dock = DockStyle.Right,
+        Width = 390,
+        Height = 70
+    };
+
+
+    searchBox = new TextBox
+    {
+        Width = 240,
+        Height = 35,
+        Font = new Font(
+            "Segoe UI",
+            10),
+        Location = new Point(0, 17)
+    };
+    
+    _searchTimer = new Timer
+    {
+        Interval = DebounceTimeMS
+    };
+
+    _searchTimer.Tick += async (s, e) =>
+    {
+        _searchTimer.Stop();
+        await LoadMovies();
+    };
+
+
+    refreshButton = new Button
+    {
+        Text = "Refresh",
+        Width = 120,
+        Height = 38,
+        Location = new Point(255, 15),
+        FlatStyle = FlatStyle.Flat,
+        BackColor = Color.FromArgb(52, 152, 219),
+        ForeColor = Color.White,
+        Font = new Font(
+            "Segoe UI",
+            10,
+            FontStyle.Bold),
+        Cursor = Cursors.Hand
+    };
+
+
+    refreshButton.FlatAppearance.BorderSize = 0;
+
+
+    refreshButton.Click += async (s, e) =>
+    {
+        await LoadMovies();
+    };
+
+
+    searchBox.TextChanged += (s, e) =>
+    {
+        _searchTimer.Stop();
+        _searchTimer.Start();
+    };
+
+
+    actionPanel.Controls.Add(searchBox);
+    actionPanel.Controls.Add(refreshButton);
+
+
+    headerPanel.Controls.Add(actionPanel);
+    headerPanel.Controls.Add(titleLabel);
+
+
+    moviePanel = new FlowLayoutPanel
+    {
+        Dock = DockStyle.Fill,
+        AutoScroll = true,
+        FlowDirection = FlowDirection.TopDown,
+        WrapContents = false,
+        Padding = new Padding(25),
+        BackColor = Color.FromArgb(245, 246, 250)
+    };
+
+
+    moviePanel.Resize += (s, e) =>
+    {
+        foreach (Control control in moviePanel.Controls)
         {
-            Dock = DockStyle.Top,
-            Height = 70,
-            BackColor = Color.White,
-            Padding = new Padding(20)
-        };
+            control.Width =
+                moviePanel.ClientSize.Width - 60;
+        }
+    };
 
 
-        titleLabel = new Label
-        {
-            Text = "Rent Movies",
-            Font = new Font(
-                "Segoe UI",
-                20,
-                FontStyle.Bold),
-            ForeColor = Color.FromArgb(40,40,40),
-            AutoSize = true,
-            Dock = DockStyle.Left,
-            TextAlign = ContentAlignment.MiddleLeft
-        };
+    headerPanel.Resize += (s, e) =>
+    {
+        searchBox.Top =
+            (headerPanel.Height - searchBox.Height) / 2;
+
+        refreshButton.Top =
+            (headerPanel.Height - refreshButton.Height) / 2;
+    };
 
 
-        Panel actionPanel = new Panel
-        {
-            Dock = DockStyle.Right,
-            Width = 390
-        };
-
-
-        searchBox = new TextBox
-        {
-            Width = 240,
-            Height = 35,
-            Font = new Font(
-                "Segoe UI",
-                10),
-            Location = new Point(0,15)
-        };
-
-
-        refreshButton = new Button
-        {
-            Text = "Refresh",
-            Width = 120,
-            Height = 38,
-            Location = new Point(255,13),
-            FlatStyle = FlatStyle.Flat,
-            BackColor = Color.FromArgb(52,152,219),
-            ForeColor = Color.White,
-            Font = new Font(
-                "Segoe UI",
-                10,
-                FontStyle.Bold),
-            Cursor = Cursors.Hand
-        };
-
-
-        refreshButton.FlatAppearance.BorderSize = 0;
-
-
-        refreshButton.Click += async (s,e)=>
-        {
-            await LoadMovies();
-        };
-
-
-        searchBox.KeyDown += async (s,e)=>
-        {
-            if(e.KeyCode == Keys.Enter)
-                await LoadMovies();
-        };
-
-
-        actionPanel.Controls.Add(searchBox);
-        actionPanel.Controls.Add(refreshButton);
-
-
-        headerPanel.Controls.Add(actionPanel);
-        headerPanel.Controls.Add(titleLabel);
-
-
-
-        moviePanel = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            AutoScroll = true,
-            FlowDirection = FlowDirection.TopDown,
-            WrapContents = false,
-            Padding = new Padding(25),
-            BackColor = Color.FromArgb(245,246,250)
-        };
-
-
-        moviePanel.Resize += (s,e)=>
-        {
-            foreach(Control control in moviePanel.Controls)
-            {
-                control.Width =
-                    moviePanel.ClientSize.Width - 60;
-            }
-        };
-
-
-        Controls.Add(moviePanel);
-        Controls.Add(headerPanel);
-    }
+    Controls.Add(moviePanel);
+    Controls.Add(headerPanel);
+}
 
 
     private async void RentMoviesView_Load(
@@ -185,9 +207,6 @@ public partial class RentMoviesView : UserControl
 
             return;
         }
-
-
-        _movies = movies;
 
 
         foreach(var movie in movies)

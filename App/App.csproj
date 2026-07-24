@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UserControls\MovieInventoryView.cs">
+    <Compile Update="UserControls\InventoryManagementView.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="Dialogs\InventoryDialog.cs">

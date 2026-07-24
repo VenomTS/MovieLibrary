@@ -11,6 +11,11 @@ public partial class AppForm : Form
     private readonly INavigationService _navigationService;
     private readonly AccountManager _accountManager;
 
+    private Button rentsButton;
+    private Button movieManagementButton;
+    private Button myRentalsButton;
+    private Button logoutButton;
+
     // Controls
     private Panel _topPanel;
     private Panel _panelContainer;
@@ -64,30 +69,31 @@ public partial class AppForm : Form
         };
 
         // Navigation buttons
-        var btnRent = CreateNavButton("Rent");
-        btnRent.Click += (_, _) => _navigationService.ShowView<RentMoviesView>();
+        rentsButton = CreateNavButton("Rent");
+        myRentalsButton = CreateNavButton("My Rentals");
+        movieManagementButton = CreateNavButton("Movie Management");
+        logoutButton = CreateNavButton("Logout");
 
-        var btnInventory = CreateNavButton("Inventory");
-        btnInventory.Click += (_, _) => _navigationService.ShowView<MovieInventoryView>();
-
-        /*
-        var btnCustomers = CreateNavButton("Customers");
-        btnCustomers.Click += (_, _) => _navigationService.ShowView<CustomersView>();
-
-        var btnReports = CreateNavButton("Reports");
-        btnReports.Click += (_, _) => _navigationService.ShowView<ReportsView>();
-        */
-
-        var btnSettings = CreateNavButton("My Rentals");
-        btnSettings.Click += (_, _) => _navigationService.ShowView<MyRentalsView>();
+        rentsButton.Click += (_, _) => _navigationService.ShowView<RentMoviesView>();
+        myRentalsButton.Click += (_, _) => _navigationService.ShowView<MyRentalsView>();
+        movieManagementButton.Click += (_, _) => _navigationService.ShowView<InventoryManagementView>();
+        
+        logoutButton.Click += LogoutButtonOnClick;
 
         // Add buttons left-to-right
-        _topPanel.Controls.Add(btnSettings);
-        _topPanel.Controls.Add(btnInventory);
-        _topPanel.Controls.Add(btnRent);
+        _topPanel.Controls.Add(logoutButton);
+        _topPanel.Controls.Add(movieManagementButton);
+        _topPanel.Controls.Add(myRentalsButton);
+        _topPanel.Controls.Add(rentsButton);
 
         Controls.Add(_panelContainer);
         Controls.Add(_topPanel);
+    }
+
+    private void LogoutButtonOnClick(object? sender, EventArgs e)
+    {
+        _accountManager.LogOut();
+        _navigationService.ShowView<LoginView>();
     }
 
     private Button CreateNavButton(string text)

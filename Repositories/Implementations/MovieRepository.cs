@@ -16,7 +16,8 @@ public class MovieRepository(AppDbContext dbContext) : RepositoryBase<Movie>(dbC
         var movies = dbContext.Movies.Include(x => x.Genres).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(query.Name))
-            movies = movies.Where(x => x.Name.Contains(query.Name));
+            movies = movies.Where(x => EF.Functions.ILike(x.Name, $"%{query.Name}%") 
+                                       || EF.Functions.TrigramsSimilarity(x.Name, query.Name) > 0.3);
 
         foreach (var genre in query.Genres)
             movies = movies.Where(x => x.Genres.Any(g => g.Name == genre));

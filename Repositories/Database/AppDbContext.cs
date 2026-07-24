@@ -17,6 +17,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     {
         base.OnModelCreating(modelBuilder);
         
+        modelBuilder.HasPostgresExtension("pg_trgm");
+        
         modelBuilder.Entity<AppUser>(b =>
         {
             b.Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");
