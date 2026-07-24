@@ -19,4 +19,30 @@ public class AuthController(UserService userService) : ControllerBase
             Ok,
             _ => NotFound("AppUser not found"));
     }
+
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
+    {
+        var result = await userService.GetUsersAsync();
+
+        return Ok(result);
+    }
+
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetRoles()
+    {
+        var result = await userService.GetRolesAsync();
+
+        return Ok(result);
+    }
+
+    [HttpPut("users/{userId:guid}")]
+    public async Task<IActionResult> UpdateUser([FromRoute] Guid userId, UpdateUserRoleRequest request)
+    {
+        var result = await userService.UpdateAsync(userId, request);
+        
+        return result.Match<IActionResult>(
+            _ => NoContent(),
+            _ => NotFound("AppUser not found"));
+    }
 }

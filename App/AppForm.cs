@@ -15,6 +15,7 @@ public partial class AppForm : Form
     private Button movieManagementButton;
     private Button myRentalsButton;
     private Button logoutButton;
+    private Button accountManagementButton;
 
     // Controls
     private Panel _topPanel;
@@ -77,19 +78,23 @@ public partial class AppForm : Form
         rentsButton = CreateNavButton("Rent");
         myRentalsButton = CreateNavButton("My Rentals");
         movieManagementButton = CreateNavButton("Movie Management");
+        accountManagementButton = CreateNavButton("Account Management");
         logoutButton = CreateNavButton("Logout");
 
         rentsButton.Click += (_, _) => _navigationService.ShowView<RentMoviesView>();
         myRentalsButton.Click += (_, _) => _navigationService.ShowView<MyRentalsView>();
         movieManagementButton.Click += (_, _) => _navigationService.ShowView<InventoryManagementView>();
+        accountManagementButton.Click += (_, _) => _navigationService.ShowView<AccountManagementView>();
         
         logoutButton.Click += LogoutButtonOnClick;
 
         // Add buttons left-to-right
         _topPanel.Controls.Add(logoutButton);
+        _topPanel.Controls.Add(accountManagementButton);
         _topPanel.Controls.Add(movieManagementButton);
         _topPanel.Controls.Add(myRentalsButton);
         _topPanel.Controls.Add(rentsButton);
+        
 
         Controls.Add(_panelContainer);
         Controls.Add(_topPanel);
@@ -101,6 +106,7 @@ public partial class AppForm : Form
         // Movie Management moze Librarian
         
         movieManagementButton.Visible = _accountManager.HasRole("Librarian");
+        accountManagementButton.Visible = _accountManager.HasRole("Admin");
     }
 
     private void LogoutButtonOnClick(object? sender, EventArgs e)

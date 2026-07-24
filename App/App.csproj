@@ -41,6 +41,12 @@
     <Compile Update="Dialogs\EditMovieDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="UserControls\AccountManagementView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Dialogs\EditAccountDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

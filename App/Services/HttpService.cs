@@ -121,13 +121,25 @@ namespace App.Services
                 };
             }
             
-            var result = await response.Content.ReadFromJsonAsync<TResponse>(_options);
-            return new APIResponse<TResponse>
+            try
             {
-                Status = response.StatusCode,
-                Content = result,
-                ErrorResponse = null,
-            };
+                var result = await response.Content.ReadFromJsonAsync<TResponse>(_options);
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = result,
+                    ErrorResponse = null,
+                };
+            }
+            catch (Exception)
+            {
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = default,
+                    ErrorResponse = null,
+                };
+            }
         }
 
         public async Task<APIResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data)
@@ -151,13 +163,25 @@ namespace App.Services
                 };
             }
             
-            var result = await response.Content.ReadFromJsonAsync<TResponse>(_options);
-            return new APIResponse<TResponse>
+            try
             {
-                Status = response.StatusCode,
-                Content = result,
-                ErrorResponse = null,
-            };
+                var result = await response.Content.ReadFromJsonAsync<TResponse>(_options);
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = result,
+                    ErrorResponse = null,
+                };
+            }
+            catch (Exception)
+            {
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = default,
+                    ErrorResponse = null,
+                };
+            }
         }
 
 
