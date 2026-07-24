@@ -67,8 +67,11 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
 
         var available = await repositoryManager.InventoryRecords.AsQueryable()
             .Where(x => x.MovieId == request.MovieId)
-            .SumAsync(x => x.Amount) -
-                        repositoryManager.Rentals.AsQueryable().Count(x => x.MovieId == request.MovieId && x.DateReturned == null);
+            .GroupBy(x => x.MovieId)
+            .Select(x => 
+                x.Sum(y => y.Amount) - repositoryManager.Rentals.AsQueryable()
+                    .Count(y => y.MovieId == request.MovieId && y.DateReturned == null)
+            ).FirstAsync();
 
         if (available <= 0)
             return new MovieOutOfStock();
