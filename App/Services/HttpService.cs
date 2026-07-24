@@ -130,6 +130,36 @@ namespace App.Services
             };
         }
 
+        public async Task<APIResponse<TResponse>> PutAsync<TRequest, TResponse>(string url, TRequest data)
+        {
+            var json = JsonSerializer.Serialize(data, _options);
+
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _client.PutAsync(url, content);
+
+            // Response failed
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadFromJsonAsync<ErrorResponse>(_options);
+
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = default,
+                    ErrorResponse = error
+                };
+            }
+            
+            var result = await response.Content.ReadFromJsonAsync<TResponse>(_options);
+            return new APIResponse<TResponse>
+            {
+                Status = response.StatusCode,
+                Content = result,
+                ErrorResponse = null,
+            };
+        }
+
 
         public async Task<HttpStatusCode> DeleteAsync(string url)
         {

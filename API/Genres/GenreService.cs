@@ -40,4 +40,17 @@ public class GenreService(IGenreRepository genreRepo)
             Name = genre.Name
         };
     }
+
+    public async Task<List<GenreResponse>> GetAllAsync()
+    {
+        var genres = await genreRepo.GetAllAsync();
+
+        var genreDto = genres.Select(x => new GenreResponse
+        {
+            Id = x.Id,
+            Name = x.Name
+        });
+        
+        return genreDto.ToList();
+    }
 }

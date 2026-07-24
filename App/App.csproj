@@ -35,6 +35,12 @@
     <Compile Update="UserControls\MyRentalsView.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Dialogs\AddGenreDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dialogs\EditMovieDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

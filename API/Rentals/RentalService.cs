@@ -69,7 +69,7 @@ namespace API.Rentals
                 MovieId = request.MovieId,
             });
 
-            if (rentals.Any())
+            if (rentals.Any(x => x.DateReturned == null))
                 return new AlreadyRenting();
 
             var rentingDate = request.DateRented ?? DateOnly.FromDateTime(DateTime.Now);

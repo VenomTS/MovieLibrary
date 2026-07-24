@@ -15,4 +15,9 @@ public class MovieGenreRepository(AppDbContext dbContext) : RepositoryBase<Movie
         return await dbContext.MovieGenres.AnyAsync(x =>
             x.MovieId == movieGenre.MovieId && x.GenreId == movieGenre.GenreId);
     }
+
+    public async Task<List<MovieGenre>> GetByMovieId(Guid movieId)
+    {
+        return await dbContext.MovieGenres.Where(x => x.MovieId == movieId).ToListAsync();
+    }
 }

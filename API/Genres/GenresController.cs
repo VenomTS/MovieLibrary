@@ -7,6 +7,14 @@ namespace API.Genres;
 [Route("api/v1/[controller]")]
 public class GenresController(GenreService genreService) : ControllerBase
 {
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await genreService.GetAllAsync();
+
+        return Ok(result);
+    }
+    
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {

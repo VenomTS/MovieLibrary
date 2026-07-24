@@ -246,13 +246,13 @@ public partial class RentMoviesView : UserControl
             Text =
                 $"Genres: {genres}\n" +
                 $"Release: {movie.ReleaseDate:d}\n" +
-                $"Available: {movie.Stock.AmountInStock}"
+                $"Available: {movie.Stock}"
         };
 
 
         Button rentButton = new Button
         {
-            Text = movie.Stock.AmountInStock > 0
+            Text = movie.Stock > 0
                 ? "Rent Movie"
                 : "Unavailable",
 
@@ -260,7 +260,7 @@ public partial class RentMoviesView : UserControl
             Height = 38,
 
             BackColor =
-                movie.Stock.AmountInStock > 0
+                movie.Stock > 0
                 ? Color.FromArgb(46,204,113)
                 : Color.Gray,
 
@@ -298,7 +298,7 @@ public partial class RentMoviesView : UserControl
         };
 
 
-        if(movie.Stock.AmountInStock > 0)
+        if(movie.Stock > 0)
         {
             rentButton.Click += async (s,e)=>
             {
@@ -345,7 +345,7 @@ public partial class RentMoviesView : UserControl
                             DateTime.Now)
                 });
 
-        if(response.Status == HttpStatusCode.OK)
+        if(response.Status == HttpStatusCode.Created)
             MessageBox.Show($"You rented {movie.Name}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         else if(response.Status == HttpStatusCode.Conflict)
             MessageBox.Show($"{movie.Name} is out of stock", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

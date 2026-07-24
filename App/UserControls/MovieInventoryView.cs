@@ -1,3 +1,4 @@
+using System.Net;
 using App.Dialogs;
 using App.Services.Interfaces;
 using DTO;
@@ -12,7 +13,7 @@ public partial class MovieInventoryView : UserControl
     private Button addMovieButton;
     private Label titleLabel;
 
-    private IHttpService _httpService;
+    private readonly IHttpService _httpService;
 
     public MovieInventoryView(IHttpService httpService)
     {
@@ -24,7 +25,6 @@ public partial class MovieInventoryView : UserControl
 
         Load += MovieInventoryControl_Load;
     }
-
 
     private void SetupUI()
     {
@@ -38,7 +38,6 @@ public partial class MovieInventoryView : UserControl
             Padding = new Padding(20)
         };
 
-
         titleLabel = new Label
         {
             Text = "Movie Inventory",
@@ -48,7 +47,6 @@ public partial class MovieInventoryView : UserControl
             Dock = DockStyle.Left,
             TextAlign = ContentAlignment.MiddleLeft
         };
-
 
         addMovieButton = new Button
         {
@@ -66,10 +64,8 @@ public partial class MovieInventoryView : UserControl
         addMovieButton.FlatAppearance.BorderSize = 0;
         addMovieButton.Click += AddMovieButton_Click;
 
-
         headerPanel.Controls.Add(addMovieButton);
         headerPanel.Controls.Add(titleLabel);
-
 
         moviePanel = new FlowLayoutPanel
         {
@@ -81,26 +77,22 @@ public partial class MovieInventoryView : UserControl
             BackColor = Color.FromArgb(245, 246, 250)
         };
 
-
         moviePanel.Resize += (s, e) =>
         {
-            foreach(Control control in moviePanel.Controls)
+            foreach (Control control in moviePanel.Controls)
             {
                 control.Width = moviePanel.ClientSize.Width - 60;
             }
         };
 
-
         Controls.Add(moviePanel);
         Controls.Add(headerPanel);
     }
-
 
     private async void MovieInventoryControl_Load(object sender, EventArgs e)
     {
         await LoadMovies();
     }
-
 
     private async Task LoadMovies()
     {
@@ -112,7 +104,7 @@ public partial class MovieInventoryView : UserControl
         if (movies == null || movies.Count == 0)
         {
             moviePanel.Controls.Add(
-                new Label()
+                new Label
                 {
                     Text = "No movies available",
                     Font = new Font("Segoe UI", 12),
@@ -123,14 +115,11 @@ public partial class MovieInventoryView : UserControl
             return;
         }
 
-
-        foreach(var movie in movies)
+        foreach (var movie in movies)
         {
             AddMovieRow(movie);
         }
     }
-
-
 
     private void AddMovieRow(MovieResponse movie)
     {
@@ -143,37 +132,30 @@ public partial class MovieInventoryView : UserControl
             Padding = new Padding(20)
         };
 
-
         Label movieName = new Label
         {
             Text = movie.Name,
-            Font = new Font(
-                "Segoe UI",
-                14,
-                FontStyle.Bold),
-            ForeColor = Color.FromArgb(30,30,30),
+            Font = new Font("Segoe UI", 14, FontStyle.Bold),
+            ForeColor = Color.FromArgb(30, 30, 30),
             AutoSize = true,
-            Location = new Point(20,15)
+            Location = new Point(20, 15)
         };
-
 
         string genres = movie.Genres.Count == 0
             ? "None"
-            : string.Join(", ", movie.Genres);
-
+            : string.Join(", ", movie.Genres.Select(x => x.Name));
 
         Label details = new Label
         {
             AutoSize = true,
-            Location = new Point(20,45),
+            Location = new Point(20, 45),
             ForeColor = Color.Gray,
-            Font = new Font("Segoe UI",10),
+            Font = new Font("Segoe UI", 10),
             Text =
                 $"Genres: {genres}\n" +
                 $"Release: {movie.ReleaseDate:d}\n" +
-                $"Available: {movie.Stock.AmountInStock}"
+                $"Available: {movie.Stock}"
         };
-
 
         Button updateButton = new Button
         {
@@ -182,63 +164,79 @@ public partial class MovieInventoryView : UserControl
             Height = 38,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
             FlatStyle = FlatStyle.Flat,
-            BackColor = Color.FromArgb(46,204,113),
+            BackColor = Color.FromArgb(46, 204, 113),
             ForeColor = Color.White,
             Cursor = Cursors.Hand,
-            Font = new Font("Segoe UI",9,FontStyle.Bold)
+            Font = new Font("Segoe UI", 9, FontStyle.Bold)
         };
-
 
         updateButton.FlatAppearance.BorderSize = 0;
 
+        Button editButton = new Button
+        {
+            Text = "Edit",
+            Width = 90,
+            Height = 38,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right,
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(243, 156, 18),
+            ForeColor = Color.White,
+            Cursor = Cursors.Hand,
+            Font = new Font("Segoe UI", 9, FontStyle.Bold)
+        };
+
+        editButton.FlatAppearance.BorderSize = 0;
+
+        const int spacing = 10;
 
         updateButton.Location = new Point(
             card.Width - updateButton.Width - 25,
-            40
-        );
+            40);
 
+        editButton.Location = new Point(
+            updateButton.Left - editButton.Width - spacing,
+            40);
 
-        card.Resize += (s,e)=>
+        card.Resize += (s, e) =>
         {
             updateButton.Left = card.Width - updateButton.Width - 25;
+            editButton.Left = updateButton.Left - editButton.Width - spacing;
         };
 
-
-        updateButton.Click += async (s,e)=>
+        updateButton.Click += async (s, e) =>
         {
             await UpdateInventory(movie);
         };
 
-
-        card.MouseEnter += (s,e)=>
+        editButton.Click += async (s, e) =>
         {
-            card.BackColor = Color.FromArgb(235,245,255);
+            await EditMovie(movie);
         };
 
+        card.MouseEnter += (s, e) =>
+        {
+            card.BackColor = Color.FromArgb(235, 245, 255);
+        };
 
-        card.MouseLeave += (s,e)=>
+        card.MouseLeave += (s, e) =>
         {
             card.BackColor = Color.White;
         };
 
-
         card.Controls.Add(movieName);
         card.Controls.Add(details);
+        card.Controls.Add(editButton);
         card.Controls.Add(updateButton);
-
 
         moviePanel.Controls.Add(card);
     }
-
-
 
     private async Task UpdateInventory(MovieResponse movie)
     {
         using var dialog = new InventoryDialog();
 
-        if(dialog.ShowDialog() != DialogResult.OK)
+        if (dialog.ShowDialog() != DialogResult.OK)
             return;
-
 
         var request = new CreateInventoryRecordRequest
         {
@@ -247,11 +245,43 @@ public partial class MovieInventoryView : UserControl
             Date = dialog.ArrivalDate
         };
 
-
         await _httpService.PostAsync<CreateInventoryRecordRequest, InventoryRecordResponse>(
             "inventoryRecords",
             request);
 
+        await LoadMovies();
+    }
+
+    private async Task EditMovie(MovieResponse movie)
+    {
+        using var dialog = new EditMovieDialog(_httpService, movie);
+
+        if (dialog.ShowDialog() != DialogResult.OK)
+            return;
+
+        var request = new UpdateMovieRequest
+        {
+            Name = dialog.MovieName,
+            ReleaseDate = dialog.ReleaseDate,
+            GenreIds = dialog.SelectedGenreIds
+        };
+
+        var response = await _httpService.PutAsync<UpdateMovieRequest, MovieResponse>(
+            $"movies/{movie.Id}",
+            request);
+
+        if (response.Status == HttpStatusCode.NotFound)
+        {
+            MessageBox.Show("Movie not found", "Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+        if (response.Status == HttpStatusCode.Conflict)
+        {
+            MessageBox.Show("Movie with given information already exists", "Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+        
+        MessageBox.Show("Movie updated", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         await LoadMovies();
     }
@@ -260,9 +290,8 @@ public partial class MovieInventoryView : UserControl
     {
         using var dialog = new AddMovieDialog();
 
-        if(dialog.ShowDialog() != DialogResult.OK)
+        if (dialog.ShowDialog() != DialogResult.OK)
             return;
-
 
         var movie = new AddMovieRequest
         {
@@ -270,11 +299,9 @@ public partial class MovieInventoryView : UserControl
             ReleaseDate = dialog.ReleaseDate
         };
 
-
         await _httpService.PostAsync<AddMovieRequest, MovieResponse>(
             "movies",
             movie);
-
 
         await LoadMovies();
     }

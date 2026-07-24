@@ -6,5 +6,5 @@ public class MovieResponse
     public string Name { get; set; } = string.Empty;
     public DateOnly ReleaseDate { get; set; }
     public List<MovieGenreResponse> Genres { get; set; } = [];
-    public MovieStockResponse Stock { get; set; }
+    public int Stock { get; set; }
 }

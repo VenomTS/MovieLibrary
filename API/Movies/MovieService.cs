@@ -3,11 +3,16 @@ using DTO.Movies;
 using DTO.SearchQueries;
 using Models;
 using OneOf;
+using OneOf.Types;
 using Repositories.Interfaces;
 
 namespace API.Movies;
 
-public class MovieService(IMovieRepository movieRepo, IRentalRepository rentalRepo, IInventoryRecordRepository inventoryRepo)
+public class MovieService(IMovieRepository movieRepo, 
+    IRentalRepository rentalRepo, 
+    IInventoryRecordRepository inventoryRepo, 
+    IGenreRepository genreRepo, 
+    IMovieGenreRepository movieGenreRepo)
 {
     public async Task<List<MovieResponse>> GetMoviesAsync(MovieSearchQuery query)
     {
@@ -23,10 +28,7 @@ public class MovieService(IMovieRepository movieRepo, IRentalRepository rentalRe
                 Id = genre.Id,
                 Name = genre.Name,
             }).ToList(),
-            Stock = new MovieStockResponse
-            {
-                AmountInStock = GetMovieStock(x.Id).GetAwaiter().GetResult()
-            }
+            Stock = GetMovieStock(x.Id).GetAwaiter().GetResult()
         });
         
         return moviesDto.ToList();
@@ -73,10 +75,7 @@ public class MovieService(IMovieRepository movieRepo, IRentalRepository rentalRe
                     Id = x.Id,
                     Name = x.Name,
                 }).ToList(),
-                Stock = new MovieStockResponse
-                {
-                    AmountInStock = GetMovieStock(movie.Id).GetAwaiter().GetResult(),
-                }
+                Stock = await GetMovieStock(movie.Id)
             };
     }
 
@@ -90,5 +89,71 @@ public class MovieService(IMovieRepository movieRepo, IRentalRepository rentalRe
         var totalRentedMovies = await rentalRepo.GetByMovieIdAsync(movieId);
         var totalMoviesNotReturned = totalRentedMovies.Count(x => x.DateReturned == null);
         return totalInventory - totalMoviesNotReturned;
+    }
+
+    public async Task<OneOf<MovieResponse, MovieAlreadyExists, NotFound>> UpdateAsync(Guid id, UpdateMovieRequest request)
+    {
+        var movie = await movieRepo.GetByIdAsync(id);
+        if (movie == null)
+            return new NotFound();
+
+        // Begin Tracking
+        await movieRepo.Update(movie);
+
+        var existingMovies = await movieRepo.Search(new MovieSearchQuery
+        {
+            Name = request.Name,
+        });
+        
+        // Ako bilo koji postojeci film ima ISTI DATUM A RAZLICIT ID
+        if (existingMovies.Any(x => x.ReleaseDate == request.ReleaseDate && x.Id != id))
+            return new MovieAlreadyExists();
+        
+        movie.Name = request.Name;
+        movie.ReleaseDate = request.ReleaseDate;
+
+        var currentMovieGenres = await movieGenreRepo.GetByMovieId(movie.Id);
+        foreach (var currentGenre in currentMovieGenres)
+        {
+            if (request.GenreIds.Remove(currentGenre.GenreId))
+                continue;
+
+            await genreRepo.DeleteById(currentGenre.GenreId);
+        }
+        
+        foreach (var genreId in request.GenreIds)
+        {
+            var genre = await genreRepo.GetByIdAsync(genreId);
+            if (genre == null)
+                continue;
+
+            var movieGenre = new MovieGenre
+            {
+                MovieId = movie.Id,
+                GenreId = genre.Id,
+            };
+            await movieGenreRepo.CreateAsync(movieGenre);
+        }
+
+        await movieRepo.SaveChangesAsync();
+        
+        // Calling it again to get includes
+        movie = await movieRepo.GetByIdAsync(id, x => x.Genres);
+        if (movie == null)
+            return new NotFound();
+        var movieStock = await GetMovieStock(movie.Id);
+
+        return new MovieResponse
+        {
+            Id = movie.Id,
+            Name = movie.Name,
+            ReleaseDate = movie.ReleaseDate,
+            Genres = movie.Genres.Select(x => new MovieGenreResponse
+            {
+                Id = x.Id,
+                Name = x.Name,
+            }).ToList(),
+            Stock = movieStock
+        };
     }
 }

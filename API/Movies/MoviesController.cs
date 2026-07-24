@@ -44,4 +44,23 @@ public class MoviesController(MovieService movieService) : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateMovie([FromRoute] Guid id, [FromBody] UpdateMovieRequest request)
+    {
+        var result = await movieService.UpdateAsync(id, request);
+
+        return result.Match<IActionResult>(
+            Ok,
+            _ => Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Detail = $"The {request.Name} with release date {request.ReleaseDate} already exists",
+            }),
+            _ => NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Detail = $"The movie with ID {id} was not found",
+            }));
+    }
 }
