@@ -97,9 +97,6 @@ public class MovieService(IMovieRepository movieRepo,
         if (movie == null)
             return new NotFound();
 
-        // Begin Tracking
-        await movieRepo.Update(movie);
-
         var existingMovies = await movieRepo.Search(new MovieSearchQuery
         {
             Name = request.Name,
@@ -108,6 +105,9 @@ public class MovieService(IMovieRepository movieRepo,
         // Ako bilo koji postojeci film ima ISTI DATUM A RAZLICIT ID
         if (existingMovies.Any(x => x.ReleaseDate == request.ReleaseDate && x.Id != id))
             return new MovieAlreadyExists();
+        
+        // Begin Tracking
+        await movieRepo.Update(movie);
         
         movie.Name = request.Name;
         movie.ReleaseDate = request.ReleaseDate;

@@ -38,5 +38,10 @@ namespace App.Account
             User = null;
             httpService.SetJwt("");
         }
+
+        public bool HasRole(string role)
+        {
+            return IsLoggedIn() && User!.Roles.Contains(role);
+        }
     }
 }

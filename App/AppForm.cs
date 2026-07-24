@@ -38,6 +38,8 @@ public partial class AppForm : Form
 
         _navigationService.Initialize(_panelContainer);
         _navigationService.OnNavigatedTo += OnNavigatedTo;
+        
+        SetupButtonPermissions();
 
         _navigationService.ShowView<LoginView>();
     }
@@ -50,6 +52,9 @@ public partial class AppForm : Form
         
         if(!_accountManager.IsLoggedIn() && view is not (LoginView or RegisterView))
             _navigationService.ShowView<LoginView>();
+        
+        if(view is not (LoginView or RegisterView))
+            SetupButtonPermissions();
     }
 
     private void InitializeControls()
@@ -88,6 +93,14 @@ public partial class AppForm : Form
 
         Controls.Add(_panelContainer);
         Controls.Add(_topPanel);
+    }
+
+    private void SetupButtonPermissions()
+    {
+        // Logout, Renting and MyRentals moze svako
+        // Movie Management moze Librarian
+        
+        movieManagementButton.Visible = _accountManager.HasRole("Librarian");
     }
 
     private void LogoutButtonOnClick(object? sender, EventArgs e)
