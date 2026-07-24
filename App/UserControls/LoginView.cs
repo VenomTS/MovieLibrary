@@ -18,8 +18,7 @@ namespace App
 
         private INavigationService _navigationService;
         private IAuthService _authService;
-
-
+        
         public LoginView(
             INavigationService navigationService,
             IAuthService authService)
@@ -31,9 +30,7 @@ namespace App
 
             InitializeControls();
         }
-
-
-
+        
         private async void BtnLogin_Click(object sender, EventArgs e)
         {
             errorProvider.Clear();
@@ -48,8 +45,7 @@ namespace App
 
                 valid = false;
             }
-
-
+            
             if (string.IsNullOrWhiteSpace(txtPassword.Text))
             {
                 errorProvider.SetError(
@@ -58,13 +54,10 @@ namespace App
 
                 valid = false;
             }
-
-
+            
             if (!valid)
                 return;
-
-
-
+            
             var apiResponse = await _authService.LoginAsync(
                 txtMail.Text,
                 txtPassword.Text);
@@ -81,10 +74,7 @@ namespace App
                     MessageBoxIcon.Error);
             }
         }
-
-
-
-
+        
         private void InitializeControls()
         {
             Dock = DockStyle.Fill;

@@ -1,4 +1,5 @@
 ﻿using API.OneOfTypes;
+using AutoMapper;
 using DTO.InventoryRecords;
 using Models;
 using OneOf;
@@ -7,21 +8,15 @@ using Repositories.Interfaces;
 
 namespace API.InventoryRecords
 {
-    public class InventoryRecordService(IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo)
+    public class InventoryRecordService(IMapper mapper, IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo)
     {
         public async Task<OneOf<InventoryRecordSingularResponse, NotFound>> GetByIdAsync(Guid id)
         {
             var record = await inventoryRepo.GetByIdAsync(id);
             if (record == null)
                 return new NotFound();
-
-            return new InventoryRecordSingularResponse()
-            {
-                Id = record.Id,
-                MovieId = record.MovieId,
-                Amount = record.Amount,
-                Date = record.Date
-            };
+            
+            return mapper.Map<InventoryRecordSingularResponse>(record);
         }
         
         public async Task<OneOf<InventoryRecordSingularResponse, MovieNotFound>> AddAsync(CreateInventoryRecordRequest request)
@@ -29,29 +24,20 @@ namespace API.InventoryRecords
             var movieExists = await movieRepo.MovieExistsAsync(request.MovieId);
             if (!movieExists)
                 return new MovieNotFound();
-
-            var inventoryRecord = new InventoryRecord
-            {
-                MovieId = request.MovieId,
-                Amount = request.Amount,
-                Date = request.Date ?? DateOnly.FromDateTime(DateTime.Now)
-            };
+            
+            var inventoryRecord = mapper.Map<InventoryRecord>(request);
 
             await inventoryRepo.CreateAsync(inventoryRecord);
             await inventoryRepo.SaveChangesAsync();
-
-            return new InventoryRecordSingularResponse
-            {
-                MovieId = inventoryRecord.MovieId,
-                Amount = inventoryRecord.Amount,
-                Date = inventoryRecord.Date
-            };
+            
+            return mapper.Map<InventoryRecordSingularResponse>(inventoryRecord);
         }
 
         public async Task<List<InventoryRecordResponse>> GetAllAsync()
         {
             var records = await inventoryRepo.GetAllAsync();
 
+            // No clue how to convert this into AutoMapper
             var recordsDto = records.GroupBy(x => x.MovieId).Select(
                 x => new InventoryRecordResponse
                 {
@@ -74,7 +60,8 @@ namespace API.InventoryRecords
                 return new MovieNotFound();
 
             var records = await inventoryRepo.GetByMovieId(movieId);
-
+            
+            // Same here
             var recordsDto = records.GroupBy(x => x.Date)
                 .Select(x => new InventoryRecordDataResponse
                 {

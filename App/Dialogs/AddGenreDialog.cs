@@ -12,8 +12,6 @@ public partial class AddGenreDialog : Form
     private Button btnSave;
     private Button btnCancel;
 
-    public string GenreName => txtGenreName.Text.Trim();
-
     public AddGenreDialog(IHttpService httpService)
     {
         _httpService = httpService;
@@ -30,7 +28,7 @@ public partial class AddGenreDialog : Form
         MinimizeBox = false;
         ClientSize = new Size(400, 170);
 
-        Label lblGenre = new Label
+        var lblGenre = new Label
         {
             Text = "Genre Name",
             AutoSize = true,

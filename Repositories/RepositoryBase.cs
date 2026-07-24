@@ -8,6 +8,8 @@ namespace Repositories
     {
         private readonly DbSet<TEntity> dbSet = context.Set<TEntity>();
 
+        public IQueryable<TEntity> AsQueryable() => dbSet.AsQueryable();
+
         public async Task<TEntity?> GetByIdAsync(Guid id, params Expression<Func<TEntity, object>>[] includes)
         {
             IQueryable<TEntity> query = context.Set<TEntity>();

@@ -1,4 +1,5 @@
 using API.OneOfTypes;
+using AutoMapper;
 using DTO.MovieGenres;
 using Models;
 using OneOf;
@@ -7,7 +8,7 @@ using Repositories.Interfaces;
 
 namespace API.MovieGenres;
 
-public class MovieGenreService(IMovieGenreRepository movieGenreRepo, IMovieRepository movieRepo, IGenreRepository genreRepo)
+public class MovieGenreService(IMapper mapper, IMovieGenreRepository movieGenreRepo, IMovieRepository movieRepo, IGenreRepository genreRepo)
 {
     public async Task<OneOf<Success, MovieNotFound, GenreNotFound, MovieGenreAlreadyExists>> AddMovieGenre(AddMovieGenreRequest request)
     {
@@ -19,11 +20,7 @@ public class MovieGenreService(IMovieGenreRepository movieGenreRepo, IMovieRepos
         if(!genreExists)
             return new GenreNotFound();
         
-        var movieGenre = new MovieGenre
-        {
-            MovieId = request.MovieId,
-            GenreId = request.GenreId
-        };
+        var movieGenre = mapper.Map<MovieGenre>(request);
         var movieGenreExists = await movieGenreRepo.MovieGenreExists(movieGenre);
         if (movieGenreExists)
             return new MovieGenreAlreadyExists();

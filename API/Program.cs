@@ -12,6 +12,7 @@ using Scalar.AspNetCore;
 using API.Auth;
 using Microsoft.AspNetCore.Identity;
 using Models;
+using Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>()
     .AddApiEndpoints();
 
+builder.Services.AddAutoMapper(_ => { }, typeof(API.Mapper.AutoMapper));
+
 // Services
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
@@ -45,6 +48,7 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IMovieGenreRepository, MovieGenreRepository>();
 builder.Services.AddScoped<IRentalRepository, RentalRepository>();
 builder.Services.AddScoped<IInventoryRecordRepository, InventoryRecordRepository>();
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 
 var app = builder.Build();
 

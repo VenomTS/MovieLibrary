@@ -1,4 +1,5 @@
 using API.OneOfTypes;
+using AutoMapper;
 using DTO.Movies;
 using DTO.SearchQueries;
 using Models;
@@ -8,7 +9,8 @@ using Repositories.Interfaces;
 
 namespace API.Movies;
 
-public class MovieService(IMovieRepository movieRepo, 
+public class MovieService(IMapper mapper,
+    IMovieRepository movieRepo, 
     IRentalRepository rentalRepo, 
     IInventoryRecordRepository inventoryRepo, 
     IGenreRepository genreRepo, 
@@ -17,43 +19,26 @@ public class MovieService(IMovieRepository movieRepo,
     public async Task<List<MovieResponse>> GetMoviesAsync(MovieSearchQuery query)
     {
         var movies = await movieRepo.Search(query);
-
-        var moviesDto = movies.Select(x => new MovieResponse
-        {
-            Id = x.Id,
-            Name = x.Name,
-            ReleaseDate = x.ReleaseDate,
-            Genres = x.Genres.Select(genre => new MovieGenreResponse
-            {
-                Id = genre.Id,
-                Name = genre.Name,
-            }).ToList(),
-            Stock = GetMovieStock(x.Id).GetAwaiter().GetResult()
-        });
         
-        return moviesDto.ToList();
+        var moviesDto = mapper.Map<List<MovieResponse>>(movies);
+        foreach(var movie in moviesDto)
+            movie.Stock = await GetMovieStock(movie.Id);
+
+        return moviesDto;
     }
     
     public async Task<OneOf<MovieResponse, MovieAlreadyExists>> AddMovieAsync(AddMovieRequest request)
     {
-        var movie = new Movie
-        {
-            Name = request.Name,
-            ReleaseDate = request.ReleaseDate,
-        };
+        var movie = mapper.Map<Movie>(request);
 
         var movieExists = await movieRepo.MovieExistsAsync(movie);
         if (movieExists)
             return new MovieAlreadyExists();
 
         await movieRepo.CreateAsync(movie);
-        var movieResponse = new MovieResponse
-        {
-            Id = movie.Id,
-            Name = movie.Name,
-            ReleaseDate = movie.ReleaseDate,
-            Genres = [],
-        };
+        
+        var movieResponse = mapper.Map<MovieResponse>(movie);
+        movieResponse.Stock = await GetMovieStock(movie.Id);
         
         await movieRepo.SaveChangesAsync();
         return movieResponse;
@@ -62,21 +47,13 @@ public class MovieService(IMovieRepository movieRepo,
     public async Task<OneOf<MovieResponse, MovieNotFound>> GetMovieByIdAsync(Guid id)
     {
         var movie = await movieRepo.GetByIdAsync(id, x => x.Id == id);
-
-        return movie == null
-            ? new MovieNotFound()
-            : new MovieResponse
-            {
-                Id = movie.Id,
-                Name = movie.Name,
-                ReleaseDate = movie.ReleaseDate,
-                Genres = movie.Genres.Select(x => new MovieGenreResponse
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                }).ToList(),
-                Stock = await GetMovieStock(movie.Id)
-            };
+        
+        if(movie == null)
+            return new MovieNotFound();
+        
+        var movieResponse = mapper.Map<MovieResponse>(movie);
+        movieResponse.Stock = await GetMovieStock(movie.Id);
+        return movieResponse;
     }
 
     private async Task<int> GetMovieStock(Guid movieId)
@@ -142,18 +119,9 @@ public class MovieService(IMovieRepository movieRepo,
         if (movie == null)
             return new NotFound();
         var movieStock = await GetMovieStock(movie.Id);
-
-        return new MovieResponse
-        {
-            Id = movie.Id,
-            Name = movie.Name,
-            ReleaseDate = movie.ReleaseDate,
-            Genres = movie.Genres.Select(x => new MovieGenreResponse
-            {
-                Id = x.Id,
-                Name = x.Name,
-            }).ToList(),
-            Stock = movieStock
-        };
+        
+        var movieDto = mapper.Map<MovieResponse>(movie);
+        movieDto.Stock = movieStock;
+        return movieDto;
     }
 }

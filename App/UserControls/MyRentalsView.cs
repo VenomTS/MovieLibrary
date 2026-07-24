@@ -171,7 +171,7 @@ public partial class MyRentalsView : UserControl
                 "Segoe UI",
                 10),
             Text =
-                $"Released: {rental.Movie.DateReleased:d}\n" +
+                $"Released: {rental.Movie.ReleaseDate:d}\n" +
                 $"Rented: {rental.DateRented:d}"
         };
 
