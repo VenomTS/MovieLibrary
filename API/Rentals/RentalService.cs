@@ -1,4 +1,5 @@
-﻿using API.OneOfTypes;
+﻿using System.Security.Claims;
+using API.OneOfTypes;
 using DTO.Rentals;
 using DTO.SearchQueries;
 using Microsoft.AspNetCore.Identity;
@@ -53,8 +54,17 @@ namespace API.Rentals
             return rentalsDto;
         }
 
-        public async Task<OneOf<RentalResponse, AlreadyRenting, MovieNotFound, UserNotFound, MovieOutOfStock>> RentMovie(RentRequest request)
+        public async Task<OneOf<RentalResponse,
+            Unauthorized,
+            AlreadyRenting, 
+            MovieNotFound, 
+            UserNotFound, 
+            MovieOutOfStock>> RentMovie(RentRequest request, ClaimsPrincipal user)
         {
+            var currUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (currUserId == null || request.UserId.ToString() != currUserId)
+                return new Unauthorized();
+            
             var movieExists = await movieRepo.MovieExistsAsync(request.MovieId);
             if (!movieExists)
                 return new MovieNotFound();
@@ -102,12 +112,16 @@ namespace API.Rentals
             };
         }
 
-        public async Task<OneOf<RentalResponse, RentalNotFound>> ReturnMovie(Guid rentalId, ReturnRequest request)
+        public async Task<OneOf<RentalResponse, Unauthorized, RentalNotFound>> ReturnMovie(Guid rentalId, ReturnRequest request, ClaimsPrincipal user)
         {
             var rental = await rentalRepo.GetByIdAsync(rentalId);
 
             if (rental == null)
                 return new RentalNotFound();
+            
+            var currUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (currUserId == null || rental.UserId.ToString() != currUserId)
+                return new Unauthorized();
 
             rental.DateReturned = request.DateReturned ?? DateOnly.FromDateTime(DateTime.Now);
 
@@ -123,8 +137,12 @@ namespace API.Rentals
             };
         }
 
-        public async Task<OneOf<List<UserRentalsResponse>, NotFound>> GetUnreturnedByUserId(Guid userId)
+        public async Task<OneOf<List<UserRentalsResponse>, Unauthorized, NotFound>> GetUnreturnedByUserId(Guid userId, ClaimsPrincipal user)
         {
+            var currUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (currUserId == null || userId.ToString() != currUserId)
+                return new Unauthorized();
+            
             var userExists = await userManager.Users.AnyAsync(x => x.Id == userId);
             if (!userExists)
                 return new NotFound();
