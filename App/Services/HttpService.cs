@@ -39,6 +39,13 @@ namespace App.Services
         public async Task<APIResponse<TResponse>> GetAsync<TResponse>(string url)
         {
             var response = await _client.GetAsync(url);
+            
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = default,
+                };
 
             // Response failed
             if (!response.IsSuccessStatusCode)
@@ -65,6 +72,13 @@ namespace App.Services
         public async Task<APIResponse<TResponse>> PostAsync<TRequest, TResponse>(string url, TRequest data)
         {
             var response = await _client.PostAsJsonAsync(url, data, _options);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = default,
+                };
 
             // Response failed
             if (!response.IsSuccessStatusCode)
@@ -107,6 +121,13 @@ namespace App.Services
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _client.PatchAsync(url, content);
+            
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = default,
+                };
 
             // Response failed
             if (!response.IsSuccessStatusCode)
@@ -149,6 +170,13 @@ namespace App.Services
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _client.PutAsync(url, content);
+            
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                return new APIResponse<TResponse>
+                {
+                    Status = response.StatusCode,
+                    Content = default,
+                };
 
             // Response failed
             if (!response.IsSuccessStatusCode)

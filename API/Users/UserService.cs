@@ -25,11 +25,8 @@ public class UserService(UserManager<AppUser> userManager, RoleManager<IdentityR
             return new UserNotFound();
         
         var roles = await userManager.GetRolesAsync(accountUser);
-        if (roles.Count == 0)
-        {
+        if(roles.Count == 0)
             await userManager.AddToRoleAsync(accountUser, DefaultRole);
-            roles.Add(DefaultRole);
-        }
 
         return new GetMeResponse
         {

@@ -190,6 +190,7 @@ public partial class RentMoviesView : UserControl
 
 
         var response = await _httpService.GetAsync<List<MovieResponse>>($"movies{search}");
+        
         var movies = response.Content;
 
         if(movies == null || movies.Count == 0)

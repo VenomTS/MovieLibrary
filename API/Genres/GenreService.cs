@@ -3,15 +3,16 @@ using AutoMapper;
 using DTO.Genres;
 using Models;
 using OneOf;
+using Repositories;
 using Repositories.Interfaces;
 
 namespace API.Genres;
 
-public class GenreService(IMapper mapper, IGenreRepository genreRepo)
+public class GenreService(IMapper mapper, IRepositoryManager repositoryManager)
 {
     public async Task<OneOf<GenreResponse, GenreNotFound>> GetByIdAsync(Guid id)
     {
-        var genre = await genreRepo.GetByIdAsync(id);
+        var genre = await repositoryManager.Genres.GetByIdAsync(id);
         if (genre == null)
             return new GenreNotFound();
         
@@ -19,21 +20,21 @@ public class GenreService(IMapper mapper, IGenreRepository genreRepo)
     }
     public async Task<OneOf<GenreResponse, GenreAlreadyExists>> CreateGenre(CreateGenreRequest request)
     {
-        var genreExists = await genreRepo.GenreExistsAsync(request.Name);
+        var genreExists = await repositoryManager.Genres.GenreExistsAsync(request.Name);
         if (genreExists)
             return new GenreAlreadyExists();
         
         var genre = mapper.Map<Genre>(request);
 
-        await genreRepo.CreateAsync(genre);
-        await genreRepo.SaveChangesAsync();
+        await repositoryManager.Genres.CreateAsync(genre);
+        await repositoryManager.Genres.SaveChangesAsync();
         
         return mapper.Map<GenreResponse>(genre);
     }
 
     public async Task<List<GenreResponse>> GetAllAsync()
     {
-        var genres = await genreRepo.GetAllAsync();
+        var genres = await repositoryManager.Genres.GetAllAsync();
         
         var genreDto = mapper.Map<List<GenreResponse>>(genres);
         

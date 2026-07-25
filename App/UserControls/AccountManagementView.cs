@@ -1,3 +1,4 @@
+using System.Net;
 using App.APIResponses;
 using App.Dialogs;
 using App.Services.Interfaces;
@@ -81,6 +82,7 @@ public partial class AccountManagementView : UserControl
         userPanel.Controls.Clear();
 
         var rolesResponse = await _httpService.GetAsync<List<RoleResponse>>("auth/roles");
+        
         _roles = rolesResponse.Content ?? new List<RoleResponse>();
 
         var usersResponse = await _httpService.GetAsync<List<AppUserResponse>>("auth/users");

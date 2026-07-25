@@ -15,4 +15,9 @@ public class RepositoryManager(
     public IMovieGenreRepository MovieGenres { get; set; } = movieGenreRepository;
     public IMovieRepository Movies { get; set; } = movieRepository;
     public IRentalRepository Rentals { get; set; } = rentalRepository;
+
+    public async Task SaveChangesAsync()
+    {
+        await Movies.SaveChangesAsync();
+    }
 }

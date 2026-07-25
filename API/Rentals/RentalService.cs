@@ -16,11 +16,11 @@ namespace API.Rentals;
 // Dodati RepositoryManager koji bi abstractovo sve repositories
 // Dodati BUILD QUERY u RepositoryManager-u koji ce buildati selected query
 
-public class RentalService(IMapper mapper, IRepositoryManager repositoryManager, IRentalRepository rentalRepo, IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo, UserManager<AppUser> userManager)
+public class RentalService(IMapper mapper, IRepositoryManager repositoryManager, UserManager<AppUser> userManager)
 {
     public async Task<OneOf<RentalDetailResponse, NotFound>> GetByIdAsync(Guid id)
     {
-        var rental = await rentalRepo.GetByIdAsync(id, x => x.Movie, x => x.AppUser);
+        var rental = await repositoryManager.Rentals.GetByIdAsync(id, x => x.Movie, x => x.AppUser);
         if (rental == null)
             return new NotFound();
             
@@ -29,7 +29,7 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
         
     public async Task<List<RentalResponse>> GetAllRentals(RentalSearchQuery rentalSearch)
     {
-        var rentals = await rentalRepo.Search(rentalSearch);
+        var rentals = await repositoryManager.Rentals.Search(rentalSearch);
 
         var rentalsDto = mapper.Map<List<RentalResponse>>(rentals);
         return rentalsDto;
@@ -46,7 +46,7 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
         if (currUserId == null || request.UserId.ToString() != currUserId)
             return new Unauthorized();
             
-        var movieExists = await movieRepo.MovieExistsAsync(request.MovieId);
+        var movieExists = await repositoryManager.Movies.MovieExistsAsync(request.MovieId);
         if (!movieExists)
             return new MovieNotFound();
             
@@ -54,7 +54,7 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
         if (!userExists)
             return new UserNotFound();
 
-        var rentals = await rentalRepo.Search(new RentalSearchQuery
+        var rentals = await repositoryManager.Rentals.Search(new RentalSearchQuery
         {
             UserId = request.UserId,
             MovieId = request.MovieId,
@@ -79,15 +79,15 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
         var rental = mapper.Map<Rental>(request);
         rental.DateRented = rentingDate;
 
-        await rentalRepo.CreateAsync(rental);
-        await rentalRepo.SaveChangesAsync();
+        await repositoryManager.Rentals.CreateAsync(rental);
+        await repositoryManager.Rentals.SaveChangesAsync();
         
         return mapper.Map<RentalResponse>(rental);
     }
 
     public async Task<OneOf<RentalResponse, Unauthorized, RentalNotFound>> ReturnMovie(Guid rentalId, ReturnRequest request, ClaimsPrincipal user)
     {
-        var rental = await rentalRepo.GetByIdAsync(rentalId);
+        var rental = await repositoryManager.Rentals.GetByIdAsync(rentalId);
 
         if (rental == null)
             return new RentalNotFound();
@@ -98,7 +98,7 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
 
         rental.DateReturned = request.DateReturned ?? DateOnly.FromDateTime(DateTime.Now);
 
-        await rentalRepo.SaveChangesAsync();
+        await repositoryManager.Rentals.SaveChangesAsync();
         
         return mapper.Map<RentalResponse>(rental);
     }

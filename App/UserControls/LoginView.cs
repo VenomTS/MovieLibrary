@@ -61,18 +61,18 @@ namespace App
             var apiResponse = await _authService.LoginAsync(
                 txtMail.Text,
                 txtPassword.Text);
-            
-            if(apiResponse.Status == HttpStatusCode.OK)
-                _navigationService.ShowView<AfterLoginView>();
 
-            else
+            if (apiResponse.Status != HttpStatusCode.OK)
             {
                 MessageBox.Show(
                     "Invalid mail or password.",
                     "Login Failed",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
+                return;
             }
+            
+            _navigationService.ShowView<AfterLoginView>();
         }
         
         private void InitializeControls()

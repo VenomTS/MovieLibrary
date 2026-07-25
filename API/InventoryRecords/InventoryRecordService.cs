@@ -4,15 +4,16 @@ using DTO.InventoryRecords;
 using Models;
 using OneOf;
 using OneOf.Types;
+using Repositories;
 using Repositories.Interfaces;
 
 namespace API.InventoryRecords
 {
-    public class InventoryRecordService(IMapper mapper, IInventoryRecordRepository inventoryRepo, IMovieRepository movieRepo)
+    public class InventoryRecordService(IMapper mapper, IRepositoryManager repositoryManager)
     {
         public async Task<OneOf<InventoryRecordSingularResponse, NotFound>> GetByIdAsync(Guid id)
         {
-            var record = await inventoryRepo.GetByIdAsync(id);
+            var record = await repositoryManager.InventoryRecords.GetByIdAsync(id);
             if (record == null)
                 return new NotFound();
             
@@ -21,21 +22,21 @@ namespace API.InventoryRecords
         
         public async Task<OneOf<InventoryRecordSingularResponse, MovieNotFound>> AddAsync(CreateInventoryRecordRequest request)
         {
-            var movieExists = await movieRepo.MovieExistsAsync(request.MovieId);
+            var movieExists = await repositoryManager.Movies.MovieExistsAsync(request.MovieId);
             if (!movieExists)
                 return new MovieNotFound();
             
             var inventoryRecord = mapper.Map<InventoryRecord>(request);
 
-            await inventoryRepo.CreateAsync(inventoryRecord);
-            await inventoryRepo.SaveChangesAsync();
+            await repositoryManager.InventoryRecords.CreateAsync(inventoryRecord);
+            await repositoryManager.InventoryRecords.SaveChangesAsync();
             
             return mapper.Map<InventoryRecordSingularResponse>(inventoryRecord);
         }
 
         public async Task<List<InventoryRecordResponse>> GetAllAsync()
         {
-            var records = await inventoryRepo.GetAllAsync();
+            var records = await repositoryManager.InventoryRecords.GetAllAsync();
 
             // No clue how to convert this into AutoMapper
             var recordsDto = records.GroupBy(x => x.MovieId).Select(
@@ -55,11 +56,11 @@ namespace API.InventoryRecords
 
         public async Task<OneOf<List<InventoryRecordDataResponse>, MovieNotFound>> GetByMovieId(Guid movieId)
         {
-            var movieExists = await movieRepo.MovieExistsAsync(movieId);
+            var movieExists = await repositoryManager.Movies.MovieExistsAsync(movieId);
             if (!movieExists)
                 return new MovieNotFound();
 
-            var records = await inventoryRepo.GetByMovieId(movieId);
+            var records = await repositoryManager.InventoryRecords.GetByMovieId(movieId);
             
             // Same here
             var recordsDto = records.GroupBy(x => x.Date)

@@ -9,4 +9,6 @@ public interface IRepositoryManager
     public IMovieGenreRepository MovieGenres { get; set; }
     public IMovieRepository Movies { get; set; }
     public IRentalRepository Rentals { get; set; }
+
+    public Task SaveChangesAsync();
 }
