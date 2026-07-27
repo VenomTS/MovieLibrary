@@ -9,15 +9,13 @@ using Models;
 using OneOf;
 using OneOf.Types;
 using Repositories;
-using Repositories.Interfaces;
 
 namespace API.Rentals;
 
-// Dodati RepositoryManager koji bi abstractovo sve repositories
-// Dodati BUILD QUERY u RepositoryManager-u koji ce buildati selected query
-
 public class RentalService(IMapper mapper, IRepositoryManager repositoryManager, UserManager<AppUser> userManager)
 {
+    private const int ReturnAutomaticallyAfterDays = 7;
+    
     public async Task<OneOf<RentalDetailResponse, NotFound>> GetByIdAsync(Guid id)
     {
         var rental = await repositoryManager.Rentals.GetByIdAsync(id, x => x.Movie, x => x.AppUser);
@@ -65,13 +63,12 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
 
         var rentingDate = request.DateRented ?? DateOnly.FromDateTime(DateTime.Now);
 
-        var available = await repositoryManager.InventoryRecords.AsQueryable()
-            .Where(x => x.MovieId == request.MovieId)
-            .GroupBy(x => x.MovieId)
-            .Select(x => 
-                x.Sum(y => y.Amount) - repositoryManager.Rentals.AsQueryable()
-                    .Count(y => y.MovieId == request.MovieId && y.DateReturned == null)
-            ).FirstAsync();
+        var available = await repositoryManager.ExecuteProcedure<int>("CALL GetAvailableCopies(@movieId, NULL)",
+            new CommandParameter
+            {
+                Name = "movieId",
+                Value = request.MovieId
+            });
 
         if (available <= 0)
             return new MovieOutOfStock();
@@ -118,5 +115,17 @@ public class RentalService(IMapper mapper, IRepositoryManager repositoryManager,
             .Where(x => x.UserId == userId && x.DateReturned == null).ToListAsync();
         
         return mapper.Map<List<UserRentalsResponse>>(unreturned);
+    }
+
+    public async Task ProcessOverDueRentals()
+    {
+        var cutOffDate = DateOnly.FromDateTime(DateTime.Now);
+        cutOffDate = cutOffDate.AddDays(-ReturnAutomaticallyAfterDays);
+
+        await repositoryManager.ExecuteProcedure("CALL ReturnOverdueRentals(@rentedAt)", new CommandParameter
+        {
+            Name = "rentedAt",
+            Value = cutOffDate
+        });
     }
 }

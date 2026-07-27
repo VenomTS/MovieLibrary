@@ -2,6 +2,7 @@ using API.OneOfTypes;
 using AutoMapper;
 using DTO.Movies;
 using DTO.SearchQueries;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using OneOf;
 using OneOf.Types;
@@ -58,10 +59,13 @@ public class MovieService(IMapper mapper, IRepositoryManager repositoryManager)
         if (!movieExists)
             return 0;
 
-        var totalInventory = await repositoryManager.InventoryRecords.GetTotalAmount(movieId, DateOnly.FromDateTime(DateTime.Now));
-        var totalRentedMovies = await repositoryManager.Rentals.GetByMovieIdAsync(movieId);
-        var totalMoviesNotReturned = totalRentedMovies.Count(x => x.DateReturned == null);
-        return totalInventory - totalMoviesNotReturned;
+        var available = await repositoryManager.ExecuteProcedure<int>("CALL GetAvailableCopies(@movieId, NULL)",
+            new CommandParameter
+            {
+                Name = "movieId",
+                Value = movieId
+            });
+        return available;
     }
 
     public async Task<OneOf<MovieResponse, MovieAlreadyExists, NotFound>> UpdateAsync(Guid id, UpdateMovieRequest request)

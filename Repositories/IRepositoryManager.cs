@@ -11,4 +11,6 @@ public interface IRepositoryManager
     public IRentalRepository Rentals { get; set; }
 
     public Task SaveChangesAsync();
+    public Task<T> ExecuteProcedure<T>(string command, params CommandParameter[] args);
+    public Task ExecuteProcedure(string command, params CommandParameter[] args);
 }

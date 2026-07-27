@@ -15,6 +15,11 @@ namespace Repositories.Implementations
             return await dbContext.Rentals.Where(x => x.MovieId == movieId).ToListAsync();
         }
 
+        public async Task<List<Rental>> GetUnreturnedRentalsRentedBefore(DateOnly dateRented)
+        {
+            return await dbContext.Rentals.Where(x => x.DateRented <= dateRented && x.DateReturned == null).ToListAsync();
+        }
+
         public async Task<List<Rental>> GetByUserIdAsync(Guid userId)
         {
             return await dbContext.Rentals.Include(x => x.Movie).Where(x => x.UserId == userId).ToListAsync();

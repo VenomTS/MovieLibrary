@@ -7,6 +7,7 @@ namespace Repositories.Interfaces
     public interface IRentalRepository : IRepositoryBase<Rental>
     {
         public Task<IEnumerable<Rental>> Search(RentalSearchQuery query);
+        public Task<List<Rental>> GetUnreturnedRentalsRentedBefore(DateOnly dateRented);
         public Task<List<Rental>> GetByMovieIdAsync(Guid movieId);
         public Task<List<Rental>> GetByUserIdAsync(Guid userId);
     }

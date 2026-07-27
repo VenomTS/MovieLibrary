@@ -10,6 +10,7 @@ using Repositories.Implementations;
 using Repositories.Interfaces;
 using Scalar.AspNetCore;
 using API.Auth;
+using API.BackgroundServices;
 using Microsoft.AspNetCore.Identity;
 using Models;
 using Repositories;
@@ -34,6 +35,8 @@ builder.Services
 builder.Services.AddAutoMapper(_ => { }, typeof(API.Mapper.AutoMapper));
 
 // Services
+builder.Services.AddHostedService<RentalsWorker>();
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
 builder.Services.AddScoped<GenreService>();
