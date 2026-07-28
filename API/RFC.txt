@@ -1,0 +1,19 @@
+CREATE OR REPLACE FUNCTION HasDaysPassed(inputDate DATE, amount INT)
+RETURNS BOOL
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN CURRENT_DATE >= inputDate + amount;
+END; $$
+
+CREATE OR REPLACE FUNCTION HasMonthsPassed(inputDate DATE, amount INT)
+RETURNS BOOL
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN (
+    (EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM inputDate)) * 12
+    + (EXTRACT(MONTH FROM CURRENT_DATE) - EXTRACT(MONTH FROM inputDate))
+  ) >= amount;
+END;
+$$;

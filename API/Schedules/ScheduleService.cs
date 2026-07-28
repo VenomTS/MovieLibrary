@@ -10,6 +10,7 @@ public class ScheduleService(IRepositoryManager repositoryManager)
 {
     public async Task<List<ScheduleBase>> GetScheduledSchedulesAsync()
     {
+        // Ideja: Dodati LastSent na Schedule, tako da uvijek kad posaljem invoice znam kad sam ga poslao
         var today = DateOnly.FromDateTime(DateTime.Now);
         var schedules = await repositoryManager.Schedules.AsQueryable()
             .Where(x => x.StartDate <= today && (x.EndDate == null || x.EndDate >= today))
@@ -60,7 +61,12 @@ public class ScheduleService(IRepositoryManager repositoryManager)
     
     private bool IsScheduled(WeeklySchedule schedule, Invoice? lastSentInvoice)
     {
-        return false;
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        
+        if (lastSentInvoice == null)
+            return IsDayMatch(schedule.ScheduleDays, today.DayOfWeek);
+        
+        return today >= lastSentInvoice.DateSent.AddDays(7 * schedule.IntervalWeeks) && IsDayMatch(schedule.ScheduleDays, today.DayOfWeek);
     }
     
     private bool IsScheduled(MonthlySchedule schedule, Invoice? lastSentInvoice)
@@ -71,6 +77,13 @@ public class ScheduleService(IRepositoryManager repositoryManager)
     private static bool IsWeekDay(DayOfWeek dayOfWeek)
     {
         return dayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday);
+    }
+
+    private static bool IsDayMatch(ScheduleDays days, DayOfWeek dayOfWeek)
+    {
+        var convertedDayOfWeek = ((int) dayOfWeek + 6) % 7;
+        var flag = (ScheduleDays) (1 << convertedDayOfWeek);
+        return days.HasFlag(flag);
     }
     
     public async Task<List<ScheduleBase>> GetAllAsync()
