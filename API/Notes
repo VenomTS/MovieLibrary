@@ -1,0 +1,4 @@
+Testirati ovo temeljno
+Napraviti da je svaki tip schedule-a svoj zaseban table
+Probati prebaciti sto vise na DB myb
+Napraviti odvojene endpoints and requests for each type of schedule
