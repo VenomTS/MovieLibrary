@@ -20,6 +20,8 @@
         <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
         <PackageReference Include="OneOf" Version="3.0.271" />
+        <PackageReference Include="Quartz" Version="3.19.1" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.19.1" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.16.15" />
     </ItemGroup>
 

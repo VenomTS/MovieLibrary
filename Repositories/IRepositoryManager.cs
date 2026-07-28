@@ -1,3 +1,4 @@
+using Repositories.Implementations;
 using Repositories.Interfaces;
 
 namespace Repositories;
@@ -9,6 +10,8 @@ public interface IRepositoryManager
     public IMovieGenreRepository MovieGenres { get; set; }
     public IMovieRepository Movies { get; set; }
     public IRentalRepository Rentals { get; set; }
+    public IScheduleRepository Schedules { get; set; }
+    public IInvoiceRepository Invoices { get; set; }
 
     public Task SaveChangesAsync();
     public Task<T> ExecuteProcedure<T>(string command, params CommandParameter[] args);

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using API.Genres;
 using API.InventoryRecords;
 using API.MovieGenres;
@@ -10,14 +11,17 @@ using Repositories.Implementations;
 using Repositories.Interfaces;
 using Scalar.AspNetCore;
 using API.Auth;
-using API.BackgroundServices;
+using API.Quartz;
+using API.Schedules;
 using Microsoft.AspNetCore.Identity;
 using Models;
+using Quartz;
 using Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -35,7 +39,20 @@ builder.Services
 builder.Services.AddAutoMapper(_ => { }, typeof(API.Mapper.AutoMapper));
 
 // Services
-builder.Services.AddHostedService<RentalsWorker>();
+// builder.Services.AddHostedService<RentalsWorker>();
+
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("SendInvoices");
+    
+    q.AddJob<SendInvoicesJob>(options => options.WithIdentity(jobKey));
+
+    q.AddTrigger(options => options.ForJob(jobKey)
+        .WithIdentity("SendInvoicesTrigger")
+        .WithCronSchedule("*/15 * * * * ?"));
+});
+
+builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
@@ -43,6 +60,7 @@ builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<MovieGenreService>();
 builder.Services.AddScoped<RentalService>();
 builder.Services.AddScoped<InventoryRecordService>();
+builder.Services.AddScoped<ScheduleService>();
 builder.Services.AddSingleton<IEmailSender<AppUser>, NoOpEmailSender>();
 
 // Repositories
@@ -52,6 +70,8 @@ builder.Services.AddScoped<IMovieGenreRepository, MovieGenreRepository>();
 builder.Services.AddScoped<IRentalRepository, RentalRepository>();
 builder.Services.AddScoped<IInventoryRecordRepository, InventoryRecordRepository>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 
 var app = builder.Build();
 

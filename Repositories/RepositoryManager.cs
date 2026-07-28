@@ -11,7 +11,9 @@ public class RepositoryManager(
     IInventoryRecordRepository inventoryRecordRepository,
     IMovieGenreRepository movieGenreRepository,
     IMovieRepository movieRepository,
-    IRentalRepository rentalRepository
+    IRentalRepository rentalRepository,
+    IScheduleRepository scheduleRepository,
+    IInvoiceRepository invoiceRepository
 ) : IRepositoryManager
 {
     public IGenreRepository Genres { get; set; } = genreRepository;
@@ -19,6 +21,8 @@ public class RepositoryManager(
     public IMovieGenreRepository MovieGenres { get; set; } = movieGenreRepository;
     public IMovieRepository Movies { get; set; } = movieRepository;
     public IRentalRepository Rentals { get; set; } = rentalRepository;
+    public IScheduleRepository Schedules { get; set; } = scheduleRepository;
+    public IInvoiceRepository Invoices { get; set; } = invoiceRepository;
 
     public async Task SaveChangesAsync()
     {
