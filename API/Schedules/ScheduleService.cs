@@ -68,6 +68,10 @@ public class ScheduleService(IRepositoryManager repositoryManager)
         var daysSinceMonday = ((int) today.DayOfWeek - (int) WeekStartsWith + 7) % 7;
         var mondayDate = today.AddDays(-daysSinceMonday);
         
+        // Ako je prethodni invoice poslat prije najblizeg ponedjeljka
+        // i danas je ponedjeljak ili kasnije
+        // i dan odgovara
+        // Onda je valid
         return lastSentInvoice.DateSent < mondayDate && mondayDate <= today && IsDayMatch(schedule.ScheduleDays, today.DayOfWeek);
     }
     
