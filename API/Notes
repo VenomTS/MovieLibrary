@@ -1,1 +1,27 @@
-DayOfMonth ne smije biti veci od 28, jer Februar is special
+DayOfMonth ne smije biti veci od 28, jer Februar is special - FIXED
+
+InvoiceTemplate:
+Id
+UserId
+Price
+Description
+SchedulerId
+
+INVOICE COPY-PASTE-UJE PODATKE IZ InvoiceTemplate I TO JE TO
+
+Invoice:
+Id
+UserId
+Price
+Description
+DateCreated
+
+SCHEDULER CHANGES (TODO):
+Kada se triggeruje scheduler, pokusati ponovo poslati sve stare koji nisu poslani
+Ako failuje, nista, jebigica
+Ako uspije, UPDATE-uj ga na Successful
+ONDA
+Uzmi sve koji trebaju danas biti poslani, DODAJ IH KAO IN-PROGRESS
+Update-uj scheduler za next trigger
+
+Novi job koji runnuje i pokusava da posalje sve one invoices koji su in-progress

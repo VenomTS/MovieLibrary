@@ -11,6 +11,8 @@ using Repositories.Implementations;
 using Repositories.Interfaces;
 using Scalar.AspNetCore;
 using API.Auth;
+using API.InvoiceDeliveries;
+using API.Invoices;
 using API.Quartz;
 using API.Schedules;
 using Microsoft.AspNetCore.Identity;
@@ -61,6 +63,9 @@ builder.Services.AddScoped<MovieGenreService>();
 builder.Services.AddScoped<RentalService>();
 builder.Services.AddScoped<InventoryRecordService>();
 builder.Services.AddScoped<ScheduleService>();
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<InvoiceDeliveryService>();
+builder.Services.AddScoped<InvoiceSendingService>();
 builder.Services.AddSingleton<IEmailSender<AppUser>, NoOpEmailSender>();
 
 // Repositories
@@ -72,6 +77,7 @@ builder.Services.AddScoped<IInventoryRecordRepository, InventoryRecordRepository
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IInvoiceDeliveryRepository, InvoiceDeliveryRepository>();
 
 var app = builder.Build();
 

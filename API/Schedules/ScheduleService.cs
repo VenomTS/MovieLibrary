@@ -1,3 +1,4 @@
+using API.Invoices;
 using DTO.Schedules;
 using Models.Schedules;
 using Models.Schedules.Rules;
@@ -22,7 +23,7 @@ public class ScheduleService(IRepositoryManager repositoryManager)
         }
     }
 
-    private async Task<List<Schedule>> GetScheduledAsync()
+    public async Task<List<Schedule>> GetScheduledAsync()
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
         var schedules = await repositoryManager.Schedules.GetScheduledAsync(today);
@@ -111,8 +112,13 @@ public class ScheduleService(IRepositoryManager repositoryManager)
     private static DateOnly GetMonthlyOccurrence(RecurrenceRule rule, DateOnly startDate)
     {
         var candidateMonth = startDate.AddMonths(rule.Interval);
-        if(rule.DayOfMonth != null)
-            return new DateOnly(candidateMonth.Year, candidateMonth.Month, rule.DayOfMonth.Value);
+        
+        if (rule.DayOfMonth != null)
+        {
+            var candidateDay = Math.Min(rule.DayOfMonth!.Value,
+                DateTime.DaysInMonth(candidateMonth.Year, candidateMonth.Month));
+            return new DateOnly(candidateMonth.Year, candidateMonth.Month, candidateDay);
+        }
         
         return GetDateFromOrdinalOccurence(candidateMonth, rule.Ordinal!.Value, rule.OrdinalType!.Value);
     }

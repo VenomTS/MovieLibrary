@@ -14,6 +14,7 @@ public interface IRepositoryManager
     public IRentalRepository Rentals { get; set; }
     public IScheduleRepository Schedules { get; set; }
     public IInvoiceRepository Invoices { get; set; }
+    public IInvoiceDeliveryRepository InvoiceDeliveries { get; set; }
     public UserManager<AppUser> Users { get; set; }
 
     public Task SaveChangesAsync();

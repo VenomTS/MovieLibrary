@@ -16,6 +16,7 @@ public class RepositoryManager(
     IRentalRepository rentalRepository,
     IScheduleRepository scheduleRepository,
     IInvoiceRepository invoiceRepository,
+    IInvoiceDeliveryRepository invoiceDeliveryRepository,
     UserManager<AppUser> userManager
 ) : IRepositoryManager
 {
@@ -26,6 +27,7 @@ public class RepositoryManager(
     public IRentalRepository Rentals { get; set; } = rentalRepository;
     public IScheduleRepository Schedules { get; set; } = scheduleRepository;
     public IInvoiceRepository Invoices { get; set; } = invoiceRepository;
+    public IInvoiceDeliveryRepository InvoiceDeliveries { get; set; } = invoiceDeliveryRepository;
     public UserManager<AppUser> Users { get; set; } = userManager;
 
     public async Task SaveChangesAsync()

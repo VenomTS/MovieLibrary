@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Models.InvoiceDeliveries;
 using Models.Schedules;
 using Models.Schedules.Rules;
 
@@ -19,6 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
     public DbSet<RecurrenceRule> RecurrenceRules { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
+    public DbSet<InvoiceDelivery> InvoiceDeliveries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

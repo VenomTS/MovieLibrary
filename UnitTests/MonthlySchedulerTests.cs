@@ -271,7 +271,26 @@ public class MonthlySchedulerTests
             new DateOnly(2025, 1, 29));
 
         Assert.Equal(
-            new DateOnly(2025, 3, 1),
+            new DateOnly(2025, 2, 28),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_TestMonthsWithout31Days()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 1, 31),
+            1);
+
+        schedule.RecurrenceRule.DayOfMonth = 31;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 1, 31));
+
+        Assert.Equal(
+            new DateOnly(2025, 2, 28),
             result);
     }
 
@@ -285,11 +304,8 @@ public class MonthlySchedulerTests
             1);
 
         schedule.RecurrenceRule.DayOfMonth = 31;
-
-        Assert.ThrowsAny<Exception>(() =>
-            ScheduleService.GetNextOccurrence(
-                schedule,
-                new DateOnly(2025, 1, 31)));
+        
+        Assert.Equal(new DateOnly(2025, 2, 28), ScheduleService.GetNextOccurrence(schedule, new DateOnly(2025, 1, 31)));
     }
     
     [Fact]

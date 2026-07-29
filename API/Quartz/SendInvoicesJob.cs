@@ -1,22 +1,34 @@
+using API.InvoiceDeliveries;
+using API.Invoices;
 using API.Schedules;
 using Quartz;
 
 namespace API.Quartz;
 
-public class SendInvoicesJob(ScheduleService scheduleService) : IJob
+public class SendInvoicesJob(ScheduleService scheduleService, 
+    InvoiceDeliveryService invoiceDeliveryService, 
+    InvoiceService invoiceService,
+    InvoiceSendingService invoiceSendingService) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
-        /*
-        var scheduled = await scheduleService.GetScheduledSchedulesAsync();
-        
-        if(scheduled.Count == 0)
-            Console.WriteLine("No invoices to be sent");
-        
-        foreach(var schedule in scheduled)
-        {
-            Console.WriteLine($"Sending invoice {schedule.Id} to User {schedule.UserId}");
-        }
-        */
+        await SendUnsuccessfulInvoices();
+        await SendSchedulesInvoices();
+    }
+
+    private async Task SendSchedulesInvoices()
+    {
+        var scheduled = await scheduleService.GetScheduledAsync();
+        var scheduledIds = scheduled.Select(x => x.Id).ToList();
+
+        var scheduledInvoices = await invoiceService.GetScheduledInvoices(scheduledIds);
+
+        foreach (var invoice in scheduledInvoices)
+            await invoiceSendingService.SendNewInvoiceAsync(invoice);
+    }
+
+    private async Task SendUnsuccessfulInvoices()
+    {
+        await invoiceDeliveryService.ResendUnsuccessfulInvoicesAsync();
     }
 }
