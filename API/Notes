@@ -1,5 +1,3 @@
-DayOfMonth ne smije biti veci od 28, jer Februar is special - FIXED
-
 InvoiceTemplate:
 Id
 UserId
@@ -25,3 +23,7 @@ Uzmi sve koji trebaju danas biti poslani, DODAJ IH KAO IN-PROGRESS
 Update-uj scheduler za next trigger
 
 Novi job koji runnuje i pokusava da posalje sve one invoices koji su in-progress
+
+Brisati InvoiceDeliveries nakon fazon 3 mjeseca
+
+Postoji RRule library za Scheduling, tkd ono
