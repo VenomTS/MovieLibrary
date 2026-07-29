@@ -1,7 +1,7 @@
-namespace Models.Schedules;
+namespace Models.Schedules.Rules;
 
 [Flags]
-public enum ScheduleDays
+public enum DaysOfWeek
 {
     Monday = 1 << 0,
     Tuesday = 1 << 1,

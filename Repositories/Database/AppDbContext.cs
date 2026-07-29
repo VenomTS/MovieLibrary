@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.Schedules;
+using Models.Schedules.Rules;
 
 namespace Repositories.Database;
 
@@ -13,9 +14,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<MovieGenre> MovieGenres { get; set; }
     public DbSet<Rental> Rentals { get; set; }
     public DbSet<InventoryRecord> InventoryRecords { get; set; }
-
-    public DbSet<ScheduleBase> Schedules { get; set; }
+    
     public DbSet<Invoice> Invoices { get; set; }
+
+    public DbSet<RecurrenceRule> RecurrenceRules { get; set; }
+    public DbSet<Schedule> Schedules { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,12 +36,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         
         modelBuilder.Entity<Rental>().HasOne(x => x.AppUser).WithMany().HasForeignKey(x => x.UserId);
         modelBuilder.Entity<Invoice>().HasOne(x => x.AppUser).WithMany().HasForeignKey(x => x.UserId);
-        
-        modelBuilder.Entity<ScheduleBase>()
-            .HasDiscriminator<string>("ScheduleType")
-            .HasValue<DailySchedule>("Daily")
-            .HasValue<WeeklySchedule>("Weekly")
-            .HasValue<MonthlySchedule>("Monthly");
-        modelBuilder.Entity<ScheduleBase>().HasOne(x => x.AppUser).WithOne().HasForeignKey<ScheduleBase>(x => x.UserId);
+
+        modelBuilder.Entity<Schedule>().OwnsOne(x => x.RecurrenceRule);
     }
 }

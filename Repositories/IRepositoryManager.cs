@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+using Models;
 using Repositories.Implementations;
 using Repositories.Interfaces;
 
@@ -12,6 +14,7 @@ public interface IRepositoryManager
     public IRentalRepository Rentals { get; set; }
     public IScheduleRepository Schedules { get; set; }
     public IInvoiceRepository Invoices { get; set; }
+    public UserManager<AppUser> Users { get; set; }
 
     public Task SaveChangesAsync();
     public Task<T> ExecuteProcedure<T>(string command, params CommandParameter[] args);

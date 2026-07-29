@@ -1,5 +1,7 @@
 using System.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Models;
 using Repositories.Database;
 using Repositories.Interfaces;
 
@@ -13,7 +15,8 @@ public class RepositoryManager(
     IMovieRepository movieRepository,
     IRentalRepository rentalRepository,
     IScheduleRepository scheduleRepository,
-    IInvoiceRepository invoiceRepository
+    IInvoiceRepository invoiceRepository,
+    UserManager<AppUser> userManager
 ) : IRepositoryManager
 {
     public IGenreRepository Genres { get; set; } = genreRepository;
@@ -23,6 +26,7 @@ public class RepositoryManager(
     public IRentalRepository Rentals { get; set; } = rentalRepository;
     public IScheduleRepository Schedules { get; set; } = scheduleRepository;
     public IInvoiceRepository Invoices { get; set; } = invoiceRepository;
+    public UserManager<AppUser> Users { get; set; } = userManager;
 
     public async Task SaveChangesAsync()
     {

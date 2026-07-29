@@ -1,6 +1,6 @@
-namespace Models.Schedules;
+namespace Models.Schedules.Rules;
 
-public enum MonthlyDayType
+public enum Ordinal
 {
     First,
     Second,

@@ -1,179 +1,234 @@
 using DTO.Schedules;
-using Microsoft.EntityFrameworkCore;
-using Models;
 using Models.Schedules;
+using Models.Schedules.Rules;
 using Repositories;
 
 namespace API.Schedules;
 
 public class ScheduleService(IRepositoryManager repositoryManager)
 {
-
     private const DayOfWeek WeekStartsWith = DayOfWeek.Monday;
     private const int WeekLength = 7;
     
-    public async Task<List<ScheduleBase>> GetScheduledSchedulesAsync()
+    public async Task ExecuteScheduledAsync()
     {
-        // Ideja: Dodati LastTrigger na Schedule, tako da uvijek kad posaljem invoice znam kad sam ga poslao
-        var today = DateOnly.FromDateTime(DateTime.Now);
-        var schedules = await repositoryManager.Schedules.AsQueryable()
-            .Where(x => x.StartDate <= today && (x.EndDate == null || x.EndDate >= today))
-            .ToListAsync();
-        
-        var scheduledSchedules = new List<ScheduleBase>();
+        var scheduled = await GetScheduledAsync();
 
-        foreach (var schedule in schedules)
+        foreach (var schedule in scheduled)
         {
-            switch (schedule)
+            // Send Invoice to Customer
+
+            schedule.NextOccurrence = GetNextOccurrence(schedule, DateOnly.FromDateTime(DateTime.Now));
+        }
+    }
+
+    private async Task<List<Schedule>> GetScheduledAsync()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var schedules = await repositoryManager.Schedules.GetScheduledAsync(today);
+
+        return schedules;
+    }
+
+    public static DateOnly GetNextOccurrence(Schedule schedule, DateOnly date)
+    {
+        // var today = DateOnly.FromDateTime(DateTime.Now);
+        var startDate = schedule.StartDate > date ? schedule.StartDate : date;
+
+        return schedule.RecurrenceRule.Frequency switch
+        {
+            Frequency.Daily => GetDailyOccurrence(schedule.RecurrenceRule, startDate),
+            Frequency.Weekly => GetWeeklyOccurrence(schedule.RecurrenceRule, startDate),
+            Frequency.Monthly => GetMonthlyOccurrence(schedule.RecurrenceRule, startDate),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    private static DateOnly GetDailyOccurrence(RecurrenceRule rule, DateOnly startDate)
+    {
+        if (rule.DaysOfWeek == null) return startDate.AddDays(rule.Interval);
+        
+        var candidate = startDate.AddDays(1);
+        while(candidate.DayOfWeek is (DayOfWeek.Saturday or DayOfWeek.Sunday))
+            candidate = candidate.AddDays(1);
+
+        return candidate;
+    }
+    
+    private static DateOnly GetWeeklyOccurrence(RecurrenceRule rule, DateOnly startDate)
+    {
+        var candidate = startDate.AddDays(1);
+
+        while (true)
+        {
+            var weekStart = GetWeekStart(candidate);
+
+            var weeksSinceStart =
+                (weekStart.DayNumber - GetWeekStart(startDate).DayNumber) / 7;
+
+            var isValidWeek = weeksSinceStart % rule.Interval == 0;
+
+            if (isValidWeek)
             {
-                case DailySchedule dailySchedule when IsScheduled(dailySchedule):
-                case WeeklySchedule weeklySchedule when IsScheduled(weeklySchedule):
-                case MonthlySchedule monthlySchedule when IsScheduled(monthlySchedule):
-                    scheduledSchedules.Add(schedule);
-                    break;
+                while (candidate < weekStart.AddDays(7))
+                {
+                    if (IsDaySelected(rule.DaysOfWeek!.Value, candidate.DayOfWeek))
+                        return candidate;
+
+                    candidate = candidate.AddDays(1);
+                }
+            }
+            else
+            {
+                candidate = weekStart.AddDays(7);
             }
         }
-
-        return scheduledSchedules;
     }
 
-    private static bool IsScheduled(DailySchedule schedule)
+    private static DateOnly GetWeekStart(DateOnly date)
     {
-        var today = DateOnly.FromDateTime(DateTime.Now);
-        
-        var enoughTimePassed = today >= schedule.LastTrigger.AddDays(schedule.IntervalDays);
-
-        return enoughTimePassed && (!schedule.OnlyWeekdays || IsWeekDay(today.DayOfWeek));
+        var difference = ((int) date.DayOfWeek - (int) WeekStartsWith + 7) % 7;
+        return date.AddDays(-difference);
     }
     
-    private static bool IsScheduled(WeeklySchedule schedule)
+    private static bool IsDaySelected(DaysOfWeek days, DayOfWeek day)
     {
-        var today = DateOnly.FromDateTime(DateTime.Now);
-        
-        var nextInvoiceWeek = schedule.LastTrigger.AddDays(WeekLength * schedule.IntervalWeeks);
-        var daysSinceWeekStart = ((int) nextInvoiceWeek.DayOfWeek - (int) WeekStartsWith + 7) % 7;
-        var weekStartDate = nextInvoiceWeek.AddDays(-daysSinceWeekStart);
-
-        var enoughTimePassed = schedule.LastTrigger < weekStartDate && weekStartDate <= today;
-
-        return enoughTimePassed && IsDayMatch(schedule.ScheduleDays, today.DayOfWeek);
-    }
-    
-    private static bool IsScheduled(MonthlySchedule schedule)
-    {
-        var today = DateOnly.FromDateTime(DateTime.Now);
-
-        var enoughTimePassed =
-            (today.Year - schedule.LastTrigger.Year) * 12 + 
-            (today.Month - schedule.LastTrigger.Month) >=
-            schedule.IntervalMonths;
-
-        if (!enoughTimePassed)
-            return false;
-        
-        if(schedule.IntervalDays != null)
-            return schedule.IntervalDays.Value == today.Day;
-
-        // return schedule.Day switch
-        // {
-        //     MonthlyDay.Day => true,
-        //     MonthlyDay.WeekDay => IsWeekDay(today.DayOfWeek),
-        //     MonthlyDay.WeekEndDay => !IsWeekDay(today.DayOfWeek),
-        //     _ => schedule.Day != null && IsDayMatch(schedule.Day.Value, today.DayOfWeek)
-        // };
-    }
-
-    private static bool IsWeekDay(DayOfWeek dayOfWeek)
-    {
-        return dayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday);
-    }
-
-    private static bool IsDayMatch(ScheduleDays days, DayOfWeek dayOfWeek)
-    {
-        var convertedDayOfWeek = ((int) dayOfWeek + 6) % 7;
-        var flag = (ScheduleDays) (1 << convertedDayOfWeek);
-        return days.HasFlag(flag);
-    }
-
-    private static bool IsDayMatch(MonthlyDay day, DayOfWeek dayOfWeek)
-    {
-        var convertedDayOfWeek = ((int) dayOfWeek + 6) % 7;
-        return (int) day == convertedDayOfWeek;
-    }
-    
-    public async Task<List<ScheduleBase>> GetAllAsync()
-    {
-        var schedules = await repositoryManager.Schedules.GetAllAsync();
-
-        foreach (var sch in schedules)
+        var flag = day switch
         {
-            if (sch is DailySchedule daily)
-            {
-                Console.WriteLine("Found daily");
-            }
+            DayOfWeek.Monday => DaysOfWeek.Monday,
+            DayOfWeek.Tuesday => DaysOfWeek.Tuesday,
+            DayOfWeek.Wednesday => DaysOfWeek.Wednesday,
+            DayOfWeek.Thursday => DaysOfWeek.Thursday,
+            DayOfWeek.Friday => DaysOfWeek.Friday,
+            DayOfWeek.Saturday => DaysOfWeek.Saturday,
+            DayOfWeek.Sunday => DaysOfWeek.Sunday,
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
-            if (sch is WeeklySchedule weekly)
-            {
-                Console.WriteLine("Found weekly");
-            }
+        return (days & flag) != 0;
+    }
 
-            if (sch is MonthlySchedule monthly)
-            {
-                Console.WriteLine("Found monthly");
-            }
+    private static DateOnly GetMonthlyOccurrence(RecurrenceRule rule, DateOnly startDate)
+    {
+        var candidateMonth = startDate.AddMonths(rule.Interval);
+        if(rule.DayOfMonth != null)
+            return new DateOnly(candidateMonth.Year, candidateMonth.Month, rule.DayOfMonth.Value);
+        
+        return GetDateFromOrdinalOccurence(candidateMonth, rule.Ordinal!.Value, rule.OrdinalType!.Value);
+    }
+
+    private static DateOnly GetDateFromOrdinalOccurence(DateOnly month, Ordinal ordinal, OrdinalType ordinalType)
+    {
+        var days = GetDaysForOrdinalType(ordinalType);
+
+        if (ordinal == Ordinal.Last)
+        {
+            var lastDay = new DateOnly(month.Year, month.Month, DateTime.DaysInMonth(month.Year, month.Month));
+
+            while (!days.Contains(lastDay.DayOfWeek))
+                lastDay = lastDay.AddDays(-1);
+
+            return lastDay;
         }
 
-        return [];
+        var occurenceNumber = ordinal switch
+        {
+            Ordinal.First => 1,
+            Ordinal.Second => 2,
+            Ordinal.Third => 3,
+            Ordinal.Fourth => 4,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+        var candidate = new DateOnly(month.Year, month.Month, 1);
+        var count = 0;
+
+        while (candidate.Month == month.Month)
+        {
+            if (days.Contains(candidate.DayOfWeek))
+            {
+                count += 1;
+                if (count == occurenceNumber)
+                    return candidate;
+                
+                // Dan pronadjen, dodaji sedmicu
+                candidate = candidate.AddDays(WeekLength);
+                continue;
+            }
+            
+            candidate = candidate.AddDays(1);
+        }
+
+        throw new InvalidOperationException(
+            $"Could not find {ordinal} {ordinalType} in {month:yyyy-MM}");
+    }
+    
+    private static HashSet<DayOfWeek> GetDaysForOrdinalType(OrdinalType type)
+    {
+        return type switch
+        {
+            OrdinalType.Monday => [DayOfWeek.Monday],
+
+            OrdinalType.Tuesday => [DayOfWeek.Tuesday],
+
+            OrdinalType.Wednesday => [DayOfWeek.Wednesday],
+
+            OrdinalType.Thursday => [DayOfWeek.Thursday],
+
+            OrdinalType.Friday => [DayOfWeek.Friday],
+
+            OrdinalType.Saturday => [DayOfWeek.Saturday],
+
+            OrdinalType.Sunday => [DayOfWeek.Sunday],
+
+            OrdinalType.Day => Enum.GetValues<DayOfWeek>().ToHashSet(),
+
+            OrdinalType.WeekDay =>
+            [
+                DayOfWeek.Monday,
+                DayOfWeek.Tuesday,
+                DayOfWeek.Wednesday,
+                DayOfWeek.Thursday,
+                DayOfWeek.Friday
+            ],
+
+            OrdinalType.WeekEndDay =>
+            [
+                DayOfWeek.Saturday,
+                DayOfWeek.Sunday
+            ],
+
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
+    }
+    
+    public async Task<List<Schedule>> GetAllAsync()
+    {
+        var schedules = await repositoryManager.Schedules.GetAllAsync(x => x.RecurrenceRule);
+        
+        return schedules;
     }
 
     public async Task CreateAsync(CreateScheduleRequest request)
     {
-        // Apply checks bla bla bla
-        if (request.Type == CreateScheduleTypes.Daily)
+        var schedule = new Schedule
         {
-            var daily = new DailySchedule
+            StartDate = request.StartDate,
+            EndDate = request.EndDate,
+            RecurrenceRule = new RecurrenceRule
             {
-                UserId = request.UserId,
-                Time = request.Time,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                IntervalDays = request.IntervalDays!.Value,
-                OnlyWeekdays = request.EveryWeekday!.Value,
-                LastTrigger = DateOnly.MinValue,
-            };
-            
-            await repositoryManager.Schedules.CreateAsync(daily);
-        }
-        else if (request.Type == CreateScheduleTypes.Weekly)
-        {
-            var weekly = new WeeklySchedule
-            {
-                UserId = request.UserId,
-                Time = request.Time,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                IntervalWeeks = request.IntervalWeeks!.Value,
-                ScheduleDays = request.ScheduleDays!.Value,
-                LastTrigger = DateOnly.MinValue,
-            };
-            await repositoryManager.Schedules.CreateAsync(weekly);
-        }
-        else
-        {
-            var monthly = new MonthlySchedule
-            {
-                UserId = request.UserId,
-                Time = request.Time,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                IntervalMonths = request.IntervalMonths!.Value,
-                DayType = request.DayType,
-                Day = request.Day,
-                LastTrigger = DateOnly.MinValue,
-            };
-            await repositoryManager.Schedules.CreateAsync(monthly);
-        }
-        
+                Frequency = request.RecurrenceRule.Frequency,
+                Interval = request.RecurrenceRule.Interval,
+                DaysOfWeek = request.RecurrenceRule.DaysOfWeek,
+                DayOfMonth = request.RecurrenceRule.DayOfMonth,
+                Ordinal = request.RecurrenceRule.Ordinal,
+                OrdinalType = request.RecurrenceRule.OrdinalType,
+                Period = request.RecurrenceRule.Period,
+            }
+        };
+
+        schedule.NextOccurrence = GetNextOccurrence(schedule, DateOnly.FromDateTime(DateTime.Now));
+        await repositoryManager.Schedules.CreateAsync(schedule);
         await repositoryManager.SaveChangesAsync();
     }
 }

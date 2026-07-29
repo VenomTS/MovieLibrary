@@ -7,6 +7,7 @@ public class SendInvoicesJob(ScheduleService scheduleService) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
+        /*
         var scheduled = await scheduleService.GetScheduledSchedulesAsync();
         
         if(scheduled.Count == 0)
@@ -16,5 +17,6 @@ public class SendInvoicesJob(ScheduleService scheduleService) : IJob
         {
             Console.WriteLine($"Sending invoice {schedule.Id} to User {schedule.UserId}");
         }
+        */
     }
 }
