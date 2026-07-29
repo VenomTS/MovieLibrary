@@ -10,32 +10,26 @@ public class ScheduleService(IRepositoryManager repositoryManager)
 {
 
     private const DayOfWeek WeekStartsWith = DayOfWeek.Monday;
+    private const int WeekLength = 7;
     
     public async Task<List<ScheduleBase>> GetScheduledSchedulesAsync()
     {
-        // Ideja: Dodati LastSent na Schedule, tako da uvijek kad posaljem invoice znam kad sam ga poslao
+        // Ideja: Dodati LastTrigger na Schedule, tako da uvijek kad posaljem invoice znam kad sam ga poslao
         var today = DateOnly.FromDateTime(DateTime.Now);
         var schedules = await repositoryManager.Schedules.AsQueryable()
             .Where(x => x.StartDate <= today && (x.EndDate == null || x.EndDate >= today))
-            .Select(x => new
-            {
-                Schedule = x,
-                LastSent = repositoryManager.Invoices.AsQueryable()
-                    .Where(y => y.ScheduleId == x.Id)
-                    .OrderByDescending(y => y.DateSent)
-                    .FirstOrDefault()
-            }).ToListAsync();
+            .ToListAsync();
         
         var scheduledSchedules = new List<ScheduleBase>();
 
         foreach (var schedule in schedules)
         {
-            switch (schedule.Schedule)
+            switch (schedule)
             {
-                case DailySchedule dailySchedule when IsScheduled(dailySchedule, schedule.LastSent):
-                case WeeklySchedule weeklySchedule when IsScheduled(weeklySchedule, schedule.LastSent):
-                case MonthlySchedule monthlySchedule when IsScheduled(monthlySchedule, schedule.LastSent):
-                    scheduledSchedules.Add(schedule.Schedule);
+                case DailySchedule dailySchedule when IsScheduled(dailySchedule):
+                case WeeklySchedule weeklySchedule when IsScheduled(weeklySchedule):
+                case MonthlySchedule monthlySchedule when IsScheduled(monthlySchedule):
+                    scheduledSchedules.Add(schedule);
                     break;
             }
         }
@@ -43,44 +37,50 @@ public class ScheduleService(IRepositoryManager repositoryManager)
         return scheduledSchedules;
     }
 
-    private static bool IsScheduled(DailySchedule schedule, Invoice? lastSentInvoice)
+    private static bool IsScheduled(DailySchedule schedule)
     {
-        // WORKS????
         var today = DateOnly.FromDateTime(DateTime.Now);
         
-        // Ako nema prethodnog invoice, onda saljemo danas
-        if (lastSentInvoice == null)
-            return (schedule.OnlyWeekdays && IsWeekDay(today.DayOfWeek)) || !schedule.OnlyWeekdays;
-        
-        // Ako ima prethodnog invoice, moramo provjeriti da li je interval pravilan
-        var enoughTimePassed = today > lastSentInvoice.DateSent.AddDays(schedule.IntervalDays);
+        var enoughTimePassed = today >= schedule.LastTrigger.AddDays(schedule.IntervalDays);
 
-        return enoughTimePassed && (!schedule.OnlyWeekdays || (schedule.OnlyWeekdays && IsWeekDay(today.DayOfWeek)));
+        return enoughTimePassed && (!schedule.OnlyWeekdays || IsWeekDay(today.DayOfWeek));
     }
     
-    private static bool IsScheduled(WeeklySchedule schedule, Invoice? lastSentInvoice)
+    private static bool IsScheduled(WeeklySchedule schedule)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
         
-        if (lastSentInvoice == null)
-            return IsDayMatch(schedule.ScheduleDays, today.DayOfWeek);
-        
-        var daysSinceMonday = ((int) today.DayOfWeek - (int) WeekStartsWith + 7) % 7;
-        var mondayDate = today.AddDays(-daysSinceMonday);
-        
-        // Ako je prethodni invoice poslat prije najblizeg ponedjeljka
-        // i danas je ponedjeljak ili kasnije
-        // i dan odgovara
-        // Onda je valid
-        return lastSentInvoice.DateSent < mondayDate && mondayDate <= today && IsDayMatch(schedule.ScheduleDays, today.DayOfWeek);
+        var nextInvoiceWeek = schedule.LastTrigger.AddDays(WeekLength * schedule.IntervalWeeks);
+        var daysSinceWeekStart = ((int) nextInvoiceWeek.DayOfWeek - (int) WeekStartsWith + 7) % 7;
+        var weekStartDate = nextInvoiceWeek.AddDays(-daysSinceWeekStart);
+
+        var enoughTimePassed = schedule.LastTrigger < weekStartDate && weekStartDate <= today;
+
+        return enoughTimePassed && IsDayMatch(schedule.ScheduleDays, today.DayOfWeek);
     }
     
-    private bool IsScheduled(MonthlySchedule schedule, Invoice? lastSentInvoice)
+    private static bool IsScheduled(MonthlySchedule schedule)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
-        var passedLongEnough = lastSentInvoice == null || today.Month > lastSentInvoice.DateSent.AddMonths(schedule.IntervalMonths).Month;
 
-        return false;
+        var enoughTimePassed =
+            (today.Year - schedule.LastTrigger.Year) * 12 + 
+            (today.Month - schedule.LastTrigger.Month) >=
+            schedule.IntervalMonths;
+
+        if (!enoughTimePassed)
+            return false;
+        
+        if(schedule.IntervalDays != null)
+            return schedule.IntervalDays.Value == today.Day;
+
+        // return schedule.Day switch
+        // {
+        //     MonthlyDay.Day => true,
+        //     MonthlyDay.WeekDay => IsWeekDay(today.DayOfWeek),
+        //     MonthlyDay.WeekEndDay => !IsWeekDay(today.DayOfWeek),
+        //     _ => schedule.Day != null && IsDayMatch(schedule.Day.Value, today.DayOfWeek)
+        // };
     }
 
     private static bool IsWeekDay(DayOfWeek dayOfWeek)
@@ -93,6 +93,12 @@ public class ScheduleService(IRepositoryManager repositoryManager)
         var convertedDayOfWeek = ((int) dayOfWeek + 6) % 7;
         var flag = (ScheduleDays) (1 << convertedDayOfWeek);
         return days.HasFlag(flag);
+    }
+
+    private static bool IsDayMatch(MonthlyDay day, DayOfWeek dayOfWeek)
+    {
+        var convertedDayOfWeek = ((int) dayOfWeek + 6) % 7;
+        return (int) day == convertedDayOfWeek;
     }
     
     public async Task<List<ScheduleBase>> GetAllAsync()
@@ -132,7 +138,8 @@ public class ScheduleService(IRepositoryManager repositoryManager)
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 IntervalDays = request.IntervalDays!.Value,
-                OnlyWeekdays = request.EveryWeekday!.Value
+                OnlyWeekdays = request.EveryWeekday!.Value,
+                LastTrigger = DateOnly.MinValue,
             };
             
             await repositoryManager.Schedules.CreateAsync(daily);
@@ -147,6 +154,7 @@ public class ScheduleService(IRepositoryManager repositoryManager)
                 EndDate = request.EndDate,
                 IntervalWeeks = request.IntervalWeeks!.Value,
                 ScheduleDays = request.ScheduleDays!.Value,
+                LastTrigger = DateOnly.MinValue,
             };
             await repositoryManager.Schedules.CreateAsync(weekly);
         }
@@ -161,6 +169,7 @@ public class ScheduleService(IRepositoryManager repositoryManager)
                 IntervalMonths = request.IntervalMonths!.Value,
                 DayType = request.DayType,
                 Day = request.Day,
+                LastTrigger = DateOnly.MinValue,
             };
             await repositoryManager.Schedules.CreateAsync(monthly);
         }

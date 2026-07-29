@@ -7,6 +7,7 @@ public abstract class ScheduleBase
     public TimeOnly Time { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
+    public DateOnly LastTrigger { get; set; }
 
     public AppUser AppUser { get; set; }
 }

@@ -21,5 +21,5 @@ public class CreateScheduleRequest
     // Monthly Schedule
     public int? IntervalMonths { get; set; }
     public MonthlyDayType? DayType { get; set; }
-    public DayOfWeek? Day { get; set; }
+    public MonthlyDay? Day { get; set; }
 }
