@@ -13,6 +13,7 @@ using Scalar.AspNetCore;
 using API.Auth;
 using API.InvoiceDeliveries;
 using API.Invoices;
+using API.InvoiceTemplates;
 using API.Quartz;
 using API.Schedules;
 using Microsoft.AspNetCore.Identity;
@@ -45,12 +46,12 @@ builder.Services.AddAutoMapper(_ => { }, typeof(API.Mapper.AutoMapper));
 
 builder.Services.AddQuartz(q =>
 {
-    var jobKey = new JobKey("SendInvoices");
+    var jobKey = new JobKey("InvoiceHandler");
     
-    q.AddJob<SendInvoicesJob>(options => options.WithIdentity(jobKey));
+    q.AddJob<InvoiceHandler>(options => options.WithIdentity(jobKey));
 
     q.AddTrigger(options => options.ForJob(jobKey)
-        .WithIdentity("SendInvoicesTrigger")
+        .WithIdentity("InvoiceHandlerTrigger")
         .WithCronSchedule("*/15 * * * * ?"));
 });
 
@@ -64,6 +65,7 @@ builder.Services.AddScoped<RentalService>();
 builder.Services.AddScoped<InventoryRecordService>();
 builder.Services.AddScoped<ScheduleService>();
 builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<InvoiceTemplateService>();
 builder.Services.AddScoped<InvoiceDeliveryService>();
 builder.Services.AddScoped<InvoiceSendingService>();
 builder.Services.AddSingleton<IEmailSender<AppUser>, NoOpEmailSender>();
@@ -77,6 +79,7 @@ builder.Services.AddScoped<IInventoryRecordRepository, InventoryRecordRepository
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IInvoiceTemplateRepository, InvoiceTemplateRepository>();
 builder.Services.AddScoped<IInvoiceDeliveryRepository, InvoiceDeliveryRepository>();
 
 var app = builder.Build();

@@ -10,25 +10,14 @@ public class ScheduleService(IRepositoryManager repositoryManager)
 {
     private const DayOfWeek WeekStartsWith = DayOfWeek.Monday;
     private const int WeekLength = 7;
-    
-    public async Task ExecuteScheduledAsync()
+
+    public async Task UpdateNextOccurrenceAsync(Schedule schedule)
     {
-        var scheduled = await GetScheduledAsync();
-
-        foreach (var schedule in scheduled)
-        {
-            // Send Invoice to Customer
-
-            schedule.NextOccurrence = GetNextOccurrence(schedule, DateOnly.FromDateTime(DateTime.Now));
-        }
-    }
-
-    public async Task<List<Schedule>> GetScheduledAsync()
-    {
-        var today = DateOnly.FromDateTime(DateTime.Now);
-        var schedules = await repositoryManager.Schedules.GetScheduledAsync(today);
-
-        return schedules;
+        await repositoryManager.Schedules.Update(schedule);
+        
+        // Find next occurrence based on current "NextOccurrence"
+        schedule.NextOccurrence = GetNextOccurrence(schedule, schedule.NextOccurrence);
+        await repositoryManager.SaveChangesAsync();
     }
 
     public static DateOnly GetNextOccurrence(Schedule schedule, DateOnly date)

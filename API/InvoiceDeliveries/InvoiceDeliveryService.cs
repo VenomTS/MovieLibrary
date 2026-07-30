@@ -11,8 +11,20 @@ public class InvoiceDeliveryService(IRepositoryManager repositoryManager, Invoic
     {
         await repositoryManager.InvoiceDeliveries.AsQueryable()
             .Where(x => x.DateCreated < DateOnly.FromDateTime(DateTime.Now.AddMonths(-3)))
-            .ExecuteDeleteAsync<InvoiceDelivery>();
+            .ExecuteDeleteAsync();
     }
+
+    public async Task QueueUnsuccessfulInvoicesAsync()
+    {
+        await repositoryManager.InvoiceDeliveries.QueueUnsuccessfulInvoicesAsync();
+    }
+
+    public async Task<List<InvoiceDelivery>> GetScheduledInvoiceDeliveries()
+    {
+        return await repositoryManager.InvoiceDeliveries.GetInProgressInvoicesAsync();
+    }
+    
+    /*
     
     private async Task<List<InvoiceDelivery>> GetUnsuccessfulAsync()
     {
@@ -35,4 +47,5 @@ public class InvoiceDeliveryService(IRepositoryManager repositoryManager, Invoic
         foreach (var attempt in unsuccessful)
             await invoiceSendingService.ResentInvoiceAsync(attempt);
     }
+    */
 }

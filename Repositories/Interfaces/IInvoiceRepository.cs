@@ -1,4 +1,5 @@
 using Models;
+using Models.Invoices;
 
 namespace Repositories.Interfaces;
 

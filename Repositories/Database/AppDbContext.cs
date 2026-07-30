@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.InvoiceDeliveries;
+using Models.Invoices;
 using Models.Schedules;
 using Models.Schedules.Rules;
 
@@ -15,11 +16,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<MovieGenre> MovieGenres { get; set; }
     public DbSet<Rental> Rentals { get; set; }
     public DbSet<InventoryRecord> InventoryRecords { get; set; }
-    
-    public DbSet<Invoice> Invoices { get; set; }
 
     public DbSet<RecurrenceRule> RecurrenceRules { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
+    
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<InvoiceTemplate> InvoiceTemplates { get; set; }
     public DbSet<InvoiceDelivery> InvoiceDeliveries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,8 +39,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.Entity<Movie>().HasMany(x => x.Genres).WithMany(x => x.Movies).UsingEntity<MovieGenre>();
         
         modelBuilder.Entity<Rental>().HasOne(x => x.AppUser).WithMany().HasForeignKey(x => x.UserId);
+
         modelBuilder.Entity<Invoice>().HasOne(x => x.AppUser).WithMany().HasForeignKey(x => x.UserId);
 
         modelBuilder.Entity<Schedule>().OwnsOne(x => x.RecurrenceRule);
+        modelBuilder.Entity<InvoiceDelivery>().HasKey(x => new { x.InvoiceTemplateId, x.ScheduleId, x.DateCreated });
     }
 }

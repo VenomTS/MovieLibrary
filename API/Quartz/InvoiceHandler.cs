@@ -1,8 +1,17 @@
+using API.InvoiceDeliveries;
+using API.Invoices;
+using API.InvoiceTemplates;
+using API.Schedules;
+using Models.Schedules;
 using Quartz;
 
 namespace API.Quartz;
 
-public class InvoiceHandler : IJob
+public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService, 
+    ScheduleService scheduleService,
+    InvoiceService invoiceService,
+    InvoiceSendingService invoiceSendingService,
+    InvoiceTemplateService invoiceTemplateService) : IJob
 {
     /*
      * Steps:
@@ -12,23 +21,55 @@ public class InvoiceHandler : IJob
      * 4. Update Scheduler
      * 5. Start sending those "In Progress"
      */
-    public Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Running InvoiceHandler");
+        await MarkFailedInvoices();
+        await MarkScheduledInvoices();
+        await StartSendingInvoices();
     }
 
     private async Task MarkFailedInvoices()
     {
-        await Task.CompletedTask;
+        // Mark all failed invoices as 'InProgress'
+        await invoiceDeliveryService.QueueUnsuccessfulInvoicesAsync();
     }
 
     private async Task MarkScheduledInvoices()
     {
-        await Task.CompletedTask;
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var scheduledInvoices = await invoiceTemplateService.GetScheduledInvoicesAsync(today);
+        var uniqueSchedules = new List<Schedule>();
+        
+        foreach (var scheduledInvoice in scheduledInvoices)
+        {
+            await invoiceService.CreateInvoice(scheduledInvoice);
+            
+            if (uniqueSchedules.Any(x => x.Id == scheduledInvoice.ScheduleId))
+                continue;
+
+            uniqueSchedules.Add(scheduledInvoice.Schedule);
+        }
+
+        await UpdateSchedules(uniqueSchedules);
     }
 
+    private async Task UpdateSchedules(List<Schedule> uniqueSchedules)
+    {
+        foreach (var uniqueSchedule in uniqueSchedules)
+            await scheduleService.UpdateNextOccurrenceAsync(uniqueSchedule);
+    }
+    
     private async Task DeleteOldInvoiceDeliveries()
     {
         await Task.CompletedTask;
+    }
+
+    private async Task StartSendingInvoices()
+    {
+        var invoices = await invoiceDeliveryService.GetScheduledInvoiceDeliveries();
+
+        foreach (var invoice in invoices)
+            await invoiceSendingService.SendInvoiceAsync(invoice);
     }
 }
