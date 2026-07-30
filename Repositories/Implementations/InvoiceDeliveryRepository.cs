@@ -12,22 +12,22 @@ public class InvoiceDeliveryRepository(AppDbContext dbContext) : RepositoryBase<
     public async Task QueueUnsuccessfulInvoicesAsync()
     {
         await _dbContext.InvoiceDeliveries
-            .Where(x => x.Status != InvoiceDeliveryStatus.Successful)
-            .ExecuteUpdateAsync(x => x.SetProperty(id => id.Status, InvoiceDeliveryStatus.InProgress));
+            .Where(x => x.DeliveryStatus != InvoiceDeliveryStatus.Successful)
+            .ExecuteUpdateAsync(x => x.SetProperty(id => id.DeliveryStatus, InvoiceDeliveryStatus.InProgress));
     }
 
     public async Task MarkAsStatusAsync(InvoiceDelivery invoiceDelivery, InvoiceDeliveryStatus status)
     {
         await _dbContext.InvoiceDeliveries
             .Where(x => x.InvoiceId == invoiceDelivery.InvoiceId && x.DateCreated == invoiceDelivery.DateCreated)
-            .ExecuteUpdateAsync(x => x.SetProperty(id => id.Status, status));
+            .ExecuteUpdateAsync(x => x.SetProperty(id => id.DeliveryStatus, status));
     }
 
     public async Task<List<InvoiceDelivery>> GetInProgressInvoicesAsync()
     {
         return await _dbContext.InvoiceDeliveries
             .Include(x => x.Invoice)
-            .Where(x => x.Status == InvoiceDeliveryStatus.InProgress)
+            .Where(x => x.DeliveryStatus == InvoiceDeliveryStatus.InProgress)
             .ToListAsync();
     }
 }

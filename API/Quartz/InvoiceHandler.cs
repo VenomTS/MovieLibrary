@@ -49,6 +49,11 @@ public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService,
                 continue;
 
             uniqueSchedules.Add(scheduledInvoice.Schedule);
+            
+            // Crash Me Pls
+            var random = new Random();
+            if(random.NextDouble() < 0.25)
+                Environment.FailFast("Simulated crash");
         }
 
         await UpdateSchedules(uniqueSchedules);

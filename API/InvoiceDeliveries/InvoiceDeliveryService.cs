@@ -29,10 +29,10 @@ public class InvoiceDeliveryService(IRepositoryManager repositoryManager, Invoic
     private async Task<List<InvoiceDelivery>> GetUnsuccessfulAsync()
     {
         var unsuccessfulDeliveries = await repositoryManager.InvoiceDeliveries.AsQueryable()
-            .Where(x => x.Status != InvoiceDeliveryStatus.Successful &&
+            .Where(x => x.DeliveryStatus != InvoiceDeliveryStatus.Successful &&
                         !repositoryManager.InvoiceDeliveries.AsQueryable()
                             .Any(y => x.InvoiceId == y.InvoiceId &&
-                                      y.Status == InvoiceDeliveryStatus.Successful &&
+                                      y.DeliveryStatus == InvoiceDeliveryStatus.Successful &&
                                       x.OriginalDate == y.OriginalDate &&
                                       x.ScheduleId == y.ScheduleId))
             .Include(x => x.Invoice)

@@ -23,12 +23,13 @@ public class InvoiceService(IRepositoryManager repositoryManager)
             InvoiceId = invoice.Id,
             InvoiceTemplateId = invoiceTemplate.Id,
             ScheduleId = invoiceTemplate.ScheduleId,
-            Status = InvoiceDeliveryStatus.InProgress,
+            DeliveryStatus = InvoiceDeliveryStatus.InProgress,
             DateCreated = today,
         };
         
         await repositoryManager.Invoices.CreateAsync(invoice);
         await repositoryManager.InvoiceDeliveries.CreateAsync(invoiceDelivery);
+        
         await repositoryManager.SaveChangesAsync();
     }
 }
