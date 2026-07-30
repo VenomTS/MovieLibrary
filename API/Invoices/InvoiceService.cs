@@ -6,7 +6,7 @@ namespace API.Invoices;
 
 public class InvoiceService(IRepositoryManager repositoryManager)
 {
-    public async Task CreateInvoice(InvoiceTemplate invoiceTemplate)
+    public async Task CreateAutomaticInvoice(InvoiceTemplate invoiceTemplate)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
         var invoice = new Invoice

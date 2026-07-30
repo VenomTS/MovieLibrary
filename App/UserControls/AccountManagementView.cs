@@ -3,6 +3,7 @@ using App.Account;
 using App.APIResponses;
 using App.Dialogs;
 using App.Services.Interfaces;
+using DTO.InvoiceTemplates;
 using DTO.Users;
 
 namespace App.UserControls;
@@ -13,16 +14,14 @@ public partial class AccountManagementView : UserControl
     private Label titleLabel;
 
     private readonly IHttpService _httpService;
-    private readonly AccountManager _accountManager;
 
     private List<RoleResponse> _roles = new();
 
-    public AccountManagementView(IHttpService httpService, AccountManager accountManager)
+    public AccountManagementView(IHttpService httpService)
     {
         InitializeComponent();
 
         _httpService = httpService;
-        _accountManager = accountManager;
 
         SetupUI();
 
@@ -213,7 +212,7 @@ public partial class AccountManagementView : UserControl
         startSubscriptionButton.Click += async (s, e) =>
         {
             using var dialog = new EditInvoiceTemplateDialog(
-                _accountManager,
+                user,
                 _httpService);
 
             if (dialog.ShowDialog() != DialogResult.OK)
@@ -223,6 +222,37 @@ public partial class AccountManagementView : UserControl
 
             // API call goes here later.
             // Ovdje raditi gluposti sa njim...
+            if (template == null)
+                throw new Exception("Template is null?");
+
+            var schedule = new CreateInvoiceTemplateScheduleRequest
+            {
+                StartDate = template.Schedule.StartDate,
+                EndDate = template.Schedule.EndDate,
+                Frequency = template.Schedule.Frequency,
+                Interval = template.Schedule.Interval,
+                DaysOfWeek = template.Schedule.DaysOfWeek,
+                DayOfMonth = template.Schedule.DayOfMonth,
+                Ordinal = template.Schedule.Ordinal,
+                OrdinalType = template.Schedule.OrdinalType,
+            };
+
+            var invoiceTemplate = new CreateInvoiceTemplateRequest
+            {
+                UserId = user.Id,
+                Price = template.Price,
+                Description = template.Description,
+                Schedule = schedule,
+            };
+
+            var response =
+                await _httpService.PostAsync<CreateInvoiceTemplateRequest, InvoiceTemplateResponse>("invoicetemplates",
+                    invoiceTemplate);
+
+            if (response.Status != HttpStatusCode.OK)
+                MessageBox.Show($"{response.Status}", "Error");
+            else
+                MessageBox.Show("Successfully created an invoice template", "Success");
         };
 
         card.MouseEnter += (s, e) =>

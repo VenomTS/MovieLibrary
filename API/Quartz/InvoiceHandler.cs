@@ -42,7 +42,7 @@ public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService,
         
         foreach (var scheduledInvoice in scheduledInvoices)
         {
-            await invoiceService.CreateInvoice(scheduledInvoice);
+            await invoiceService.CreateAutomaticInvoice(scheduledInvoice);
             
             // Crash Me Pls
             var random = new Random();

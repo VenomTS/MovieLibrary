@@ -1,3 +1,4 @@
+using System.Net;
 using App.Account;
 using DTO;
 using DTO.Users;
@@ -12,7 +13,6 @@ namespace App.Dialogs;
 public partial class EditInvoiceTemplateDialog : Form
 {
     private readonly IHttpService _httpService;
-    private readonly AccountManager _accountManager;
 
     private TextBox priceTextBox;
     private TextBox descriptionTextBox;
@@ -28,16 +28,17 @@ public partial class EditInvoiceTemplateDialog : Form
     private MonthlyView? monthlyScheduleView;
 
     private InvoiceTemplateDetailedResponse? _template;
+    private AppUserResponse _user;
 
     private bool _loadingFrequency;
 
     public EditInvoiceTemplateDialog(
-        AccountManager accountManager,
+        AppUserResponse user,
         IHttpService httpService)
     {
         InitializeComponent();
 
-        _accountManager = accountManager;
+        _user = user;
         _httpService = httpService;
 
         SetupUI();
@@ -245,22 +246,26 @@ public partial class EditInvoiceTemplateDialog : Form
 
             var response =
                 await _httpService.GetAsync<InvoiceTemplateDetailedResponse>(
-                    $"invoicetemplates/{_accountManager.User!.Id}");
+                    $"invoicetemplates/{_user.Id}");
 
-            _template = response.Content;
-
-            if (_template == null)
+            if(response.Status == HttpStatusCode.OK)
+                _template = response.Content;
+            else
             {
-                MessageBox.Show(
-                    "Invoice template could not be found.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-
-                DialogResult = DialogResult.Cancel;
-                Close();
-
-                return;
+                _template = new InvoiceTemplateDetailedResponse
+                {
+                    UserId = _user.Id,
+                    Price = 0,
+                    Description = "Write description",
+                    Schedule = new ScheduleResponse
+                    {
+                        StartDate = DateOnly.FromDateTime(DateTime.Now),
+                        EndDate = null,
+                        Frequency = Frequency.Monthly,
+                        Ordinal = Ordinal.First,
+                        OrdinalType = OrdinalType.Monday,
+                    }
+                };
             }
 
             FillTemplateData();

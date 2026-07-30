@@ -21,7 +21,7 @@ public class InvoiceTemplatesController(InvoiceTemplateService invoiceTemplateSe
         var result = await invoiceTemplateService.GetByUserIdAsync(userId);
         return result.Match<IActionResult>(
             Ok,
-            _ => NotFound("User not found"));
+            _ => NotFound());
     }
 
     [HttpGet]

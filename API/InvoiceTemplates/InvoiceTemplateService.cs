@@ -1,7 +1,10 @@
+using API.OneOfTypes;
 using DTO.InvoiceTemplates;
 using DTO.Schedules;
 using Microsoft.EntityFrameworkCore;
 using Models.Invoices;
+using Models.Schedules;
+using Models.Schedules.Rules;
 using OneOf;
 using OneOf.Types;
 using Repositories;
@@ -10,13 +13,49 @@ namespace API.InvoiceTemplates;
 
 public class InvoiceTemplateService(IRepositoryManager repositoryManager)
 {
-    public async Task<InvoiceTemplateResponse> CreateAsync(CreateInvoiceTemplateRequest request)
+    public async Task<OneOf<InvoiceTemplateResponse, InvoiceTemplateAlreadyExists>> CreateAsync(CreateInvoiceTemplateRequest request)
     {
+        // Ako se ne moze napraviti, edituj ga?
+        if(!await CanCreateInvoiceTemplate(request))
+            return new InvoiceTemplateAlreadyExists();
+        
+        var schedule = new Schedule
+        {
+            StartDate = request.Schedule.StartDate,
+            EndDate = request.Schedule.EndDate,
+            RecurrenceRule = new RecurrenceRule
+            {
+                Frequency = request.Schedule.Frequency,
+                Interval = request.Schedule.Interval,
+                DaysOfWeek = request.Schedule.DaysOfWeek,
+                DayOfMonth = request.Schedule.DayOfMonth,
+                Ordinal = request.Schedule.Ordinal,
+                OrdinalType = request.Schedule.OrdinalType,
+            }
+        };
+
+        var existingSchedule = await repositoryManager.Schedules.AsQueryable()
+            .Where(x => x.StartDate <= schedule.StartDate &&
+                        x.EndDate == schedule.EndDate &&
+                        x.RecurrenceRule.Frequency == schedule.RecurrenceRule.Frequency &&
+                        x.RecurrenceRule.Interval == schedule.RecurrenceRule.Interval &&
+                        x.RecurrenceRule.DaysOfWeek == schedule.RecurrenceRule.DaysOfWeek &&
+                        x.RecurrenceRule.DayOfMonth == schedule.RecurrenceRule.DayOfMonth &&
+                        x.RecurrenceRule.Ordinal == schedule.RecurrenceRule.Ordinal &&
+                        x.RecurrenceRule.OrdinalType == schedule.RecurrenceRule.OrdinalType)
+            .FirstOrDefaultAsync();
+
+        if (existingSchedule == null)
+        {
+            await repositoryManager.Schedules.CreateAsync(schedule);
+            existingSchedule = schedule;
+        }
+            
         // Checks, whether there exists Invoice Template for this user, etc, etc...
         var invoice = new InvoiceTemplate
         {
             UserId = request.UserId,
-            ScheduleId = request.ScheduleId,
+            ScheduleId = existingSchedule.Id,
             Price = request.Price,
             Description = request.Description,
         };
@@ -33,6 +72,11 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager)
             Description = invoice.Description,
         };
         return invoiceResponse;
+    }
+
+    private async Task<bool> CanCreateInvoiceTemplate(CreateInvoiceTemplateRequest request)
+    {
+        return await repositoryManager.InvoiceTemplates.GetByUserIdAsync(request.UserId) != null;
     }
 
     public async Task<OneOf<InvoiceTemplateDetailedResponse?, NotFound>> GetByUserIdAsync(Guid userId)
