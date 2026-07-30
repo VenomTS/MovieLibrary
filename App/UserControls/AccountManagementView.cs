@@ -1,4 +1,5 @@
 using System.Net;
+using App.Account;
 using App.APIResponses;
 using App.Dialogs;
 using App.Services.Interfaces;
@@ -12,14 +13,16 @@ public partial class AccountManagementView : UserControl
     private Label titleLabel;
 
     private readonly IHttpService _httpService;
+    private readonly AccountManager _accountManager;
 
     private List<RoleResponse> _roles = new();
 
-    public AccountManagementView(IHttpService httpService)
+    public AccountManagementView(IHttpService httpService, AccountManager accountManager)
     {
         InitializeComponent();
 
         _httpService = httpService;
+        _accountManager = accountManager;
 
         SetupUI();
 
@@ -82,7 +85,7 @@ public partial class AccountManagementView : UserControl
         userPanel.Controls.Clear();
 
         var rolesResponse = await _httpService.GetAsync<List<RoleResponse>>("auth/roles");
-        
+
         _roles = rolesResponse.Content ?? new List<RoleResponse>();
 
         var usersResponse = await _httpService.GetAsync<List<AppUserResponse>>("auth/users");
@@ -155,13 +158,36 @@ public partial class AccountManagementView : UserControl
 
         editRolesButton.FlatAppearance.BorderSize = 0;
 
+        Button startSubscriptionButton = new Button
+        {
+            Text = "Start Subscription",
+            Width = 150,
+            Height = 38,
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(46, 204, 113),
+            ForeColor = Color.White,
+            Cursor = Cursors.Hand,
+            Font = new Font("Segoe UI", 9, FontStyle.Bold)
+        };
+
+        startSubscriptionButton.FlatAppearance.BorderSize = 0;
+
+        // Position the buttons next to each other
+        startSubscriptionButton.Location = new Point(
+            card.Width - startSubscriptionButton.Width - 25,
+            40);
+
         editRolesButton.Location = new Point(
-            card.Width - editRolesButton.Width - 25,
+            startSubscriptionButton.Left - editRolesButton.Width - 10,
             40);
 
         card.Resize += (s, e) =>
         {
-            editRolesButton.Left = card.Width - editRolesButton.Width - 25;
+            startSubscriptionButton.Left =
+                card.Width - startSubscriptionButton.Width - 25;
+
+            editRolesButton.Left =
+                startSubscriptionButton.Left - editRolesButton.Width - 10;
         };
 
         editRolesButton.Click += async (s, e) =>
@@ -173,13 +199,30 @@ public partial class AccountManagementView : UserControl
 
             var selectedRoleIds = dialog.SelectedRoleIds;
 
-            var response = await _httpService.PutAsync<UpdateUserRoleRequest, EmptyResponse>($"auth/users/{user.Id}",
+            var response = await _httpService.PutAsync<UpdateUserRoleRequest, EmptyResponse>(
+                $"auth/users/{user.Id}",
                 new UpdateUserRoleRequest
                 {
                     Roles = selectedRoleIds
                 });
 
             await LoadUsers();
+        };
+
+        // TODO: Implement subscription functionality
+        startSubscriptionButton.Click += async (s, e) =>
+        {
+            using var dialog = new EditInvoiceTemplateDialog(
+                _accountManager,
+                _httpService);
+
+            if (dialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            var template = dialog.Template;
+
+            // API call goes here later.
+            // Ovdje raditi gluposti sa njim...
         };
 
         card.MouseEnter += (s, e) =>
@@ -195,6 +238,7 @@ public partial class AccountManagementView : UserControl
         card.Controls.Add(emailLabel);
         card.Controls.Add(rolesLabel);
         card.Controls.Add(editRolesButton);
+        card.Controls.Add(startSubscriptionButton);
 
         userPanel.Controls.Add(card);
     }

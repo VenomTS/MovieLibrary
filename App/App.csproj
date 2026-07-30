@@ -50,6 +50,18 @@
     <Compile Update="UserControls\AfterLoginView.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Dialogs\EditInvoiceTemplateDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Views\DailyView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Views\WeeklyView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Views\MonthlyView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

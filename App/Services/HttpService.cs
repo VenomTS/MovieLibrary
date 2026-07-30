@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using App.APIResponses;
 
 namespace App.Services
@@ -13,6 +14,10 @@ namespace App.Services
         private readonly JsonSerializerOptions _options = new()
         {
             PropertyNameCaseInsensitive = true,
+            Converters =
+            {
+                new JsonStringEnumConverter()
+            }
         };
 
         private const string DefaultAddress = "http://localhost:5126/api/v1/";
