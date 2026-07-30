@@ -49,7 +49,13 @@ builder.Services.AddQuartz(q =>
     var jobKey = new JobKey("InvoiceHandler");
     
     q.AddJob<InvoiceHandler>(options => options.WithIdentity(jobKey));
-
+    
+    // Trigger once on startup
+    q.AddTrigger(options => options.ForJob(jobKey)
+        .WithIdentity("InvoiceHandlerStartupTrigger")
+        .StartNow());
+    
+    // Trigger every 15 seconds
     q.AddTrigger(options => options.ForJob(jobKey)
         .WithIdentity("InvoiceHandlerTrigger")
         .WithCronSchedule("*/15 * * * * ?"));
