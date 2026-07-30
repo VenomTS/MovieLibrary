@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Models;
 using Models.Invoices;
 using Repositories.Database;
 using Repositories.Interfaces;

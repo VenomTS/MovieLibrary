@@ -19,33 +19,15 @@ public class InvoiceDeliveryService(IRepositoryManager repositoryManager, Invoic
         await repositoryManager.InvoiceDeliveries.QueueUnsuccessfulInvoicesAsync();
     }
 
-    public async Task<List<InvoiceDelivery>> GetScheduledInvoiceDeliveries()
+    private async Task<List<InvoiceDelivery>> GetScheduledInvoiceDeliveries()
     {
         return await repositoryManager.InvoiceDeliveries.GetInProgressInvoicesAsync();
     }
     
-    /*
-    
-    private async Task<List<InvoiceDelivery>> GetUnsuccessfulAsync()
+    public async Task SendInvoicesAsync()
     {
-        var unsuccessfulDeliveries = await repositoryManager.InvoiceDeliveries.AsQueryable()
-            .Where(x => x.DeliveryStatus != InvoiceDeliveryStatus.Successful &&
-                        !repositoryManager.InvoiceDeliveries.AsQueryable()
-                            .Any(y => x.InvoiceId == y.InvoiceId &&
-                                      y.DeliveryStatus == InvoiceDeliveryStatus.Successful &&
-                                      x.OriginalDate == y.OriginalDate &&
-                                      x.ScheduleId == y.ScheduleId))
-            .Include(x => x.Invoice)
-            .ToListAsync();
-        return unsuccessfulDeliveries;
+        var scheduledInvoiceDeliveries = await GetScheduledInvoiceDeliveries();
+        foreach(var invoiceDelivery in scheduledInvoiceDeliveries)
+            await invoiceSendingService.SendInvoiceAsync(invoiceDelivery);
     }
-
-    public async Task ResendUnsuccessfulInvoicesAsync()
-    {
-        var unsuccessful = await GetUnsuccessfulAsync();
-
-        foreach (var attempt in unsuccessful)
-            await invoiceSendingService.ResentInvoiceAsync(attempt);
-    }
-    */
 }

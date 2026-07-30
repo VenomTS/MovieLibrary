@@ -10,7 +10,6 @@ namespace API.Quartz;
 public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService, 
     ScheduleService scheduleService,
     InvoiceService invoiceService,
-    InvoiceSendingService invoiceSendingService,
     InvoiceTemplateService invoiceTemplateService) : IJob
 {
     /*
@@ -74,9 +73,10 @@ public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService,
 
     private async Task StartSendingInvoices()
     {
-        var invoices = await invoiceDeliveryService.GetScheduledInvoiceDeliveries();
-
-        foreach (var invoice in invoices)
-            await invoiceSendingService.SendInvoiceAsync(invoice);
+        await invoiceDeliveryService.SendInvoicesAsync();
+        // var invoices = await invoiceDeliveryService.GetScheduledInvoiceDeliveries();
+        //
+        // foreach (var invoice in invoices)
+        //     await invoiceSendingService.SendInvoiceAsync(invoice);
     }
 }

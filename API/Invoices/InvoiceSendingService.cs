@@ -11,7 +11,7 @@ public class InvoiceSendingService(IRepositoryManager repositoryManager)
         // Simulate sending an invoice
         // SendMail(invoiceDelivery.Invoice);
         var random = new Random();
-        var successful = random.NextDouble() < 0.25;
+        var successful = random.NextDouble() < 0.5;
 
         var newStatus = successful ? InvoiceDeliveryStatus.Successful : InvoiceDeliveryStatus.Failed;
         

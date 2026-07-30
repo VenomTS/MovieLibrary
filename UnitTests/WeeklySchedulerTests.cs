@@ -469,4 +469,84 @@ public class WeeklySchedulerTests
             new DateOnly(2026, 1, 5),
             result);
     }
+    
+    [Fact]
+    public void Weekly_MondayAndWednesday_TodayIsMonday_ReturnsWednesday()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Weekly,
+            new DateOnly(2025, 7, 1),
+            1);
+
+        schedule.RecurrenceRule.DaysOfWeek =
+            DaysOfWeek.Monday |
+            DaysOfWeek.Wednesday;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 7, 14)); // Monday
+
+        Assert.Equal(
+            new DateOnly(2025, 7, 16),
+            result);
+    }
+    
+    [Fact]
+    public void Weekly_FridayAndSunday_TodayIsSunday_ReturnsNextFriday()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Weekly,
+            new DateOnly(2025, 7, 1),
+            1);
+
+        schedule.RecurrenceRule.DaysOfWeek =
+            DaysOfWeek.Friday |
+            DaysOfWeek.Sunday;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 7, 13)); // Sunday
+
+        Assert.Equal(
+            new DateOnly(2025, 7, 18),
+            result);
+    }
+    
+    [Fact]
+    public void Weekly_StartDateInFuture_DoesNotReturnOccurrenceBeforeStartDate()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Weekly,
+            new DateOnly(2025, 7, 20),
+            1);
+
+        schedule.RecurrenceRule.DaysOfWeek = DaysOfWeek.Monday;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 7, 10));
+
+        Assert.Equal(
+            new DateOnly(2025, 7, 21),
+            result);
+    }
+    
+    [Fact]
+    public void Weekly_TwoWeekInterval_IsAnchoredToStartDate()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Weekly,
+            new DateOnly(2025, 7, 1), // Tuesday
+            2);
+
+        schedule.RecurrenceRule.DaysOfWeek = DaysOfWeek.Monday;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 7, 2));
+
+        Assert.Equal(
+            new DateOnly(2025, 7, 14),
+            result);
+    }
 }

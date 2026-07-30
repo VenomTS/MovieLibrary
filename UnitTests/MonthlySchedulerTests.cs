@@ -529,4 +529,187 @@ public class MonthlySchedulerTests
             new DateOnly(2025, 2, 28),
             result);
     }
+    
+    [Fact]
+    public void Monthly_AfterScheduledDay_ReturnsNextMonth()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 7, 15),
+            1);
+
+        schedule.RecurrenceRule.DayOfMonth = 15;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 7, 20));
+
+        Assert.Equal(
+            new DateOnly(2025, 8, 15),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_EveryThreeMonths_AfterSeveralOccurrences_ReturnsNextQuarter()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 1, 15),
+            3);
+
+        schedule.RecurrenceRule.DayOfMonth = 15;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 10, 16));
+
+        Assert.Equal(
+            new DateOnly(2026, 1, 15),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_Day31_April_ReturnsApril30()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 3, 31),
+            1);
+
+        schedule.RecurrenceRule.DayOfMonth = 31;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 3, 31));
+
+        Assert.Equal(
+            new DateOnly(2025, 4, 30),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_Day31_June_ReturnsJune30()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 5, 31),
+            1);
+
+        schedule.RecurrenceRule.DayOfMonth = 31;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 5, 31));
+
+        Assert.Equal(
+            new DateOnly(2025, 6, 30),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_FirstMonday_EveryThreeMonths_ReturnsCorrectMonth()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 1, 6),
+            3);
+
+        schedule.RecurrenceRule.Ordinal = Ordinal.First;
+        schedule.RecurrenceRule.OrdinalType = OrdinalType.Monday;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 1, 6));
+
+        Assert.Equal(
+            new DateOnly(2025, 4, 7),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_FirstWeekday_WhenMonthStartsSaturday_ReturnsMonday()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 1, 1),
+            1);
+
+        schedule.RecurrenceRule.Ordinal = Ordinal.First;
+        schedule.RecurrenceRule.OrdinalType = OrdinalType.WeekDay;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 1, 1));
+
+        Assert.Equal(
+            new DateOnly(2025, 2, 3),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_LastWeekday_WhenMonthEndsSunday_ReturnsFriday()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 7, 31),
+            1);
+
+        schedule.RecurrenceRule.Ordinal = Ordinal.Last;
+        schedule.RecurrenceRule.OrdinalType = OrdinalType.WeekDay;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 7, 31));
+
+        Assert.Equal(
+            new DateOnly(2025, 8, 29),
+            result);
+    }
+    
+    [Fact]
+    public void Monthly_LastWeekendDay_WhenMonthEndsFriday_ReturnsPreviousSunday()
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 1, 26),
+            1);
+
+        schedule.RecurrenceRule.Ordinal = Ordinal.Last;
+        schedule.RecurrenceRule.OrdinalType = OrdinalType.WeekEndDay;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 1, 26));
+
+        Assert.Equal(
+            new DateOnly(2025, 2, 23),
+            result);
+    }
+    
+    [Theory]
+    [InlineData(Ordinal.First, OrdinalType.Monday, 2025, 8, 4)]
+    [InlineData(Ordinal.Second, OrdinalType.Tuesday, 2025, 8, 12)]
+    [InlineData(Ordinal.Third, OrdinalType.Wednesday, 2025, 8, 20)]
+    [InlineData(Ordinal.Fourth, OrdinalType.Friday, 2025, 8, 22)]
+    public void Monthly_OrdinalWeekday_ReturnsExpectedDate(
+        Ordinal ordinal,
+        OrdinalType ordinalType,
+        int year,
+        int month,
+        int day)
+    {
+        var schedule = Shared.CreateSchedule(
+            Frequency.Monthly,
+            new DateOnly(2025, 7, 1),
+            1);
+
+        schedule.RecurrenceRule.Ordinal = ordinal;
+        schedule.RecurrenceRule.OrdinalType = ordinalType;
+
+        var result = ScheduleService.GetNextOccurrence(
+            schedule,
+            new DateOnly(2025, 7, 1));
+
+        Assert.Equal(new DateOnly(year, month, day), result);
+    }
 }
