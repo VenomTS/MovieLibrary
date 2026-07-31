@@ -7,6 +7,8 @@ namespace API.Invoices;
 
 public class InvoiceService(IRepositoryManager repositoryManager, InvoiceCounterService invoiceCounterService)
 {
+    private const string NumberFormat = "D12";
+    
     public async Task CreateAutomaticInvoice(InvoiceTemplate invoiceTemplate)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
@@ -24,7 +26,7 @@ public class InvoiceService(IRepositoryManager repositoryManager, InvoiceCounter
                 Price = invoiceTemplate.Price,
                 Description = invoiceTemplate.Description,
                 DateCreated = today,
-                Number = invoiceNumber.ToString("D12"),
+                Number = invoiceNumber.ToString(NumberFormat),
             };
 
             var invoiceDelivery = new InvoiceDelivery

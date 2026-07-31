@@ -12,7 +12,21 @@ public class InvoiceTemplatesController(InvoiceTemplateService invoiceTemplateSe
     {
         var result = await invoiceTemplateService.CreateAsync(request);
 
-        return Ok(result);
+        return result.Match<IActionResult>(
+            Ok,
+            _ => NotFound(),
+            _ => Conflict()
+        );
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] UpdateInvoiceTemplateRequest request)
+    {
+        var result = await invoiceTemplateService.PutAsync(id, request);
+
+        return result.Match<IActionResult>(
+            Ok,
+            _ => NotFound());
     }
 
     [HttpGet("{userId:guid}")]

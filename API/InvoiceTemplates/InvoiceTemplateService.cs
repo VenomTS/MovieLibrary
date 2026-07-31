@@ -1,7 +1,10 @@
 using API.OneOfTypes;
+using API.Schedules;
 using DTO.InvoiceTemplates;
 using DTO.Schedules;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Models;
 using Models.Invoices;
 using Models.Schedules;
 using Models.Schedules.Rules;
@@ -11,12 +14,17 @@ using Repositories;
 
 namespace API.InvoiceTemplates;
 
-public class InvoiceTemplateService(IRepositoryManager repositoryManager)
+public class InvoiceTemplateService(IRepositoryManager repositoryManager, UserManager<AppUser> userManager, ScheduleService scheduleService)
 {
-    public async Task<OneOf<InvoiceTemplateResponse, InvoiceTemplateAlreadyExists>> CreateAsync(CreateInvoiceTemplateRequest request)
+    public async Task<OneOf<InvoiceTemplateResponse, NotFound, InvoiceTemplateAlreadyExists>> CreateAsync(CreateInvoiceTemplateRequest request)
     {
-        // Ako se ne moze napraviti, edituj ga?
-        if(!await CanCreateInvoiceTemplate(request))
+
+        var userExists = await userManager.FindByIdAsync(request.UserId.ToString());
+        if (userExists == null)
+            return new NotFound();
+        
+        var alreadyExists = await repositoryManager.InvoiceTemplates.GetByUserIdAsync(request.UserId) != null;
+        if (alreadyExists)
             return new InvoiceTemplateAlreadyExists();
         
         var schedule = new Schedule
@@ -118,11 +126,6 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager)
         return scheduledInvoices;
     }
     
-    private async Task<bool> CanCreateInvoiceTemplate(CreateInvoiceTemplateRequest request)
-    {
-        return await repositoryManager.InvoiceTemplates.GetByUserIdAsync(request.UserId) != null;
-    }
-    
     private async Task<Schedule> FindOrCreateSchedule(Schedule schedule)
     {
         var existingSchedule = await repositoryManager.Schedules.AsQueryable()
@@ -138,8 +141,51 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager)
 
         if (existingSchedule != null)
             return existingSchedule;
+
+        return await scheduleService.CreateAsync(schedule);
+    }
+
+    public async Task<OneOf<InvoiceTemplateResponse, NotFound>> PutAsync(Guid invoiceTemplateId, UpdateInvoiceTemplateRequest request)
+    {
+        var invoiceTemplate = await repositoryManager.InvoiceTemplates.GetByIdAsync(invoiceTemplateId);
+        if (invoiceTemplate == null)
+            return new NotFound();
         
-        await repositoryManager.Schedules.CreateAsync(schedule);
-        return schedule;
+        var schedule = new Schedule
+        {
+            StartDate = request.Schedule.StartDate,
+            EndDate = request.Schedule.EndDate,
+            RecurrenceRule = new RecurrenceRule
+            {
+                Frequency = request.Schedule.Frequency,
+                Interval = request.Schedule.Interval,
+                DaysOfWeek = request.Schedule.DaysOfWeek,
+                DayOfMonth = request.Schedule.DayOfMonth,
+                Ordinal = request.Schedule.Ordinal,
+                OrdinalType = request.Schedule.OrdinalType,
+            }
+        };
+
+        schedule = await FindOrCreateSchedule(schedule);
+        
+        // Begin tracking
+        await repositoryManager.InvoiceTemplates.Update(invoiceTemplate);
+        
+        invoiceTemplate.Price = request.Price;
+        invoiceTemplate.Description = request.Description;
+        invoiceTemplate.ScheduleId = schedule.Id;
+
+        await repositoryManager.SaveChangesAsync();
+
+        var invoiceDto = new InvoiceTemplateResponse
+        {
+            Id = invoiceTemplate.Id,
+            Price = invoiceTemplate.Price,
+            Description = invoiceTemplate.Description,
+            ScheduleId = invoiceTemplate.ScheduleId,
+            UserId = invoiceTemplate.UserId,
+        };
+
+        return invoiceDto;
     }
 }

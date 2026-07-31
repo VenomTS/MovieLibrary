@@ -226,4 +226,11 @@ public class ScheduleService(IRepositoryManager repositoryManager)
         await repositoryManager.Schedules.CreateAsync(schedule);
         await repositoryManager.SaveChangesAsync();
     }
+
+    public async Task<Schedule> CreateAsync(Schedule schedule)
+    {
+        schedule.NextOccurrence = GetNextOccurrence(schedule, DateOnly.FromDateTime(DateTime.Now));
+        await repositoryManager.Schedules.CreateAsync(schedule);
+        return schedule;
+    }
 }
