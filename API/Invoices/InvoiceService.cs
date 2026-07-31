@@ -1,35 +1,51 @@
+using API.InvoiceCounters;
 using Models.InvoiceDeliveries;
 using Models.Invoices;
 using Repositories;
 
 namespace API.Invoices;
 
-public class InvoiceService(IRepositoryManager repositoryManager)
+public class InvoiceService(IRepositoryManager repositoryManager, InvoiceCounterService invoiceCounterService)
 {
     public async Task CreateAutomaticInvoice(InvoiceTemplate invoiceTemplate)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
-        var invoice = new Invoice
-        {
-            Id = Guid.NewGuid(),
-            UserId = invoiceTemplate.UserId,
-            Price = invoiceTemplate.Price,
-            Description = invoiceTemplate.Description,
-            DateCreated = today,
-        };
+        
+        await using var transaction = await repositoryManager.BeginTransactionAsync();
 
-        var invoiceDelivery = new InvoiceDelivery
+        try
         {
-            InvoiceId = invoice.Id,
-            InvoiceTemplateId = invoiceTemplate.Id,
-            ScheduleId = invoiceTemplate.ScheduleId,
-            DeliveryStatus = InvoiceDeliveryStatus.InProgress,
-            DateCreated = today,
-        };
+            var invoiceNumber = await invoiceCounterService.GetAndIncrementCountByYear(today.Year);
+            
+            var invoice = new Invoice
+            {
+                Id = Guid.NewGuid(),
+                UserId = invoiceTemplate.UserId,
+                Price = invoiceTemplate.Price,
+                Description = invoiceTemplate.Description,
+                DateCreated = today,
+                Number = invoiceNumber.ToString("D12"),
+            };
+
+            var invoiceDelivery = new InvoiceDelivery
+            {
+                InvoiceId = invoice.Id,
+                InvoiceTemplateId = invoiceTemplate.Id,
+                ScheduleId = invoiceTemplate.ScheduleId,
+                DeliveryStatus = InvoiceDeliveryStatus.InProgress,
+                DateCreated = today,
+            };
         
-        await repositoryManager.Invoices.CreateAsync(invoice);
-        await repositoryManager.InvoiceDeliveries.CreateAsync(invoiceDelivery);
+            await repositoryManager.Invoices.CreateAsync(invoice);
+            await repositoryManager.InvoiceDeliveries.CreateAsync(invoiceDelivery);
         
-        await repositoryManager.SaveChangesAsync();
+            await repositoryManager.SaveChangesAsync();
+            
+            await transaction.CommitAsync();
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+        }
     }
 }

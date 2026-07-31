@@ -7,6 +7,7 @@ public class Invoice
     public decimal Price { get; set; }
     public string Description { get; set; } = string.Empty;
     public DateOnly DateCreated { get; set; }
+    public string? Number { get; set; }
 
     public AppUser AppUser { get; set; }
 }
