@@ -9,7 +9,7 @@ public class InvoiceRepository(AppDbContext dbContext) : RepositoryBase<Invoice>
 {
     private readonly AppDbContext _dbContext = dbContext;
 
-    public async Task<string> GetMaxNumber()
+    public async Task<string?> GetMaxNumber()
     {
         return await _dbContext.Invoices.MaxAsync(x => x.Number);
     }

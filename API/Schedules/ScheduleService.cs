@@ -1,5 +1,3 @@
-using API.Invoices;
-using DTO.Schedules;
 using Models.Schedules;
 using Models.Schedules.Rules;
 using Repositories;
@@ -197,35 +195,6 @@ public class ScheduleService(IRepositoryManager repositoryManager)
 
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
-    }
-    
-    public async Task<List<Schedule>> GetAllAsync()
-    {
-        var schedules = await repositoryManager.Schedules.GetAllAsync(x => x.RecurrenceRule);
-        
-        return schedules;
-    }
-
-    public async Task CreateAsync(CreateScheduleRequest request)
-    {
-        var schedule = new Schedule
-        {
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            RecurrenceRule = new RecurrenceRule
-            {
-                Frequency = request.RecurrenceRule.Frequency,
-                Interval = request.RecurrenceRule.Interval,
-                DaysOfWeek = request.RecurrenceRule.DaysOfWeek,
-                DayOfMonth = request.RecurrenceRule.DayOfMonth,
-                Ordinal = request.RecurrenceRule.Ordinal,
-                OrdinalType = request.RecurrenceRule.OrdinalType,
-            }
-        };
-
-        schedule.NextOccurrence = GetNextOccurrence(schedule, DateOnly.FromDateTime(DateTime.Now));
-        await repositoryManager.Schedules.CreateAsync(schedule);
-        await repositoryManager.SaveChangesAsync();
     }
 
     public async Task<Schedule> CreateAsync(Schedule schedule)
