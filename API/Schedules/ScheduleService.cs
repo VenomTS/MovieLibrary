@@ -16,7 +16,9 @@ public class ScheduleService(IRepositoryManager repositoryManager)
         await repositoryManager.Schedules.Update(schedule);
         
         // Find next occurrence based on current "NextOccurrence"
-        schedule.NextOccurrence = GetNextOccurrence(schedule, schedule.NextOccurrence);
+        // Situacija: Ako je NextOccurance bio 01.08.2026, danas je 03.08.2026 i occurance je daily, nikad nece catch upovat
+        // Opcija: Da se stavi umjesto schedule.NextOccurance -> DateOnly.FromDateTime(Now)
+        schedule.NextOccurrence = GetNextOccurrence(schedule, DateOnly.FromDateTime(DateTime.Now));
         await repositoryManager.SaveChangesAsync();
     }
 
@@ -218,7 +220,6 @@ public class ScheduleService(IRepositoryManager repositoryManager)
                 DayOfMonth = request.RecurrenceRule.DayOfMonth,
                 Ordinal = request.RecurrenceRule.Ordinal,
                 OrdinalType = request.RecurrenceRule.OrdinalType,
-                Period = request.RecurrenceRule.Period,
             }
         };
 

@@ -1,4 +1,3 @@
-using API.InvoiceDeliveries;
 using Models.InvoiceDeliveries;
 using Repositories;
 
@@ -17,7 +16,5 @@ public class InvoiceSendingService(IRepositoryManager repositoryManager)
         
         await repositoryManager.InvoiceDeliveries.MarkAsStatusAsync(invoiceDelivery, newStatus);
         await repositoryManager.SaveChangesAsync();
-        
-        // await invoiceDeliveryService.MarkAsStatusAsync(invoiceDelivery, newStatus);
     }
 }

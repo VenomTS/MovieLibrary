@@ -21,7 +21,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Schedule> Schedules { get; set; }
     
     public DbSet<Invoice> Invoices { get; set; }
-    public DbSet<InvoiceCounter> InvoiceCounters { get; set; }
     public DbSet<InvoiceTemplate> InvoiceTemplates { get; set; }
     public DbSet<InvoiceDelivery> InvoiceDeliveries { get; set; }
 
@@ -42,7 +41,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.Entity<Rental>().HasOne(x => x.AppUser).WithMany().HasForeignKey(x => x.UserId);
 
         modelBuilder.Entity<Invoice>().HasOne(x => x.AppUser).WithMany().HasForeignKey(x => x.UserId);
-        modelBuilder.Entity<InvoiceCounter>().HasKey(x => x.Year);
         modelBuilder.Entity<InvoiceDelivery>().HasKey(x => new { x.InvoiceTemplateId, x.ScheduleId, x.DateCreated });
 
         modelBuilder.Entity<Schedule>().OwnsOne(x => x.RecurrenceRule);

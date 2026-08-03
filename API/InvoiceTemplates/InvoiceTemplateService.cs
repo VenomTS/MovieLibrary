@@ -18,7 +18,6 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager, UserMa
 {
     public async Task<OneOf<InvoiceTemplateResponse, NotFound, InvoiceTemplateAlreadyExists>> CreateAsync(CreateInvoiceTemplateRequest request)
     {
-
         var userExists = await userManager.FindByIdAsync(request.UserId.ToString());
         if (userExists == null)
             return new NotFound();
@@ -113,7 +112,6 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager, UserMa
     
     public async Task<List<InvoiceTemplate>> GetScheduledInvoicesAsync(DateOnly date)
     {
-        // Ovo se koristi samo za nove invoices, stari (failed) invoices su handle-ovani u InvoiceDeliveryService
         var scheduledInvoices = await repositoryManager.InvoiceTemplates.AsQueryable()
             .Include(x => x.Schedule)
             .Where(invoiceTemplate => invoiceTemplate.Schedule.NextOccurrence <= date &&

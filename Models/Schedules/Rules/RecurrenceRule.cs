@@ -11,5 +11,4 @@ public class RecurrenceRule
     public int? DayOfMonth { get; set; }
     public Ordinal? Ordinal { get; set; }
     public OrdinalType? OrdinalType { get; set; }
-    public TimeOnly Period { get; set; }
 }

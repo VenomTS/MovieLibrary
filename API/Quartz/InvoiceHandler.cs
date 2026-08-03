@@ -12,6 +12,9 @@ public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService,
     InvoiceService invoiceService,
     InvoiceTemplateService invoiceTemplateService) : IJob
 {
+
+    private const int RemoveInvoiceDeliveriesAfterMonths = 3;
+    
     /*
      * Steps:
      * 1. Mark all previously unsuccessful as "In Progress"
@@ -22,10 +25,10 @@ public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService,
      */
     public async Task Execute(IJobExecutionContext context)
     {
-        Console.WriteLine("Running InvoiceHandler");
         await MarkFailedInvoices();
         await MarkScheduledInvoices();
         await StartSendingInvoices();
+        await DeleteOldInvoiceDeliveries();
     }
 
     private async Task MarkFailedInvoices()
@@ -44,15 +47,6 @@ public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService,
         {
             await invoiceService.CreateAutomaticInvoice(scheduledInvoice);
             
-            // Crash Me Pls
-            /*
-            var random = new Random();
-            var randomValue = random.NextDouble();
-            Console.WriteLine(randomValue);
-            if(randomValue < 0.50)
-                Environment.FailFast("Simulated crash");
-            */
-            
             if (uniqueSchedules.Any(x => x.Id == scheduledInvoice.ScheduleId))
                 continue;
 
@@ -70,15 +64,13 @@ public class InvoiceHandler(InvoiceDeliveryService invoiceDeliveryService,
     
     private async Task DeleteOldInvoiceDeliveries()
     {
-        await Task.CompletedTask;
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var deleteBefore = today.AddMonths(-RemoveInvoiceDeliveriesAfterMonths);
+        await invoiceDeliveryService.DeleteInvoiceDeliveriesAsync(deleteBefore);
     }
 
     private async Task StartSendingInvoices()
     {
         await invoiceDeliveryService.SendInvoicesAsync();
-        // var invoices = await invoiceDeliveryService.GetScheduledInvoiceDeliveries();
-        //
-        // foreach (var invoice in invoices)
-        //     await invoiceSendingService.SendInvoiceAsync(invoice);
     }
 }

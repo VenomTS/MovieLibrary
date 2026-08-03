@@ -1,7 +1,7 @@
 using API.Schedules;
 using Models.Schedules.Rules;
 
-namespace UnitTests;
+namespace UnitTests.Scheduler;
 
 public class DailySchedulerTests
 {

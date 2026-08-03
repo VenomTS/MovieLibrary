@@ -7,10 +7,10 @@ namespace API.InvoiceDeliveries;
 
 public class InvoiceDeliveryService(IRepositoryManager repositoryManager, InvoiceSendingService invoiceSendingService)
 {
-    private async Task DeleteOldInvoiceDeliveriesAsync()
+    public async Task DeleteInvoiceDeliveriesAsync(DateOnly date)
     {
         await repositoryManager.InvoiceDeliveries.AsQueryable()
-            .Where(x => x.DateCreated < DateOnly.FromDateTime(DateTime.Now.AddMonths(-3)))
+            .Where(x => x.DateCreated < date)
             .ExecuteDeleteAsync();
     }
 

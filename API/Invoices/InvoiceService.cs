@@ -1,13 +1,14 @@
-using API.InvoiceCounters;
 using Models.InvoiceDeliveries;
 using Models.Invoices;
 using Repositories;
 
 namespace API.Invoices;
 
-public class InvoiceService(IRepositoryManager repositoryManager, InvoiceCounterService invoiceCounterService)
+public class InvoiceService(IRepositoryManager repositoryManager)
 {
-    private const string NumberFormat = "D12";
+    private const string NumberFormat = "D6";
+    private const int MaxValue = 999999;
+    private const string StartingInvoiceNumber = "0";
     
     public async Task CreateAutomaticInvoice(InvoiceTemplate invoiceTemplate)
     {
@@ -17,7 +18,7 @@ public class InvoiceService(IRepositoryManager repositoryManager, InvoiceCounter
 
         try
         {
-            var invoiceNumber = await invoiceCounterService.GetAndIncrementCountByYear(today.Year);
+            var invoiceNumber = await GetNextInvoiceNumber();
             
             var invoice = new Invoice
             {
@@ -49,5 +50,17 @@ public class InvoiceService(IRepositoryManager repositoryManager, InvoiceCounter
         {
             await transaction.RollbackAsync();
         }
+    }
+
+    private async Task<int> GetNextInvoiceNumber()
+    {
+        var highestInvoiceNumberStr = await repositoryManager.Invoices.GetMaxNumber(/*Optionally add Skladiste*/);
+
+        // Just to be safe
+        if (string.IsNullOrEmpty(highestInvoiceNumberStr) || string.IsNullOrWhiteSpace(highestInvoiceNumberStr))
+            highestInvoiceNumberStr = StartingInvoiceNumber;
+            
+        var invoiceNumber = int.TryParse(highestInvoiceNumberStr, out var result) ? result + 1 : MaxValue;
+        return invoiceNumber;
     }
 }

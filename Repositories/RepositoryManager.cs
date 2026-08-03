@@ -17,7 +17,6 @@ public class RepositoryManager(
     IRentalRepository rentalRepository,
     IScheduleRepository scheduleRepository,
     IInvoiceRepository invoiceRepository,
-    IInvoiceCounterRepository invoiceCounterRepository,
     IInvoiceDeliveryRepository invoiceDeliveryRepository,
     IInvoiceTemplateRepository invoiceTemplateRepository,
     UserManager<AppUser> userManager
@@ -30,7 +29,6 @@ public class RepositoryManager(
     public IRentalRepository Rentals { get; set; } = rentalRepository;
     public IScheduleRepository Schedules { get; set; } = scheduleRepository;
     public IInvoiceRepository Invoices { get; set; } = invoiceRepository;
-    public IInvoiceCounterRepository InvoiceCounters { get; set; } = invoiceCounterRepository;
     public IInvoiceDeliveryRepository InvoiceDeliveries { get; set; } = invoiceDeliveryRepository;
     public IInvoiceTemplateRepository InvoiceTemplates { get; set; } = invoiceTemplateRepository;
     public UserManager<AppUser> Users { get; set; } = userManager;
@@ -43,11 +41,6 @@ public class RepositoryManager(
     public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
         return await dbContext.Database.BeginTransactionAsync();
-    }
-
-    public Task CommitTransactionAsync()
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<T> ExecuteProcedure<T>(string commandStr, params CommandParameter[] args)

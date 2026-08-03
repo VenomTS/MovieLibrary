@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 using Models;
-using Repositories.Implementations;
 using Repositories.Interfaces;
 
 namespace Repositories;
@@ -15,7 +14,6 @@ public interface IRepositoryManager
     public IRentalRepository Rentals { get; set; }
     public IScheduleRepository Schedules { get; set; }
     public IInvoiceRepository Invoices { get; set; }
-    public IInvoiceCounterRepository InvoiceCounters { get; set; }
     public IInvoiceDeliveryRepository InvoiceDeliveries { get; set; }
     public IInvoiceTemplateRepository InvoiceTemplates { get; set; }
     public UserManager<AppUser> Users { get; set; }

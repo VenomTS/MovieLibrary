@@ -11,7 +11,6 @@ using Repositories.Implementations;
 using Repositories.Interfaces;
 using Scalar.AspNetCore;
 using API.Auth;
-using API.InvoiceCounters;
 using API.InvoiceDeliveries;
 using API.Invoices;
 using API.InvoiceTemplates;
@@ -59,7 +58,7 @@ builder.Services.AddQuartz(q =>
     // Trigger every 15 seconds
     q.AddTrigger(options => options.ForJob(jobKey)
         .WithIdentity("InvoiceHandlerTrigger")
-        .WithCronSchedule("*/15 * * * * ?"));
+        .WithCronSchedule("0 0 6 * * ?"));
 });
 
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
@@ -72,7 +71,6 @@ builder.Services.AddScoped<RentalService>();
 builder.Services.AddScoped<InventoryRecordService>();
 builder.Services.AddScoped<ScheduleService>();
 builder.Services.AddScoped<InvoiceService>();
-builder.Services.AddScoped<InvoiceCounterService>();
 builder.Services.AddScoped<InvoiceTemplateService>();
 builder.Services.AddScoped<InvoiceDeliveryService>();
 builder.Services.AddScoped<InvoiceSendingService>();
@@ -87,7 +85,6 @@ builder.Services.AddScoped<IInventoryRecordRepository, InventoryRecordRepository
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
-builder.Services.AddScoped<IInvoiceCounterRepository, InvoiceCounterRepository>();
 builder.Services.AddScoped<IInvoiceTemplateRepository, InvoiceTemplateRepository>();
 builder.Services.AddScoped<IInvoiceDeliveryRepository, InvoiceDeliveryRepository>();
 
