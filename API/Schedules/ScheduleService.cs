@@ -14,10 +14,6 @@ public class ScheduleService(IRepositoryManager repositoryManager)
     {
         await repositoryManager.Schedules.Update(schedule);
         
-        // Find next occurrence based on current "NextOccurrence"
-        // Situacija: Ako je NextOccurance bio 01.08.2026, danas je 03.08.2026 i occurance je daily, nikad nece catch upovat
-        // Opcija: Da se stavi umjesto schedule.NextOccurance -> DateOnly.FromDateTime(Now)
-        // U Real World ovo ne pravi razliku jer server nikad nece biti ugasen citav dan, but still
         schedule.NextOccurrence = GetNextOccurrence(schedule, DateOnly.FromDateTime(DateTime.Now));
         await repositoryManager.SaveChangesAsync();
     }
@@ -203,7 +199,7 @@ public class ScheduleService(IRepositoryManager repositoryManager)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
         
-        // Merge if: Oba u proslosti; Oba imaju isti dan; 
+        // Merge if: Oba u proslosti ILI Oba imaju isti dan; 
         
         var existingSchedule = await repositoryManager.Schedules.AsQueryable()
             .Where(x => ((x.StartDate <= today && schedule.StartDate <= today) || x.StartDate == schedule.StartDate) &&
