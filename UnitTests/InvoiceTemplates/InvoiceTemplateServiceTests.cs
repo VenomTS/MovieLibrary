@@ -28,6 +28,246 @@ public class InvoiceTemplateServiceTests(DatabaseFixture fixture)
     {
         await fixture.ClearDatabaseAsync();
     }
+    
+    [Fact]
+    public async Task GetScheduledInvoicesAsync_ShouldReturnInvoice_WhenEndDateIsNull()
+    {
+        await using var dbContext = fixture.CreateDbContext();
+        await fixture.ClearDatabaseAsync();
+
+        var user = await Shared.CreateUser(dbContext);
+
+        var date = new DateOnly(2026, 8, 3);
+
+        var schedule = CreateSchedule();
+        schedule.StartDate = date;
+        schedule.NextOccurrence = date;
+        schedule.EndDate = null;
+
+        dbContext.Schedules.Add(schedule);
+        await dbContext.SaveChangesAsync();
+
+        var invoice = CreateInvoiceTemplate(user.Id, schedule);
+
+        dbContext.InvoiceTemplates.Add(invoice);
+        await dbContext.SaveChangesAsync();
+
+        var repositoryManager = CreateRepositoryManager();
+        var userManager = CreateUserManager();
+        var scheduleService = CreateScheduleService(repositoryManager.Object);
+
+        repositoryManager
+            .Setup(x => x.InvoiceTemplates.AsQueryable())
+            .Returns(dbContext.InvoiceTemplates);
+
+        repositoryManager
+            .Setup(x => x.InvoiceDeliveries.AsQueryable())
+            .Returns(dbContext.InvoiceDeliveries);
+
+        var service = new InvoiceTemplateService(
+            repositoryManager.Object,
+            userManager.Object,
+            scheduleService);
+
+        // Act
+        var result = await service.GetScheduledInvoicesAsync(date);
+
+        // Assert
+        Assert.Contains(result, x => x.Id == invoice.Id);
+    }
+
+
+    [Fact]
+    public async Task GetScheduledInvoicesAsync_ShouldReturnInvoice_WhenEndDateIsAfterRequestedDate()
+    {
+        await using var dbContext = fixture.CreateDbContext();
+        await fixture.ClearDatabaseAsync();
+
+        var user = await Shared.CreateUser(dbContext);
+
+        var date = new DateOnly(2026, 8, 3);
+
+        var schedule = CreateSchedule();
+        schedule.StartDate = date;
+        schedule.NextOccurrence = date;
+        schedule.EndDate = date.AddDays(1);
+
+        dbContext.Schedules.Add(schedule);
+        await dbContext.SaveChangesAsync();
+
+        var invoice = CreateInvoiceTemplate(user.Id, schedule);
+
+        dbContext.InvoiceTemplates.Add(invoice);
+        await dbContext.SaveChangesAsync();
+
+        var repositoryManager = CreateRepositoryManager();
+        var userManager = CreateUserManager();
+        var scheduleService = CreateScheduleService(repositoryManager.Object);
+
+        repositoryManager
+            .Setup(x => x.InvoiceTemplates.AsQueryable())
+            .Returns(dbContext.InvoiceTemplates);
+
+        repositoryManager
+            .Setup(x => x.InvoiceDeliveries.AsQueryable())
+            .Returns(dbContext.InvoiceDeliveries);
+
+        var service = new InvoiceTemplateService(
+            repositoryManager.Object,
+            userManager.Object,
+            scheduleService);
+
+        // Act
+        var result = await service.GetScheduledInvoicesAsync(date);
+
+        // Assert
+        Assert.Contains(result, x => x.Id == invoice.Id);
+    }
+
+
+    [Fact]
+    public async Task GetScheduledInvoicesAsync_ShouldNotReturnInvoice_WhenEndDateIsEqualToRequestedDate()
+    {
+        await using var dbContext = fixture.CreateDbContext();
+        await fixture.ClearDatabaseAsync();
+
+        var user = await Shared.CreateUser(dbContext);
+
+        var date = new DateOnly(2026, 8, 3);
+
+        var schedule = CreateSchedule();
+        schedule.StartDate = date;
+        schedule.NextOccurrence = date;
+        schedule.EndDate = date;
+
+        dbContext.Schedules.Add(schedule);
+        await dbContext.SaveChangesAsync();
+
+        var invoice = CreateInvoiceTemplate(user.Id, schedule);
+
+        dbContext.InvoiceTemplates.Add(invoice);
+        await dbContext.SaveChangesAsync();
+
+        var repositoryManager = CreateRepositoryManager();
+        var userManager = CreateUserManager();
+        var scheduleService = CreateScheduleService(repositoryManager.Object);
+
+        repositoryManager
+            .Setup(x => x.InvoiceTemplates.AsQueryable())
+            .Returns(dbContext.InvoiceTemplates);
+
+        repositoryManager
+            .Setup(x => x.InvoiceDeliveries.AsQueryable())
+            .Returns(dbContext.InvoiceDeliveries);
+
+        var service = new InvoiceTemplateService(
+            repositoryManager.Object,
+            userManager.Object,
+            scheduleService);
+
+        // Act
+        var result = await service.GetScheduledInvoicesAsync(date);
+
+        // Assert
+        Assert.DoesNotContain(result, x => x.Id == invoice.Id);
+    }
+
+
+    [Fact]
+    public async Task GetScheduledInvoicesAsync_ShouldNotReturnInvoice_WhenEndDateIsBeforeRequestedDate()
+    {
+        await using var dbContext = fixture.CreateDbContext();
+        await fixture.ClearDatabaseAsync();
+
+        var user = await Shared.CreateUser(dbContext);
+
+        var date = new DateOnly(2026, 8, 3);
+
+        var schedule = CreateSchedule();
+        schedule.StartDate = date.AddDays(-10);
+        schedule.NextOccurrence = date.AddDays(-1);
+        schedule.EndDate = date.AddDays(-1);
+
+        dbContext.Schedules.Add(schedule);
+        await dbContext.SaveChangesAsync();
+
+        var invoice = CreateInvoiceTemplate(user.Id, schedule);
+
+        dbContext.InvoiceTemplates.Add(invoice);
+        await dbContext.SaveChangesAsync();
+
+        var repositoryManager = CreateRepositoryManager();
+        var userManager = CreateUserManager();
+        var scheduleService = CreateScheduleService(repositoryManager.Object);
+
+        repositoryManager
+            .Setup(x => x.InvoiceTemplates.AsQueryable())
+            .Returns(dbContext.InvoiceTemplates);
+
+        repositoryManager
+            .Setup(x => x.InvoiceDeliveries.AsQueryable())
+            .Returns(dbContext.InvoiceDeliveries);
+
+        var service = new InvoiceTemplateService(
+            repositoryManager.Object,
+            userManager.Object,
+            scheduleService);
+
+        // Act
+        var result = await service.GetScheduledInvoicesAsync(date);
+
+        // Assert
+        Assert.DoesNotContain(result, x => x.Id == invoice.Id);
+    }
+
+
+    [Fact]
+    public async Task GetScheduledInvoicesAsync_ShouldNotReturnInvoice_WhenNextOccurrenceIsAfterRequestedDate_EvenIfEndDateIsAfterRequestedDate()
+    {
+        await using var dbContext = fixture.CreateDbContext();
+        await fixture.ClearDatabaseAsync();
+
+        var user = await Shared.CreateUser(dbContext);
+
+        var date = new DateOnly(2026, 8, 3);
+
+        var schedule = CreateSchedule();
+        schedule.StartDate = date.AddDays(-1);
+        schedule.NextOccurrence = date.AddDays(1);
+        schedule.EndDate = date.AddDays(10);
+
+        dbContext.Schedules.Add(schedule);
+        await dbContext.SaveChangesAsync();
+
+        var invoice = CreateInvoiceTemplate(user.Id, schedule);
+
+        dbContext.InvoiceTemplates.Add(invoice);
+        await dbContext.SaveChangesAsync();
+
+        var repositoryManager = CreateRepositoryManager();
+        var userManager = CreateUserManager();
+        var scheduleService = CreateScheduleService(repositoryManager.Object);
+
+        repositoryManager
+            .Setup(x => x.InvoiceTemplates.AsQueryable())
+            .Returns(dbContext.InvoiceTemplates);
+
+        repositoryManager
+            .Setup(x => x.InvoiceDeliveries.AsQueryable())
+            .Returns(dbContext.InvoiceDeliveries);
+
+        var service = new InvoiceTemplateService(
+            repositoryManager.Object,
+            userManager.Object,
+            scheduleService);
+
+        // Act
+        var result = await service.GetScheduledInvoicesAsync(date);
+
+        // Assert
+        Assert.DoesNotContain(result, x => x.Id == invoice.Id);
+    }
+
 
     [Fact]
     public async Task CreateAsync_ShouldReturnAlreadyExists_WhenUserAlreadyHasInvoiceTemplate()

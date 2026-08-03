@@ -115,6 +115,7 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager, UserMa
         var scheduledInvoices = await repositoryManager.InvoiceTemplates.AsQueryable()
             .Include(x => x.Schedule)
             .Where(invoiceTemplate => invoiceTemplate.Schedule.NextOccurrence <= date &&
+                                      (invoiceTemplate.Schedule.EndDate == null || invoiceTemplate.Schedule.EndDate > date) &&
                                       !repositoryManager.InvoiceDeliveries.AsQueryable()
                                           .Any(invoiceDelivery =>
                                               invoiceDelivery.InvoiceTemplateId == invoiceTemplate.Id &&
