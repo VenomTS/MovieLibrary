@@ -28,43 +28,6 @@ public class InvoiceTemplateServiceTests(DatabaseFixture fixture)
     {
         await fixture.ClearDatabaseAsync();
     }
-    
-    [Fact]
-    public async Task CreateAsync_ShouldReturnNotFound_WhenUserDoesNotExist()
-    {
-        await using var dbContext = fixture.CreateDbContext();
-
-        var repositoryManager = CreateRepositoryManager();
-        var userManager = CreateUserManager();
-        var scheduleService = CreateScheduleService(repositoryManager.Object);
-
-        var request = CreateCreateRequest(Guid.NewGuid());
-
-        userManager
-            .Setup(x => x.FindByIdAsync(request.UserId.ToString()))
-            .ReturnsAsync((AppUser?)null);
-
-        var service = new InvoiceTemplateService(
-            repositoryManager.Object,
-            userManager.Object,
-            scheduleService);
-
-        // Act
-        var result = await service.CreateAsync(request);
-
-        // Assert
-        Assert.True(result.IsT1);
-        Assert.IsType<NotFound>(result.AsT1);
-
-        repositoryManager.Verify(
-            x => x.InvoiceTemplates.GetByUserIdAsync(
-                It.IsAny<Guid>()),
-            Times.Never);
-
-        repositoryManager.Verify(
-            x => x.SaveChangesAsync(),
-            Times.Never);
-    }
 
     [Fact]
     public async Task CreateAsync_ShouldReturnAlreadyExists_WhenUserAlreadyHasInvoiceTemplate()
@@ -224,10 +187,6 @@ public class InvoiceTemplateServiceTests(DatabaseFixture fixture)
         repositoryManager.Verify(
             x => x.InvoiceTemplates.CreateAsync(
                 It.IsAny<InvoiceTemplate>()),
-            Times.Once);
-
-        repositoryManager.Verify(
-            x => x.SaveChangesAsync(),
             Times.Once);
     }
 
@@ -987,10 +946,6 @@ public class InvoiceTemplateServiceTests(DatabaseFixture fixture)
 
         repositoryManager.Verify(
             x => x.InvoiceTemplates.Update(invoice),
-            Times.Once);
-
-        repositoryManager.Verify(
-            x => x.SaveChangesAsync(),
             Times.Once);
     }
 

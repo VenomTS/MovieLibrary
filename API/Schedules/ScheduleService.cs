@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Models.Schedules;
 using Models.Schedules.Rules;
 using Repositories;
@@ -196,6 +197,53 @@ public class ScheduleService(IRepositoryManager repositoryManager)
 
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
+    }
+    
+    public async Task<Schedule> FindOrCreateSchedule(Schedule schedule)
+    {
+        /*
+         * Ima bug u jako specificnom slucaju
+         * Ako korisnik vec postoji i odluci editovat svoj InvoiceTemplate
+         * I stavi da mu je starting date prije svih drugih
+         * Onda ce mu scheduler napraviti novi
+         * Primjer: Korisnik 1 postoji sa start date 03/08/2026, Daily, Interval = 1
+         * Korisnik 2 postoji sa start date 01/01/2026, Monthly, Interval = 1
+         * Korisnik 2 odluci promijeniti svoj u daily, stavi start date 01/01/2026, Daily, Interval = 1
+         * Onda mu ovaj servis napravi novi instance jer je 03/08/2026 > 01/01/2026, sto znaci da mu ne odgovara
+         * Moze se popraviti tako sto se ne gleda njegov originalni startDate nego max(startDate, today)
+         */
+        
+        /*
+         var existingSchedule = await repositoryManager.Schedules.AsQueryable()
+            .Where(x => x.StartDate <= schedule.StartDate &&
+                        x.EndDate == schedule.EndDate &&
+                        x.RecurrenceRule.Frequency == schedule.RecurrenceRule.Frequency &&
+                        x.RecurrenceRule.Interval == schedule.RecurrenceRule.Interval &&
+                        x.RecurrenceRule.DaysOfWeek == schedule.RecurrenceRule.DaysOfWeek &&
+                        x.RecurrenceRule.DayOfMonth == schedule.RecurrenceRule.DayOfMonth &&
+                        x.RecurrenceRule.Ordinal == schedule.RecurrenceRule.Ordinal &&
+                        x.RecurrenceRule.OrdinalType == schedule.RecurrenceRule.OrdinalType)
+            .FirstOrDefaultAsync();
+            */
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        
+        // Merge if: Oba u proslosti; Oba imaju isti dan; 
+        
+        var existingSchedule = await repositoryManager.Schedules.AsQueryable()
+            .Where(x => ((x.StartDate <= today && schedule.StartDate <= today) || x.StartDate == schedule.StartDate) &&
+                        x.EndDate == schedule.EndDate &&
+                        x.RecurrenceRule.Frequency == schedule.RecurrenceRule.Frequency &&
+                        x.RecurrenceRule.Interval == schedule.RecurrenceRule.Interval &&
+                        x.RecurrenceRule.DaysOfWeek == schedule.RecurrenceRule.DaysOfWeek &&
+                        x.RecurrenceRule.DayOfMonth == schedule.RecurrenceRule.DayOfMonth &&
+                        x.RecurrenceRule.Ordinal == schedule.RecurrenceRule.Ordinal &&
+                        x.RecurrenceRule.OrdinalType == schedule.RecurrenceRule.OrdinalType)
+            .FirstOrDefaultAsync();
+
+        if (existingSchedule != null)
+            return existingSchedule;
+
+        return await CreateAsync(schedule);
     }
 
     public async Task<Schedule> CreateAsync(Schedule schedule)

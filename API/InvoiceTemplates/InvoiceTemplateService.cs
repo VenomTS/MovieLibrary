@@ -41,7 +41,7 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager, UserMa
             }
         };
 
-        schedule = await FindOrCreateSchedule(schedule);
+        schedule = await scheduleService.FindOrCreateSchedule(schedule);
         
         var invoice = new InvoiceTemplate
         {
@@ -123,25 +123,6 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager, UserMa
             .ToListAsync();
         return scheduledInvoices;
     }
-    
-    private async Task<Schedule> FindOrCreateSchedule(Schedule schedule)
-    {
-        var existingSchedule = await repositoryManager.Schedules.AsQueryable()
-            .Where(x => x.StartDate <= schedule.StartDate &&
-                        x.EndDate == schedule.EndDate &&
-                        x.RecurrenceRule.Frequency == schedule.RecurrenceRule.Frequency &&
-                        x.RecurrenceRule.Interval == schedule.RecurrenceRule.Interval &&
-                        x.RecurrenceRule.DaysOfWeek == schedule.RecurrenceRule.DaysOfWeek &&
-                        x.RecurrenceRule.DayOfMonth == schedule.RecurrenceRule.DayOfMonth &&
-                        x.RecurrenceRule.Ordinal == schedule.RecurrenceRule.Ordinal &&
-                        x.RecurrenceRule.OrdinalType == schedule.RecurrenceRule.OrdinalType)
-            .FirstOrDefaultAsync();
-
-        if (existingSchedule != null)
-            return existingSchedule;
-
-        return await scheduleService.CreateAsync(schedule);
-    }
 
     public async Task<OneOf<InvoiceTemplateResponse, NotFound>> PutAsync(Guid invoiceTemplateId, UpdateInvoiceTemplateRequest request)
     {
@@ -164,7 +145,7 @@ public class InvoiceTemplateService(IRepositoryManager repositoryManager, UserMa
             }
         };
 
-        schedule = await FindOrCreateSchedule(schedule);
+        schedule = await scheduleService.FindOrCreateSchedule(schedule);
         
         // Begin tracking
         await repositoryManager.InvoiceTemplates.Update(invoiceTemplate);
