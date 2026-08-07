@@ -13,9 +13,10 @@ public class ConfigurationRequest
     public List<string> ReceiptFooterTextLines { get; set; }
     public string ReceiptFooterImage { get; set; }
     public int QrCodeSize { get; set; }
+    public int ReceiptFeedLinesBegin { get; set; }
     public int ReceiptFeedLinesEnd { get; set; }
     public string ReceiptCutPaper { get; set; }
     public string ReceiptOpenCashDrawer { get; set; }
-    public bool receiptPrintGtin { get; set; }
+    public bool ReceiptPrintGtin { get; set; }
     
 }

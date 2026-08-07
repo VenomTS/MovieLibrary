@@ -9,20 +9,22 @@ namespace Services;
 public class HttpService : IHttpService
 {
     private static readonly HttpClient Client = new();
+    private Uri _baseIpAddress;
 
-    public static void SetBearerToken(string bearerToken)
+    public void SetBearerToken(string bearerToken)
     {
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
     }
 
-    public static void SetBaseAddress(string baseIpAddress, string basePort)
+    public void SetBaseAddress(string baseIpAddress, string basePort)
     {
-        Client.BaseAddress = new Uri($"http://{baseIpAddress}:{basePort}/api/");
+        _baseIpAddress = new Uri($"http://{baseIpAddress}:{basePort}/api/");
     }
     
     public async Task<HttpResponseObject<TResponse>> PostJsonAsync<TRequest, TResponse>(string url, TRequest request, IDictionary<string, string>? headers = null)
     {
-        var httpMessage = new HttpRequestMessage(HttpMethod.Post, url)
+        var finalUrl = new Uri($"{_baseIpAddress}{url}");
+        var httpMessage = new HttpRequestMessage(HttpMethod.Post, finalUrl)
         {
             Content = JsonContent.Create(request)
         };
@@ -32,8 +34,6 @@ public class HttpService : IHttpService
                 httpMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
 
         var response = await Client.SendAsync(httpMessage);
-        
-        // var response = await Client.PostAsJsonAsync(url, request);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -65,9 +65,19 @@ public class HttpService : IHttpService
         };
     }
 
-    public async Task<HttpResponse> PostJsonAsync<TRequest>(string url, TRequest request)
+    public async Task<HttpResponse> PostJsonAsync<TRequest>(string url, TRequest request, IDictionary<string, string>? headers = null)
     {
-        var response = await Client.PostAsJsonAsync(url, request);
+        var finalUrl = new Uri($"{_baseIpAddress}{url}");
+        var httpMessage = new HttpRequestMessage(HttpMethod.Post, finalUrl)
+        {
+            Content = JsonContent.Create(request)
+        };
+        
+        if(headers != null)
+            foreach(var header in headers)
+                httpMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        
+        var response = await Client.SendAsync(httpMessage);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -109,53 +119,10 @@ public class HttpService : IHttpService
         return responseObject;
     }
 
-    public async Task<HttpResponseObject<string>> PostTextAsync(string url, string request)
-    {
-        var content = new StringContent(request, Encoding.UTF8, "text/plain");
-
-        var response = await Client.PostAsync(url, content);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var responseContent = new HttpResponseObject<string>
-            {
-                IsSuccess = false,
-                StatusCode = response.StatusCode,
-                Content = null
-            };
-
-            try
-            {
-                var message = await response.Content.ReadAsStringAsync();
-                responseContent.Message = message;
-            }
-            catch (Exception)
-            {
-                // Ignored
-            }
-            return responseContent;
-        }
-
-        try
-        {
-            var responseContent = await response.Content.ReadAsStringAsync();
-            return new HttpResponseObject<string>
-            {
-                IsSuccess = true,
-                StatusCode = response.StatusCode,
-                Content = responseContent
-            };
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Failed to parse response from PostTextAsync: {e.Message}");
-            throw;
-        }
-    }
-
     public async Task<HttpResponseObject<TResponse>> GetAsync<TResponse>(string url)
     {
-        var response = await Client.GetAsync(url);
+        var finalUrl = new Uri($"{_baseIpAddress}{url}");
+        var response = await Client.GetAsync(finalUrl);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -188,7 +155,8 @@ public class HttpService : IHttpService
 
     public async Task<HttpResponse> GetAsync(string url)
     {
-        var response = await Client.GetAsync(url);
+        var finalUrl = new Uri($"{_baseIpAddress}{url}");
+        var response = await Client.GetAsync(finalUrl);
         
         var responseContent = new HttpResponse
         {

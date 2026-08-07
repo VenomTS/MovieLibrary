@@ -16,5 +16,4 @@ public class ConfigurationResponse
     public string? CustomTabName { get; set; }
     public string? CustomTabUrl { get; set; }
     public string? DisplayDeviceName { get; set; }
-    
 }
