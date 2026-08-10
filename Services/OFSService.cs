@@ -43,14 +43,32 @@ public class OFSService
         return await GetApiResponseAsync<StatusResponse>(response);
     }
 
-    public async Task<ApiResponseObject<ConfigurationResponse>> GetSettingsAsync()
+    public async Task<ApiResponseObject<string>> GetSettingsAsync()
     {
         var message = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/settings");
         message = SetAuthorizationHeader(message);
         
         var response = await _httpClient.SendAsync(message);
+        
+        // U content ce se vratiti string ovaj citav
+        var apiResponse = new ApiResponseObject<string>()
+        {
+            IsSuccess = response.IsSuccessStatusCode,
+            StatusCode = response.StatusCode,
+        };
 
-        return await GetApiResponseAsync<ConfigurationResponse>(response);
+        try
+        {
+            apiResponse.Content = await response.Content.ReadAsStringAsync();
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Failed to parse settings as a string. Error: {ex.Message}");
+        }
+
+        return apiResponse;
+
+        // return await GetApiResponseAsync<ConfigurationResponse>(response);
     }
 
     public async Task<ApiResponse> SetSecurityParametersAsync(SecurityParametersRequest request)
