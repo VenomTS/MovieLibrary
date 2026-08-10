@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace DTO.OFS.ResponseObject;
+namespace Services.ResponseObject;
 
 public class ApiResponse
 {

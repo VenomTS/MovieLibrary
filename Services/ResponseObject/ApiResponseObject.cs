@@ -1,4 +1,4 @@
-namespace DTO.OFS.ResponseObject;
+namespace Services.ResponseObject;
 
 public class ApiResponseObject<T> : ApiResponse
 {

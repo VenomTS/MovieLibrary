@@ -1,4 +1,5 @@
 using DTO.OFS.Fiscalization.InvoiceIssue;
+using Models.OFS;
 
 namespace Core;
 
@@ -151,6 +152,54 @@ public class InvoiceIssueBuilder
             Discount = discount,
             DiscountAmount = discountAmount
         });
+        return this;
+    }
+
+    public InvoiceIssueBuilder AddItems(List<ItemRequest> items)
+    {
+        _invoiceIssueRequest.InvoiceRequest.Items.AddRange(items);
+        return this;
+    }
+
+    public InvoiceIssueBuilder AddItems(List<FaktureStaDetails> items)
+    {
+        _invoiceIssueRequest.InvoiceRequest.Items.AddRange(items.Select(x =>
+            new ItemRequest
+            {
+                Name = x.Naziv,
+                Gtin = x.Sifra,
+                Labels = [x.TarifaSifra],
+                UnitPrice = x.MPC,
+                Quantity = x.Izlaz,
+                TotalAmount = x.MPC * x.Izlaz,
+                Discount = x.PopustPosto,
+                DiscountAmount = x.PopustVrijednost
+            }));
+        return this;
+    }
+
+    public InvoiceIssueBuilder SetNormalInvoice()
+    {
+        _invoiceIssueRequest.InvoiceRequest.InvoiceType = nameof(InvoiceType.Normal);
+        _invoiceIssueRequest.InvoiceRequest.TransactionType = nameof(InvoiceTransactionType.Sale);
+        return this;
+    }
+
+    public InvoiceIssueBuilder SetCopyInvoice(string referentDocumentNumber, DateTimeOffset referentDocumentDT)
+    {
+        _invoiceIssueRequest.InvoiceRequest.InvoiceType = nameof(InvoiceType.Normal);
+        _invoiceIssueRequest.InvoiceRequest.TransactionType = nameof(InvoiceTransactionType.Sale);
+        _invoiceIssueRequest.InvoiceRequest.ReferentDocumentNumber = referentDocumentNumber;
+        _invoiceIssueRequest.InvoiceRequest.ReferentDocumentDT = referentDocumentDT;
+        return this;
+    }
+
+    public InvoiceIssueBuilder SetRefundInvoice(string referentDocumentNumber, DateTimeOffset referentDocumentDT)
+    {
+        _invoiceIssueRequest.InvoiceRequest.InvoiceType = nameof(InvoiceType.Normal);
+        _invoiceIssueRequest.InvoiceRequest.TransactionType = nameof(InvoiceTransactionType.Refund);
+        _invoiceIssueRequest.InvoiceRequest.ReferentDocumentNumber = referentDocumentNumber;
+        _invoiceIssueRequest.InvoiceRequest.ReferentDocumentDT = referentDocumentDT;
         return this;
     }
 

@@ -4,7 +4,7 @@ using DTO.OFS;
 using DTO.OFS.Configuration;
 using DTO.OFS.Fiscalization.InvoiceIssue;
 using DTO.OFS.Fiscalization.Status;
-using DTO.OFS.ResponseObject;
+using Services.ResponseObject;
 
 namespace Services;
 

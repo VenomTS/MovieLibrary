@@ -1,4 +1,5 @@
 using Core;
+using Models.OFS;
 using Services;
 
 namespace OFSApp;
@@ -55,6 +56,30 @@ public partial class FiscalSettings : Form
                 MessageBox.Show($"Greška pri provjeri statusa: {statusResponse.Message}");
                 return;
             }
+
+            var items = new List<FaktureStaDetails>
+            {
+                /*
+                new FaktureStaDetails()
+                {
+
+                },
+                new FaktureStaDetails()
+                {
+                }
+                */
+            };
+            
+            var invoice = new InvoiceIssueBuilder()
+                .SetNormalInvoice()
+                .AddItems(items)
+                .SendToMail("test@gmail.com")
+                .AddPaymentMethod(InvoicePaymentType.WireTransfer, 30)
+                .Build();
+            
+            Console.WriteLine(invoice.InvoiceRequest.Payment[0].Amount);
+
+            await _ofsService.IssueInvoice(invoice);
         
             // Get Configuration
             // var configResponse = await _configService.GetConfigurationAsync();

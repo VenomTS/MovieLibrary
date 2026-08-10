@@ -2,12 +2,12 @@ namespace DTO.OFS.Fiscalization.InvoiceIssue;
 
 public class ItemRequest
 {
-    public string Name { get; set; }
-    public string Gtin { get; set; }
-    public List<string> Labels { get; set; }
-    public decimal UnitPrice { get; set; }
-    public decimal Quantity { get; set; }
-    public decimal TotalAmount { get; set; }
-    public decimal Discount { get; set; }
-    public decimal DiscountAmount { get; set; }
+    public string Name { get; set; } // Naziv
+    public string Gtin { get; set; } // Sifra
+    public List<string> Labels { get; set; } // TarifaSifra
+    public decimal UnitPrice { get; set; } // MPC
+    public decimal Quantity { get; set; } // Izlaz
+    public decimal TotalAmount { get; set; } // Ovo se moze izracunat
+    public decimal Discount { get; set; } // PopustPosto
+    public decimal DiscountAmount { get; set; } // PopustVrijednost
 }
