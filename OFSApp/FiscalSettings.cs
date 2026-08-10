@@ -1,25 +1,18 @@
+using Core;
 using Services;
-using Services.OFS;
-using Services.OFS.Fiscalization;
 
 namespace OFSApp;
 
 public partial class FiscalSettings : Form
 {
-    private readonly IHttpService _httpService;
-    private readonly ConfigurationService _configService;
-    private readonly InitializationService _initService;
+
+    private readonly OFSService _ofsService;
     
-    public FiscalSettings(
-        IHttpService httpService,
-        ConfigurationService configService,
-        InitializationService initService)
+    public FiscalSettings(OFSService ofsService)
     {
         InitializeComponent();
         
-        _httpService = httpService;
-        _configService = configService;
-        _initService = initService;
+        _ofsService = ofsService;
     }
 
     private async void saveButton_Click(object sender, EventArgs e)
@@ -44,13 +37,11 @@ public partial class FiscalSettings : Form
             return;
         }
 
-        _httpService.SetBaseAddress(ipAddress, port);
-        _httpService.SetBearerToken(key);
+        _ofsService.Initialize(ipAddress, port, key, pin);
 
         try
         {
-            // Check Availability
-            var availabilityResponse = await _configService.CheckAvailabilityAsync();
+            var availabilityResponse = await _ofsService.VerifyAvailabilityAsync();
             if (!availabilityResponse.IsSuccess)
             {
                 MessageBox.Show($"Greška pri provjeri dostupnosti: {availabilityResponse.Message}");
@@ -58,7 +49,7 @@ public partial class FiscalSettings : Form
             }
         
             // Check Status
-            var statusResponse = await _initService.CheckStatusAsync();
+            var statusResponse = await _ofsService.VerifyStatusAsync();
             if (!statusResponse.IsSuccess)
             {
                 MessageBox.Show($"Greška pri provjeri statusa: {statusResponse.Message}");

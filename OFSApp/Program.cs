@@ -1,8 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Services;
-using Services.OFS;
-using Services.OFS.Fiscalization;
 
 namespace OFSApp;
 
@@ -33,10 +31,7 @@ static class Program
         {
             services.AddTransient<FiscalSettings>();
 
-            services.AddScoped<IHttpService, HttpService>();
-            services.AddScoped<ConfigurationService>();
-            services.AddScoped<InitializationService>();
-            services.AddScoped<InvoiceIssuingService>();
+            services.AddSingleton<OFSService>();
         });
     }
 }

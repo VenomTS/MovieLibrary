@@ -1,6 +1,6 @@
 namespace DTO.OFS.Configuration;
 
-public class ConfigurationRequest
+public class PrinterConfigurationRequest
 {
     public string PrinterName { get; set; }
     public string PrinterType { get; set; }
