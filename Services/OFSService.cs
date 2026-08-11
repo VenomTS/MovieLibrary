@@ -8,6 +8,7 @@ using Services.ResponseObject;
 
 namespace Services;
 
+// OVA KLASA MORA BITI DODANA KAO SINGLETON
 public class OFSService
 {
     private readonly HttpClient _httpClient = new();
