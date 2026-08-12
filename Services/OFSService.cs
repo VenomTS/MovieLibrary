@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using DTO.OFS;
 using DTO.OFS.Configuration;
 using DTO.OFS.Fiscalization.InvoiceIssue;
@@ -96,6 +97,19 @@ public class OFSService
         var response = await _httpClient.SendAsync(message);
 
         return await GetApiResponseAsync(response);
+    }
+
+    public async Task<ApiResponseObject<string>> EnterPinAsync(string pin)
+    {
+        var message = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/pin")
+        {
+            Content = new StringContent(pin, null, "text/plain")
+        };
+        message = SetAuthorizationHeader(message);
+        
+        var response = await _httpClient.SendAsync(message);
+        
+        return await GetApiResponseAsync<string>(response);
     }
 
     public async Task<ApiResponseObject<InvoiceIssueResponse>> IssueInvoice(InvoiceIssueRequest request,
