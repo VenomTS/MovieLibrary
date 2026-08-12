@@ -11,6 +11,7 @@ public class InvoiceIssueBuilder
     {
         _invoiceIssueRequest = new InvoiceIssueRequest
         {
+            Print = true,
             InvoiceRequest = new InvoiceRequest
             {
                 Payment = [],
